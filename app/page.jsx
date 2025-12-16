@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import ImageSlider from "@/components/ImageSlider";
 import CarAccessoriesGallery from "@/components/categories";
+import FeaturedCollections from "@/components/FeaturedCollection";
 
 
 export default function Home() {
@@ -9,6 +10,8 @@ export default function Home() {
     <main>
        <ImageSlider />
        <CarAccessoriesGallery />
+       <FeaturedCollections />
+       <ImageSlider />
       <div className="flex min-h-screen flex-col items-center justify-between p-24">
        
         <>Welcome to Yuemi Ecosystem Nepal</>
