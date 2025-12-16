@@ -253,7 +253,7 @@ const HeaderBar = () => {
 
               {/* Login and Signup Button */}
               {!isloggedin && (
-                <div className="bg-red-500 rounded-lg mb-3 mx-2 p-2 relative hover:underline hover:scale-105 transition-all duration-300 cursor-pointer">
+                <div className="bg-[#ff6602] rounded-lg mb-3 mx-2 p-2 relative hover:underline hover:scale-105 transition-all duration-300 cursor-pointer">
                   <Link
                     href="/account"
                     className="flex items-center space-x-2 text-white "

@@ -106,7 +106,8 @@ export default function FooterBar() {
   return (
     <footer className="relative w-full">
       {/* Main Footer */}
-      <div className="bg-gradient-to-r from-[#446c87] via-[#76b9e6] to-blue-600 text-white">
+      <div className="bg-white text-black">
+      {/* <div className="bg-gradient-to-r from-[#FF930F] via-[#FF930F] to-[#FF930F] text-white"> */}
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {/* Contact Us Section */}
@@ -117,7 +118,7 @@ export default function FooterBar() {
               <div className="space-y-2 sm:space-y-3">
                 <div className="space-y-2 sm:space-y-3">
                   <div className="flex items-start space-x-2 sm:space-x-3">
-                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mt-1 text-blue-200 flex-shrink-0" />
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mt-1 text-orange-200 flex-shrink-0" />
                     {settings.address ? (
                       <a
                         href={`https://www.google.com/maps/search/?q=${encodeURIComponent(settings.address)}`}
@@ -136,13 +137,13 @@ export default function FooterBar() {
                 </div>
 
                 <div className="flex items-center space-x-2 sm:space-x-3">
-                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-blue-200 flex-shrink-0" />
+                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-orange-200 flex-shrink-0" />
                   <span className="text-xs sm:text-sm">
                     {settings.primary_phone || "No phone number provided"}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 sm:space-x-3">
-                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-blue-200 flex-shrink-0" />
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-orange-200 flex-shrink-0" />
                   <Link
                     href={`mailto:${settings.primary_email}`}
                     className="text-xs sm:text-sm hover:text-red-400  transition-colors"
@@ -156,25 +157,25 @@ export default function FooterBar() {
               <div className="flex space-x-4 pt-4">
                 <Link
                   href="https://www.facebook.com/gargdentalnpl/"
-                  className="w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center transition-colors"
+                  className="w-8 h-8 bg-orange-500 hover:bg-orange-400 rounded-full flex items-center justify-center transition-colors"
                 >
                   <Facebook className="w-4 h-4" />
                 </Link>
                 <Link
                   href="#"
-                  className="w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center transition-colors"
+                  className="w-8 h-8 bg-orange-500 hover:bg-orange-400 rounded-full flex items-center justify-center transition-colors"
                 >
                   <Twitter className="w-4 h-4" />
                 </Link>
                 <Link
                   href="#"
-                  className="w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center transition-colors"
+                  className="w-8 h-8 bg-orange-500 hover:bg-orange-400 rounded-full flex items-center justify-center transition-colors"
                 >
                   <Youtube className="w-4 h-4" />
                 </Link>
                 <Link
                   href="https://www.instagram.com/gargdentalpvt.ltd/"
-                  className="w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center transition-colors"
+                  className="w-8 h-8 bg-orange-500 hover:bg-orange-400 rounded-full flex items-center justify-center transition-colors"
                 >
                   <Instagram className="w-4 h-4" />
                 </Link>
@@ -192,7 +193,7 @@ export default function FooterBar() {
                 <li className="footer-list">
                   <Link
                     href="/CompanyInfo"
-                    className="text-xs sm:text-sm hover:text-blue-200 transition-colors"
+                    className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Company Info
                   </Link>
@@ -200,7 +201,7 @@ export default function FooterBar() {
                 <li className="footer-list">
                   <Link
                     href="/legal-registration"
-                    className="text-xs sm:text-sm hover:text-blue-200 transition-colors"
+                    className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Legal Registration
                   </Link>
@@ -208,7 +209,7 @@ export default function FooterBar() {
                 {/* <li className="footer-list">
                   <Link
                     href="/MedicalCertification"
-                    className="text-xs sm:text-sm hover:text-blue-200 transition-colors"
+                    className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Medical Certifications
                   </Link>
@@ -217,7 +218,7 @@ export default function FooterBar() {
                 <li className="footer-list">
                   <Link
                     href="/returnpolicy"
-                    className="text-xs sm:text-sm hover:text-blue-200 transition-colors"
+                    className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Return & Refund Policy
                   </Link>
@@ -225,7 +226,7 @@ export default function FooterBar() {
                 <li className="footer-list">
                   <Link
                     href="/PrivacyPolicy"
-                    className="text-xs sm:text-sm hover:text-blue-200 transition-colors"
+                    className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Privacy Policy
                   </Link>
@@ -242,7 +243,7 @@ export default function FooterBar() {
                 <li className="footer-list">
                   <Link
                     href="/AboutUs"
-                    className="text-xs sm:text-sm hover:text-blue-200 transition-colors"
+                    className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     About us
                   </Link>
@@ -250,7 +251,7 @@ export default function FooterBar() {
                 <li className="footer-list">
                   <Link
                     href="/ContactUs"
-                    className="text-xs sm:text-sm hover:text-blue-200 transition-colors"
+                    className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Contact Us
                   </Link>
@@ -259,7 +260,7 @@ export default function FooterBar() {
                 <li className="footer-list">
                   <Link
                     href="/term&condition"
-                    className="text-xs sm:text-sm hover:text-blue-200 transition-colors"
+                    className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Terms and Conditions
                   </Link>
@@ -282,7 +283,7 @@ export default function FooterBar() {
                     value="male"
                     checked={gender === "male"}
                     onChange={(e) => setGender(e.target.value)}
-                    className="w-4 h-4 text-blue-600 bg-gray-50 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    className="w-4 h-4 text-orange-600 bg-gray-50 border-gray-300 focus:ring-orange-500 focus:ring-2"
                   />
                   <span className="text-sm">Male</span>
                 </label>
@@ -293,7 +294,7 @@ export default function FooterBar() {
                     value="female"
                     checked={gender === "female"}
                     onChange={(e) => setGender(e.target.value)}
-                    className="w-4 h-4 text-blue-600 bg-gray-50 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    className="w-4 h-4 text-orange-600 bg-gray-50 border-gray-300 focus:ring-orange-500 focus:ring-2"
                   />
                   <span className="text-sm">Female</span>
                 </label>
@@ -311,13 +312,13 @@ export default function FooterBar() {
                 />
                 <button
                   onClick={() => handleSubscribe(email)}
-                  className="bg-blue-800 hover:bg-blue-900 text-white px-3 py-3 text-[12px] font-semibold"
+                  className="bg-[#FF930F] hover:bg-[#FF930F] text-white px-3 py-3 text-[12px] font-semibold"
                 >
                   SUBSCRIBE
                 </button>
               </div>
 
-              <p className="text-xs text-blue-100 text-center">
+              <p className="text-xs text-[#FF930F] text-center">
                 Subscribe to the mailing list to receive updates on promotions,
                 new arrivals, discount and coupons.
               </p>
@@ -340,7 +341,7 @@ export default function FooterBar() {
             {/* Back to Top Button */}
             <button
               onClick={scrollToTop}
-              className="mt-2 sm:mt-0 w-8 sm:w-10 h-8 sm:h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center justify-center transition-colors"
+              className="mt-2 sm:mt-0 w-8 sm:w-10 h-8 sm:h-10 bg-orange-600 hover:bg-orange-700 text-white rounded-md flex items-center justify-center transition-colors"
               aria-label="Back to top"
             >
               <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
