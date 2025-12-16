@@ -1,5 +1,7 @@
 
 import ImageSlider from "@/components/ImageSlider";
+import CarAccessoriesGallery from "@/components/categories";
+import FeaturedCollections from "@/components/FeaturedCollections";
 
 
 export default function DashboardPage() {
@@ -7,7 +9,8 @@ export default function DashboardPage() {
         <div>
         <ImageSlider />
         <CarAccessoriesGallery />
-        
+        <FeaturedCollections />
+        <ImageSlider />
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         
             <h1 className="text-4xl font-bold text-gray-800 mb-4">Dashboard</h1>
