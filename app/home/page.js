@@ -4,7 +4,7 @@ import ImageSlider from "@/components/ImageSlider";
 
 export default function DashboardPage() {
     return (
-        <>
+        <div>
         <ImageSlider />
         <CarAccessoriesGallery />
         
@@ -16,6 +16,6 @@ export default function DashboardPage() {
                 Welcome to your dashboard! Here you can manage your settings and view your activity.
             </p>
         </div>
-        </>
+        </div>
     );
 }
