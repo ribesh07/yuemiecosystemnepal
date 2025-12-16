@@ -3,7 +3,7 @@ import ImageSlider from "@/components/ImageSlider";
 
 export default function DashboardPage() {
     return (
-        <>
+        <div>
         <ImageSlider />
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         
@@ -13,6 +13,6 @@ export default function DashboardPage() {
                 Welcome to your dashboard! Here you can manage your settings and view your activity.
             </p>
         </div>
-        </>
+        </div>
     );
 }
