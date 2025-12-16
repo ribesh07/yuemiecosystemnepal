@@ -297,7 +297,7 @@ const HeaderBar = () => {
                   className="flex flex-col items-center text-gray-600 hover:text-red-600 transform hover:scale-105 transition-colors cursor-pointer mr-1"
                 >
                   <div className="bg-blue-100 p-2 rounded-lg mb-1 ">
-                    <Settings className="w-6 h-6 text-blue-600" />
+                    <Settings className="w-6 h-6 text-[#ff6602]" />
                   </div>
                   <span className="text-xs">My Account</span>
                 </button>
@@ -317,25 +317,25 @@ const HeaderBar = () => {
               <div className="flex w-full max-w-xl justify-between items-center text-gray-600 sm:text-gray-600 text-bold text-[12px] sm:text-[16px] gap-x-2 sm:gap-x-4 p-0.5">
                 <Link
                   href="/dashboard"
-                  className="hover:underline font-bold hover:text-[#1FA2FF] hover:scale-105 transition-all duration-200 cursor-pointer"
+                  className="hover:underline font-bold hover:text-[#ff6602] hover:scale-105 transition-all duration-200 cursor-pointer"
                 >
                   Home
                 </Link>
                 <Link
                   href="/product"
-                  className="hover:underline font-semibold hover:text-[#1FA2FF] hover:scale-105 transition-all duration-200 cursor-pointer"
+                  className="hover:underline font-semibold hover:text-[#ff6602] hover:scale-105 transition-all duration-200 cursor-pointer"
                 >
                   Browse Products
                 </Link>
                 <Link
                   href="/hot-sales"
-                  className="hover:underline font-semibold hover:text-[#1FA2FF] hover:scale-105 transition-all duration-200 cursor-pointer"
+                  className="hover:underline font-semibold hover:text-[#ff6602] hover:scale-105 transition-all duration-200 cursor-pointer"
                 >
                   Flash Sales
                 </Link>
                 <Link
                   href="/combo-offers"
-                  className="hover:underline font-semibold hover:text-[#1FA2FF] hover:scale-105 transition-all duration-200 cursor-pointer"
+                  className="hover:underline font-semibold hover:text-[#ff6602] hover:scale-105 transition-all duration-200 cursor-pointer"
                 >
                   Combo Offers
                 </Link>
@@ -398,7 +398,7 @@ const HeaderBar = () => {
                       LOGIN
                     </button>
                     <button
-                      className="block w-full text-center text-[#0072bc] hover:underline text-sm bg-transparent"
+                      className="block w-full text-center text-[#ff6602] hover:underline text-sm bg-transparent"
                       onClick={() => {
                         router.push("/account/signup");
                         setIsMobileMenuOpen(false);
@@ -410,7 +410,7 @@ const HeaderBar = () => {
                 ) : (
                   <div className="mb-6 pb-4 border-b space-y-3">
                     <button
-                      className="w-full bg-blue-600 text-white text-sm py-3 rounded hover:bg-blue-700 transition-colors flex items-center justify-center"
+                      className="w-full bg-[#FF930F] text-white text-sm py-3 rounded hover:bg-[#ff6602] transition-colors flex items-center justify-center"
                       onClick={() => {
                         router.push("/myaccount");
                         setIsMobileMenuOpen(false);
