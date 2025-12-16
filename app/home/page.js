@@ -1,7 +1,7 @@
 
 import ImageSlider from "@/components/ImageSlider";
 import CarAccessoriesGallery from "@/components/categories";
-
+import FeaturedCollections from '@/components/FeaturedCollection';
 
 export default function DashboardPage() {
     return (
