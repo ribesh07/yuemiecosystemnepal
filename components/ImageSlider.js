@@ -35,9 +35,9 @@ const ImageSlider = () => {
   }, []);
 
   return (
-    <div className="max-w-9xl mx-auto px-1  overflow-y-auto mt-1">
+    <div className=" mx-auto px-1  overflow-y-auto mt-2 mb-5">
       {/* Main slider container */}
-      <div className=" relative h-96 overflow-hidden">
+      <div className=" relative h-120 overflow-hidden">
         {/* Images */}
         <div 
           className="flex transition-transform duration-500 ease-in-out h-full"
