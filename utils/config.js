@@ -8,3 +8,7 @@ export const CONNECTIPS_BASE_URL = process.env.NEXT_PUBLIC_CONNECTIPS_BASE_URL ;
 if (!baseUrl) {
   console.error("Missing NEXT_PUBLIC_API_URL environment variable!");
 }
+
+const BG_COLOR = '#FF930F'
+const BUTTON_COLOR = '#ff6602'
+export { BG_COLOR , BUTTON_COLOR };
