@@ -73,7 +73,7 @@ export default function CarAccessoriesGallery() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 py-16 px-4">
+    <div className="min-h-screen bg-white py-16 px-4">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-4 text-center">
           Premium Car Accessories
@@ -90,25 +90,16 @@ export default function CarAccessoriesGallery() {
               onClick={() => handleImageClick(item)}
               className="relative rounded-3xl shadow-xl overflow-hidden cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
             >
-              <div className="relative h-80 bg-gradient-to-br from-amber-100 to-orange-100 overflow-hidden">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
+            <div className="relative aspect-video overflow-hidden">
+              <img
+                src={item.image}
+                alt={item.title}
+                className="block w-full h-full object-cover"
+              />
+            </div>
               <div className="absolute top-5 left-5">
                 
               </div>
-              {/* <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
-                <h3 className="text-white text-2xl font-bold mb-2 drop-shadow-lg">
-                  {item.title}
-                </h3>
-                <p className="text-white/95 text-sm drop-shadow-md">
-                  {item.description}
-                </p>
-              </div> */}
             </div>
           ))}
         </div>
@@ -116,30 +107,21 @@ export default function CarAccessoriesGallery() {
         {/* Second Row - 1 Vertical + 4 Horizontal in 2x2 grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left Column - 1 Vertical (spans 2 rows) */}
-          <div
-            onClick={() => handleImageClick(accessories[2])}
-            className="relative rounded-3xl shadow-xl overflow-hidden cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group md:row-span-2"
-          >
-            <div className="relative h-[600px] md:h-[564px] bg-gradient-to-br from-amber-100 to-orange-100 overflow-hidden">
-              <img
-                src={accessories[2].image}
-                alt={accessories[2].title}
-                className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-            <div className="absolute top-5 left-5">
-              
-            </div>
-            {/* <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
-              <h3 className="text-white text-2xl font-bold mb-2 drop-shadow-lg">
-                {accessories[2].title}
-              </h3>
-              <p className="text-white/95 text-sm drop-shadow-md">
-                {accessories[2].description}
-              </p>
-            </div> */}
-          </div>
+     <div
+  onClick={() => handleImageClick(accessories[2])}
+  className="relative rounded-3xl h-[82%] overflow-hidden cursor-pointer transform transition-all duration-500 hover:scale-[1.01] group md:row-span-2"
+>
+  <div className="relative h-full w-full  overflow-hidden rounded-3xl">
+    <img
+      src={accessories[2].image}
+      alt={accessories[2].title}
+      className="block h-full w-full object-contain rounded-3xl transition-transform duration-500 group-hover:scale-105"
+    />
+  </div>
+
+  <div className="absolute top-5 left-5"></div>
+</div>
+
 
           {/* Right Column - 2x2 Grid */}
           <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -147,13 +129,13 @@ export default function CarAccessoriesGallery() {
               <div
                 key={item.id}
                 onClick={() => handleImageClick(item)}
-                className="relative rounded-3xl shadow-xl overflow-hidden cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
+                className="relative m-2 rounded-3xl shadow-xl overflow-hidden cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
               >
-                <div className="relative h-64 bg-gradient-to-br from-amber-100 to-orange-100 overflow-hidden">
+                <div className="relative aspect-auto bg-gradient-to-br from-amber-100 to-orange-100 overflow-hidden">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+                    className="block w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
@@ -187,11 +169,11 @@ export default function CarAccessoriesGallery() {
               <img
                 src={selectedItem.image}
                 alt={selectedItem.title}
-                className="w-full h-full object-contain p-8"
+                className="block w-full h-full object-contain"
               />
               <button
                 onClick={closeModal}
-                className="absolute top-6 right-6 bg-white/95 backdrop-blur-sm rounded-full p-3 shadow-xl hover:bg-white hover:scale-110 transition-all duration-300"
+                className="absolute top-6 right-6 bg-white/95 backdrop-blur-sm rounded-full shadow-xl hover:bg-white hover:scale-110 transition-all duration-300"
               >
                 <svg
                   className="w-6 h-6 text-gray-800"

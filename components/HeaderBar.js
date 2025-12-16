@@ -110,16 +110,31 @@ export default function Header() {
                 )}
                 </button>
 
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-            <img
-                src="/yuemi_logo_black.png"
-                alt="Yuemi Ecosystem Nepal"
-                className="h-4 md:h-6 w-auto cursor-pointer"
-                loading="lazy"
-                draggable={false}
-            />
-            </Link>
+           <Link href="/" className="relative inline-block">
+                {/* Logo */}
+                <img
+                    src="/yuemi_logo_black.png"
+                    alt="Yuemi Ecosystem Nepal"
+                    className="h-4 md:h-6 w-auto cursor-pointer"
+                    loading="lazy"
+                    draggable={false}
+                />
+
+                {/* NEPAL sticker */}
+                <span className="
+                    absolute 
+                    -bottom-1 
+                    -right-2 
+                    text-[8px] 
+                    md:text-[10px] 
+                    font-bold 
+                    tracking-wide
+                    text-orange-500
+                ">
+                    NEPAL
+                </span>
+                </Link>
+
         
 
             {/* Desktop Navigation Links */}
