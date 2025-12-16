@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Search, User, ShoppingCart, ChevronLeft, ChevronRight, ChevronDown, Menu, X, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Header() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -110,26 +111,27 @@ export default function Header() {
                 </button>
 
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <img
+            <Link href="/" className="flex items-center space-x-3">
+            <img
                 src="/yuemi_logo_black.png"
                 alt="Yuemi Ecosystem Nepal"
                 className="h-4 md:h-6 w-auto cursor-pointer"
                 loading="lazy"
                 draggable={false}
-              />
-            </div>
+            />
+            </Link>
+        
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center space-x-8 text-[14px]">
-              <a href="#home" className="text-orange-500 font-bold hover:text-orange-600 transition-colors">
+              <a href="home" className="text-orange-500 font-bold hover:underline cursor-pointer hover:text-orange-600 transition-colors">
                 HOME
               </a>
-              <a href="#about" className="text-gray-700 font-bold hover:text-orange-500 transition-colors">
+              <a href="#about" className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
                 ABOUT US
               </a>
               <div className="relative group">
-                <button className="flex items-center space-x-1 text-gray-700 font-bold hover:text-orange-500 transition-colors">
+                <button className="flex items-center space-x-1 text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
                   <span>PRODUCT</span>
                   <ChevronDown size={16} />
                 </button>
@@ -145,7 +147,7 @@ export default function Header() {
                   ))}
                 </div>
               </div>
-              <a href="#contact" className="text-gray-700 font-bold hover:text-orange-500 transition-colors">
+              <a href="#contact" className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
                 CONTACT US
               </a>
             </div>
