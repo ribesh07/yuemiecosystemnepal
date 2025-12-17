@@ -5,6 +5,7 @@ import CarAccessoriesGallery from "@/components/categories";
 import FeaturedCollections from "@/components/FeaturedCollection";
 import Bestseller from "@/components/BestSeller";
 import Testimonials from "@/components/Testimonials";
+import Support from "@/components/Support";
 
 
 export default function Home() {
@@ -16,10 +17,8 @@ export default function Home() {
        <ImageSlider />
        <Bestseller /> 
        <Testimonials />
-      <div className="flex min-h-screen flex-col items-center justify-between p-24">
-       
-        <>Welcome to Yuemi Ecosystem Nepal</>
-      </div>
+       <Support />
+      
     </main>
 
   );
