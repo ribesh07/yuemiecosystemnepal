@@ -7,9 +7,344 @@ datasource db {
    url      = env("DATABASE_URL")
 }
 
+enum AddressType {
+  HOME
+  OFFICE
+  OTHERS
+}
+
 model User {
+  id                BigInt   @id @default(autoincrement())
+  fullName          String   @map("full_name")
+  email             String   @unique
+  phone             String?  @unique
+  gender            String?
+  isPhoneVerified   Boolean  @default(false) @map("is_phone_verified")
+  isEmailVerified   Boolean  @default(false) @map("is_email_verified")
+  emailVerifiedAt   DateTime?
+  status            Boolean  @default(false)
+  orderCount        Int      @default(0)
+  loginMedium       String?
+  socialId          String?
+  password          String
+  rememberToken     String?
+  profilePhotoPath  String?
+  createdAt         DateTime?
+  updatedAt         DateTime?
+
+  addresses         CustomerAddress[]
+  orders            Order[]
+  cart              Cart?
+  wishlist          Wishlist[]
+  reviews           ProductReview[]
+
+  @@map("users")
+}
+
+model Admin {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+  name      String
+  email     String
+  address   String?
+  phone     String?
+  country   String?
+  accountType String?
+  roleId    BigInt
+  password  String
+  profilePhotoPath String?
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  role      AdminRole @relation(fields: [roleId], references: [id])
+
+  @@map("admins")
+}
+
+model AdminRole {
+  id        BigInt   @id @default(autoincrement())
+  name      String
+  modules   String?
+  status    Boolean @default(true)
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  admins    Admin[]
+
+  @@map("admin_roles")
+}
+
+
+model Province {
+  id        BigInt   @id @default(autoincrement())
+  name      String   @map("province_name")
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  cities    ShippingCity[]
+  addresses CustomerAddress[]
+
+  @@map("provinces")
+}
+
+model ShippingCity {
+  id            BigInt   @id @default(autoincrement())
+  provinceId    BigInt
+  city          String
+  shippingCost  Decimal  @default(0)
+  applyShipping Boolean  @default(true)
+  remarks       String?
+  createdAt     DateTime?
+  updatedAt     DateTime?
+
+  province      Province @relation(fields: [provinceId], references: [id])
+  zones         AddressZone[]
+  addresses CustomerAddress[]
+
+  @@map("set_shipping")
+}
+
+model AddressZone {
+  id        BigInt   @id @default(autoincrement())
+  cityId    BigInt
+  zoneName  String   @map("zone_name")
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  city      ShippingCity @relation(fields: [cityId], references: [id])
+  addresses CustomerAddress[]
+
+  @@map("address_zone")
+}
+
+model CustomerAddress {
+  id              BigInt   @id @default(autoincrement())
+  customerId      BigInt   @map("customer_id")
+  fullName        String   @map("full_name")
+  phone           String
+  provinceId      BigInt   @map("province_id")
+  cityId          BigInt   @map("city_id")
+  zoneId          BigInt   @map("zone_id")
+  address         String
+  landmark        String?
+  addressType     AddressType? @default(HOME)
+  defaultShipping Boolean @default(false)
+  defaultBilling  Boolean @default(false)
+  createdAt       DateTime?
+  updatedAt       DateTime?
+
+  /// Relations
+  user            User          @relation(fields: [customerId], references: [id])
+  province        Province      @relation(fields: [provinceId], references: [id])
+  city            ShippingCity  @relation(fields: [cityId], references: [id])
+  zone            AddressZone   @relation(fields: [zoneId], references: [id])
+
+  @@map("customer_address_book")
+}
+
+
+model Brand {
+  id        Int      @id @default(autoincrement())
+  name      String   @map("brand_name")
+  image     String?
+  top       Int      @default(0)
+  status    Int
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  products  Product[]
+
+  @@map("brands")
+}
+
+model Category {
+  id        BigInt   @id @default(autoincrement())
+  name      String   @map("category_name")
+  parentId  BigInt?
+  image     String
+  top       Int      @default(0)
+  status    Int
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id                BigInt   @id @default(autoincrement())
+  productCode       String   @unique @map("product_code")
+  name              String   @map("product_name")
+  slug              String?  @unique
+  description       String?  @map("product_description")
+  specifications    String?  @map("key_specifications")
+  packaging         String?
+  warranty          String?
+  categoryId        BigInt?
+  brandId           Int?
+  actualPrice       Decimal  @default(0) @map("actual_price")
+  sellPrice         Decimal  @default(0) @map("sell_price")
+  discount          Decimal  @default(0)
+  stockQuantity     BigInt   @default(0)
+  availableQuantity BigInt   @default(0)
+  status            Int
+  createdAt         DateTime?
+  updatedAt         DateTime?
+
+  brand             Brand?    @relation(fields: [brandId], references: [id])
+  category          Category? @relation(fields: [categoryId], references: [id])
+  images            ProductImage[]
+  variations        ProductVariation[]
+  reviews           ProductReview[]
+  cartItems         CartItem[]
+  wishlists Wishlist[]
+  orderItems        OrderItem[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id          BigInt   @id @default(autoincrement())
+  productCode String
+  imagePath   String?
+  createdAt   DateTime?
+  updatedAt   DateTime?
+
+  product     Product @relation(fields: [productCode], references: [productCode])
+
+  @@map("product_images")
+}
+
+model ProductVariation {
+  id          BigInt   @id @default(autoincrement())
+  productCode String
+  attributes  Json
+  price       Decimal
+  stock       Int
+  sku         String?
+  createdAt   DateTime?
+  updatedAt   DateTime?
+
+  product     Product @relation(fields: [productCode], references: [productCode])
+
+  @@map("product_variations")
+}
+
+
+model Cart {
+  id        BigInt   @id @default(autoincrement())
+  customerId BigInt?  @unique
+  subtotal  Decimal  @default(0)
+  tax       Decimal  @default(0)
+  shippingCost Decimal @default(0)
+  status    String?
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  user      User?     @relation(fields: [customerId], references: [id])
+  items     CartItem[]
+
+  @@map("cart")
+}
+
+model CartItem {
+  id          BigInt   @id @default(autoincrement())
+  cartId      BigInt
+  productCode String
+  quantity    BigInt
+  price       Decimal
+  actualPrice Decimal
+  createdAt   DateTime?
+  updatedAt   DateTime?
+
+  cart        Cart    @relation(fields: [cartId], references: [id])
+  product     Product @relation(fields: [productCode], references: [productCode])
+
+  @@map("cart_items")
+}
+
+model Wishlist {
+  id          BigInt   @id @default(autoincrement())
+  customerId  BigInt
+  productCode String
+  createdAt   DateTime?
+  updatedAt   DateTime?
+
+  user        User    @relation(fields: [customerId], references: [id])
+  product     Product @relation(fields: [productCode], references: [productCode])
+
+  @@map("wishlist")
+}
+
+model Order {
+  id            BigInt   @id @default(autoincrement())
+  orderNumber   BigInt   @map("order_id")
+  customerId    BigInt
+  transactionId String?
+  subtotal      Decimal
+  tax           Decimal
+  shippingCost  Decimal
+  discount      Decimal
+  totalAmount   Decimal
+  orderStatus   String   @default("processing")
+  paymentStatus String   @default("unpaid")
+  createdAt     DateTime?
+  updatedAt     DateTime?
+
+  user          User      @relation(fields: [customerId], references: [id])
+  items         OrderItem[]
+  payments      OrderPayment[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          BigInt   @id @default(autoincrement())
+  orderId     BigInt
+  productCode String
+  quantity    BigInt
+  price       Decimal
+  subtotal    Decimal
+  createdAt   DateTime?
+  updatedAt   DateTime?
+
+  order       Order   @relation(fields: [orderId], references: [id])
+  product     Product @relation(fields: [productCode], references: [productCode])
+
+  @@map("order_items")
+}
+
+model OrderPayment {
+  id          BigInt   @id @default(autoincrement())
+  orderId     BigInt
+  paymentMode String?
+  transactionId String?
+  paidAmount  Decimal
+  dueAmount   Decimal
+  status      String?
+  createdAt   DateTime?
+  updatedAt   DateTime?
+
+  order       Order @relation(fields: [orderId], references: [id])
+
+  @@map("order_payments")
+}
+
+model ProductReview {
+  id          BigInt   @id @default(autoincrement())
+  customerId  BigInt?
+  productCode String
+  orderId     String
+  name        String
+  email       String
+  review      String   @map("review_detail")
+  rating      Decimal
+  imagePath   String?
+  createdAt   DateTime?
+  updatedAt   DateTime?
+
+  user        User?    @relation(fields: [customerId], references: [id])
+  product     Product @relation(fields: [productCode], references: [productCode])
+
+  @@map("product_reviews")
 }
