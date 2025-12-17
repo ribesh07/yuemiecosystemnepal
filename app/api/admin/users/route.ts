@@ -6,11 +6,11 @@ export async function GET() {
   try {
     requireAdminRole("SUPER_ADMIN");
 
-    const users = await prisma.user.findMany({
+    const users = await prisma.admin.findMany({
       select: {
         id: true,
         email: true,
-        fullName: true
+        name: true
       }
     });
 
