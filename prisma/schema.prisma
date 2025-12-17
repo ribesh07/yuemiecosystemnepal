@@ -44,7 +44,7 @@ model User {
 model Admin {
   id        Int      @id @default(autoincrement())
   name      String
-  email     String
+  email     String  @unique
   address   String?
   phone     String?
   country   String?
