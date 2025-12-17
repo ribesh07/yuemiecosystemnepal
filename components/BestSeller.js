@@ -112,7 +112,7 @@ const Bestseller = () => {
                 
                 {/* Add to Cart Button on Hover */}
                 {!product.isSoldOut && (
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+                  <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
                     <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                       ADD TO CART
                     </button>
@@ -136,11 +136,11 @@ const Bestseller = () => {
         ))}
       </div>
       
-      <div className="text-center mt-10">
-        <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full text-lg font-medium transition-colors">
-          View all
-        </button>
-      </div>
+      <div className="flex justify-center mt-10">
+          <button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-8 py-3 rounded border-2 border-orange-600 transition-all duration-300 hover:shadow-lg">
+            View All
+          </button>
+        </div>
     </section>
   );
 };
