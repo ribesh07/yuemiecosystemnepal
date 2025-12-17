@@ -312,7 +312,7 @@ export default function FooterBar() {
                 />
                 <button
                   onClick={() => handleSubscribe(email)}
-                  className="bg-[#FF930F] hover:bg-[#FF930F] text-white px-3 py-3 text-[12px] font-semibold"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-3 text-[12px] font-semibold"
                 >
                   SUBSCRIBE
                 </button>
