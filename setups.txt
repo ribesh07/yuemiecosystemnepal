@@ -1,6 +1,7 @@
 # start
 npm i
 npx prisma generate
+npx prisma migrate deploy OR npx prisma db push
 npm run dev
 
 #dev update in schema.prisma
