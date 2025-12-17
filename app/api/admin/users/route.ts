@@ -6,7 +6,7 @@ export async function GET() {
   try {
     requireAdminRole("SUPER_ADMIN");
 
-    const users = await prisma.admin.findMany({
+    const admins = await prisma.admin.findMany({
       select: {
         id: true,
         email: true,
@@ -14,7 +14,7 @@ export async function GET() {
       }
     });
 
-    return NextResponse.json(users);
+    return NextResponse.json(admins);
   } catch {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }
