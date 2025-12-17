@@ -165,6 +165,10 @@ export default function Header() {
               <a href="/contact" className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
                 CONTACT US
               </a>
+
+              <a href="/warranty" className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
+                WARRANTY
+              </a>
             </div>
 
             {/* Icons */}
