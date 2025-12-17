@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npx prisma generate && next dev --turbopack",
+    "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js",
+    "start": "npx prisma generate && NODE_ENV=production node server.js",
     "lint": "next lint"
   },
   "dependencies": {
