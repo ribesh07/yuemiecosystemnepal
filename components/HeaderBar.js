@@ -142,7 +142,7 @@ export default function Header() {
               <a href="/" className="text-orange-500 font-bold hover:underline cursor-pointer hover:text-orange-600 transition-colors">
                 HOME
               </a>
-              <a href="#about" className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
+              <a href="/about" className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
                 ABOUT US
               </a>
               <div className="relative group">
@@ -162,7 +162,7 @@ export default function Header() {
                   ))}
                 </div>
               </div>
-              <a href="#contact" className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
+              <a href="/contact" className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
                 CONTACT US
               </a>
             </div>
