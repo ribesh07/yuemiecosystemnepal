@@ -250,9 +250,9 @@ export default function WarrantyPage() {
         </div>
 
         <div className="mt-auto p-6">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100 shadow-sm">
+          <div className="bg-gradient-to-br from-orange-50 to-indigo-50 rounded-xl p-5 border border-orange-100 shadow-sm">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -264,19 +264,19 @@ export default function WarrantyPage() {
                 {activeTab === 'register' ? (
                   <ul className="text-sm text-gray-700 space-y-1.5">
                     <li className="flex items-start gap-2">
-                      <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span>Proof of ownership</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span>Faster warranty claims</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span>Product updates</span>
@@ -357,24 +357,24 @@ export default function WarrantyPage() {
                   )}
                 </button>
 
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6">
+                <div className="bg-gradient-to-br from-orange-50 to-indigo-50 border-2 border-orange-200 rounded-xl p-6">
                   <div className="flex items-start gap-3">
-                    <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                     <div>
                       <h3 className="font-bold text-gray-800 mb-2">What happens next?</h3>
                       <ul className="text-sm text-gray-700 space-y-2">
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-500">•</span>
+                          <span className="text-orange-500">•</span>
                           <span>Your warranty will be registered in our system</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-500">•</span>
+                          <span className="text-orange-500">•</span>
                           <span>You'll receive a confirmation email</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-500">•</span>
+                          <span className="text-orange-500">•</span>
                           <span>Access to priority customer support</span>
                         </li>
                       </ul>
@@ -412,7 +412,7 @@ export default function WarrantyPage() {
                     value={checkSerial}
                     onChange={(e) => setCheckSerial(e.target.value)}
                     placeholder="Enter serial number to check warranty"
-                    className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-lg"
+                    className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-lg"
                     required
                   />
                   <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
@@ -426,7 +426,7 @@ export default function WarrantyPage() {
                 <button
                   type="submit"
                   disabled={isChecking || !checkSerial.trim()}
-                  className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all font-bold text-lg disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-bold text-lg disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
                 >
                   {isChecking ? (
                     <>
