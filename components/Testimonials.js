@@ -10,7 +10,7 @@ const Testimonials = () => {
     {
       id: 1,
       text: "I've been using these YuéMi lights for a few months now and I'm so impressed. They're durable, easy to install, and provide great visibility. It's easy to use, Highly recommend!",
-      name: "Bikesh Gupta",
+      name: "Nur ",
       location: "Kathmandu",
       image: "/employee.jpeg"
     },
