@@ -217,7 +217,7 @@ export default function FooterBar() {
 
                 <li className="footer-list">
                   <Link
-                    href="/returnpolicy"
+                    href="Company/return-policy"
                     className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Return & Refund Policy
@@ -242,7 +242,7 @@ export default function FooterBar() {
               <ul className="space-y-2 sm:space-y-3 Main-Footer-title Bottom-list-margin">
                 <li className="footer-list">
                   <Link
-                    href="/AboutUs"
+                    href="/about"
                     className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     About us
@@ -250,7 +250,7 @@ export default function FooterBar() {
                 </li>
                 <li className="footer-list">
                   <Link
-                    href="/ContactUs"
+                    href="/contact"
                     className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Contact Us
