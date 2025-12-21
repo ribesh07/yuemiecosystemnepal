@@ -3,10 +3,14 @@ GET http://localhost:3000/api/users
 Content-Type: application/json
 
 ### create users
-GET https://omsnepal.com/api/users
+POST  https://omsnepal.com/api/users
 Content-Type: application/json
 
 {
     "email" : "ak@g.co",
     "name":"test"
 }
+
+### get categories
+GET http://localhost:3000/api/categories
+Content-Type: application/json

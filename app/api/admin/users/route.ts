@@ -4,7 +4,7 @@ import { requireAdminRole } from "@/lib/auth";
 
 export async function GET() {
   try {
-    requireAdminRole("SUPER_ADMIN");
+    requireAdminRole("ADMIN");
 
     const admins = await prisma.admin.findMany({
       select: {

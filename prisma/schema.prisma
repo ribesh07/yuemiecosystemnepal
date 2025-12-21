@@ -29,7 +29,7 @@ model User {
   password          String
   rememberToken     String?
   profilePhotoPath  String?
-  createdAt         DateTime?
+  createdAt         DateTime?   @default(now())
   updatedAt         DateTime?
 
   addresses         CustomerAddress[]
@@ -52,7 +52,7 @@ model Admin {
   roleId    BigInt
   password  String
   profilePhotoPath String?
-  createdAt DateTime?
+  createdAt DateTime?   @default(now())
   updatedAt DateTime?
 
   role      AdminRole @relation(fields: [roleId], references: [id])
@@ -65,7 +65,7 @@ model AdminRole {
   name      String
   modules   String?
   status    Boolean @default(true)
-  createdAt DateTime?
+  createdAt DateTime?   @default(now())
   updatedAt DateTime?
 
   admins    Admin[]
@@ -77,7 +77,7 @@ model AdminRole {
 model Province {
   id        BigInt   @id @default(autoincrement())
   name      String   @map("province_name")
-  createdAt DateTime?
+  createdAt DateTime?   @default(now())
   updatedAt DateTime?
 
   cities    ShippingCity[]
@@ -93,7 +93,7 @@ model ShippingCity {
   shippingCost  Decimal  @default(0)
   applyShipping Boolean  @default(true)
   remarks       String?
-  createdAt     DateTime?
+  createdAt     DateTime?   @default(now())
   updatedAt     DateTime?
 
   province      Province @relation(fields: [provinceId], references: [id])
@@ -107,7 +107,7 @@ model AddressZone {
   id        BigInt   @id @default(autoincrement())
   cityId    BigInt
   zoneName  String   @map("zone_name")
-  createdAt DateTime?
+  createdAt DateTime?   @default(now())
   updatedAt DateTime?
 
   city      ShippingCity @relation(fields: [cityId], references: [id])
@@ -129,7 +129,7 @@ model CustomerAddress {
   addressType     AddressType? @default(HOME)
   defaultShipping Boolean @default(false)
   defaultBilling  Boolean @default(false)
-  createdAt       DateTime?
+  createdAt       DateTime?   @default(now())
   updatedAt       DateTime?
 
   /// Relations
@@ -148,7 +148,7 @@ model Brand {
   image     String?
   top       Int      @default(0)
   status    Int
-  createdAt DateTime?
+  createdAt DateTime?   @default(now())
   updatedAt DateTime?
 
   products  Product[]
@@ -160,10 +160,10 @@ model Category {
   id        BigInt   @id @default(autoincrement())
   name      String   @map("category_name")
   parentId  BigInt?
-  image     String
+  image     String?
   top       Int      @default(0)
-  status    Int
-  createdAt DateTime?
+  status    Int 
+  createdAt DateTime? @default(now())
   updatedAt DateTime?
 
   products  Product[]
@@ -188,7 +188,7 @@ model Product {
   stockQuantity     BigInt   @default(0)
   availableQuantity BigInt   @default(0)
   status            Int
-  createdAt         DateTime?
+  createdAt         DateTime?   @default(now())
   updatedAt         DateTime?
 
   brand             Brand?    @relation(fields: [brandId], references: [id])
@@ -207,7 +207,7 @@ model ProductImage {
   id          BigInt   @id @default(autoincrement())
   productCode String
   imagePath   String?
-  createdAt   DateTime?
+  createdAt   DateTime? @default(now())
   updatedAt   DateTime?
 
   product     Product @relation(fields: [productCode], references: [productCode])
@@ -222,7 +222,7 @@ model ProductVariation {
   price       Decimal
   stock       Int
   sku         String?
-  createdAt   DateTime?
+  createdAt   DateTime? @default(now())
   updatedAt   DateTime?
 
   product     Product @relation(fields: [productCode], references: [productCode])
@@ -238,7 +238,7 @@ model Cart {
   tax       Decimal  @default(0)
   shippingCost Decimal @default(0)
   status    String?
-  createdAt DateTime?
+  createdAt DateTime?   @default(now())
   updatedAt DateTime?
 
   user      User?     @relation(fields: [customerId], references: [id])
@@ -254,7 +254,7 @@ model CartItem {
   quantity    BigInt
   price       Decimal
   actualPrice Decimal
-  createdAt   DateTime?
+  createdAt   DateTime?     @default(now())
   updatedAt   DateTime?
 
   cart        Cart    @relation(fields: [cartId], references: [id])
@@ -267,7 +267,7 @@ model Wishlist {
   id          BigInt   @id @default(autoincrement())
   customerId  BigInt
   productCode String
-  createdAt   DateTime?
+  createdAt   DateTime?   @default(now())
   updatedAt   DateTime?
 
   user        User    @relation(fields: [customerId], references: [id])
@@ -288,7 +288,7 @@ model Order {
   totalAmount   Decimal
   orderStatus   String   @default("processing")
   paymentStatus String   @default("unpaid")
-  createdAt     DateTime?
+  createdAt     DateTime? @default(now())
   updatedAt     DateTime?
 
   user          User      @relation(fields: [customerId], references: [id])
@@ -305,7 +305,7 @@ model OrderItem {
   quantity    BigInt
   price       Decimal
   subtotal    Decimal
-  createdAt   DateTime?
+  createdAt   DateTime? @default(now())
   updatedAt   DateTime?
 
   order       Order   @relation(fields: [orderId], references: [id])
@@ -322,7 +322,7 @@ model OrderPayment {
   paidAmount  Decimal
   dueAmount   Decimal
   status      String?
-  createdAt   DateTime?
+  createdAt   DateTime? @default(now())
   updatedAt   DateTime?
 
   order       Order @relation(fields: [orderId], references: [id])
@@ -340,7 +340,7 @@ model ProductReview {
   review      String   @map("review_detail")
   rating      Decimal
   imagePath   String?
-  createdAt   DateTime?
+  createdAt   DateTime? @default(now())
   updatedAt   DateTime?
 
   user        User?    @relation(fields: [customerId], references: [id])
