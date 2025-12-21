@@ -225,7 +225,7 @@ export default function FooterBar() {
                 </li>
                 <li className="footer-list">
                   <Link
-                    href="/PrivacyPolicy"
+                    href="/Company/privacy"
                     className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Privacy Policy
