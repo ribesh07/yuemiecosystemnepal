@@ -205,8 +205,9 @@ model Product {
 
 model ProductImage {
   id          BigInt   @id @default(autoincrement())
-  productCode String
-  imagePath   String?
+  mainImage   String?
+  productCode String   @unique
+  imagePath   Json?
   createdAt   DateTime? @default(now())
   updatedAt   DateTime?
 
