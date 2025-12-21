@@ -91,10 +91,10 @@ export default function TermsAndConditions() {
       </div>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-r from-orange-600 via-yellow-600 to-red-600 text-white">
         <div className="max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
           <div className="relative z-10 max-w-3xl">
-            <div className="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm">
+            <div className="inline-flex items-center text-black px-4 py-2 bg-white bg-opacity-20 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -120,7 +120,7 @@ export default function TermsAndConditions() {
               <a
                 key={section.id}
                 href={`#${section.id}`}
-                className="text-sm text-indigo-600 hover:text-indigo-800 whitespace-nowrap px-3 py-1 rounded-full hover:bg-indigo-50 transition-colors"
+                className="text-sm text-Orange-500 hover:text-orange-600 whitespace-nowrap px-3 py-1 rounded-full hover:bg-indigo-50 transition-colors"
               >
                 {section.title}
               </a>
@@ -135,7 +135,7 @@ export default function TermsAndConditions() {
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 md:p-12 mb-12 border border-indigo-100">
           <div className="flex items-start">
             <div className="flex-shrink-0">
-              <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center">
+              <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -160,7 +160,7 @@ export default function TermsAndConditions() {
             >
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-600 rounded-xl flex items-center justify-center">
                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={section.icon} />
                     </svg>
@@ -168,7 +168,7 @@ export default function TermsAndConditions() {
                 </div>
                 <div className="ml-6 flex-1">
                   <div className="flex items-center mb-4">
-                    <span className="text-sm font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full mr-3">
+                    <span className="text-sm font-semibold text-Orange-600 bg-indigo-50 px-3 py-1 rounded-full mr-3">
                       Section {index + 1}
                     </span>
                     <h3 className="text-2xl font-bold text-gray-900">{section.title}</h3>
@@ -183,7 +183,7 @@ export default function TermsAndConditions() {
         </div>
 
         {/* Contact Section */}
-        <div className="mt-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl p-12 text-center text-white">
+        <div className="mt-16 bg-gradient-to-r from-orange-600 via-yellow-600 to-red-600 rounded-3xl shadow-2xl p-12 text-center text-white">
           <div className="max-w-3xl mx-auto">
             <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm">
               <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,13 +195,13 @@ export default function TermsAndConditions() {
               If you have any questions or concerns about these Terms and Conditions, please don't hesitate to reach out to our legal team.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="mailto:legal@example.com" className="inline-flex items-center justify-center px-8 py-4 bg-white text-indigo-600 rounded-full font-semibold hover:bg-indigo-50 transition-colors">
+              <a href="mailto:legal@example.com" className="inline-flex items-center justify-center px-8 py-4 bg-white text-orange-600 rounded-full font-semibold hover:bg-indigo-50 transition-colors">
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 Contact Legal Team
               </a>
-              <a href="#" className="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-indigo-600 transition-colors">
+              <a href="#" className="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-colors">
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
@@ -227,21 +227,7 @@ export default function TermsAndConditions() {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex justify-center space-x-6 mb-6">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
-              <span className="text-gray-600">|</span>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
-              <span className="text-gray-600">|</span>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Refund Policy</a>
-            </div>
-            <p className="text-gray-400 text-sm">© 2025 Your Store. All rights reserved.</p>
-          </div>
-        </div>
-      </div>
+      
     </div>
   );
 }
