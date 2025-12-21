@@ -82,9 +82,9 @@ export default function TermsAndConditions() {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Your Store</h1>
             <nav className="hidden md:flex space-x-8 text-sm">
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">Shop</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
+              <a href="/shop" className="text-gray-600 hover:text-gray-900 transition-colors">Shop</a>
+              <a href="/about" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
+              <a href="/contact" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
             </nav>
           </div>
         </div>
