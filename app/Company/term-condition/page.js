@@ -227,21 +227,7 @@ export default function TermsAndConditions() {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex justify-center space-x-6 mb-6">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
-              <span className="text-gray-600">|</span>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
-              <span className="text-gray-600">|</span>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Refund Policy</a>
-            </div>
-            <p className="text-gray-400 text-sm">© 2025 Your Store. All rights reserved.</p>
-          </div>
-        </div>
-      </div>
+      
     </div>
   );
 }

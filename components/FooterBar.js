@@ -217,7 +217,7 @@ export default function FooterBar() {
 
                 <li className="footer-list">
                   <Link
-                    href="Company/return-policy"
+                    href="/Company/return-policy"
                     className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Return & Refund Policy
@@ -259,7 +259,7 @@ export default function FooterBar() {
 
                 <li className="footer-list">
                   <Link
-                    href="Company/term-condition"
+                    href="/Company/term-condition"
                     className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Terms and Conditions
