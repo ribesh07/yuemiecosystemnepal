@@ -66,6 +66,8 @@ const Support = () => {
             follow Us
           </button>
         </div>
+        <div className="mt-4 mb-4 h-1 bg-orange-500 w-full"></div>
+
       </div>
     </section>
   );
