@@ -6,6 +6,9 @@ import CookieConsentBanner from "@/components/CookieConsentBanner";
 import ClientLayout from "@/components/ClientLayut";
 import FooterBar from "@/components/FooterBar";
 import HeaderBar from "@/components/HeaderBar";
+import CartSidebar from  "@/components/CartSidebar";
+
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +43,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
           <HeaderBar />
+          <CartSidebar />
            <ClientLayout>{children}</ClientLayout>
      
         <CookieConsentBanner />
