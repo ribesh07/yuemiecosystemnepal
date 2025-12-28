@@ -265,6 +265,13 @@ export default function Header() {
             />
           </button>
           <a
+            href="/warranty"
+            className="text-2xl font-normal text-gray-900 py-4 hover:text-orange-500 transition-colors"
+            onClick={toggleMobileMenu}
+          >
+            WARRANTY
+          </a>
+          <a
             href="#contact"
             className="text-2xl font-normal text-gray-900 py-4 hover:text-orange-500 transition-colors"
             onClick={toggleMobileMenu}
