@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         : null;
 
     const galleryImages = formData
-      .getAll("images")
+      .getAll("productImages") 
       .filter(
         (f): f is File =>
           f instanceof File && f.size > 0 && f.type.startsWith("image/")
