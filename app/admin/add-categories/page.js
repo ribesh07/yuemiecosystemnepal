@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 
 export default function AddCategoryPage() {
@@ -49,7 +50,7 @@ export default function AddCategoryPage() {
       const data = await res.json();
 
       if (data.success) {
-        alert("Category added successfully!");
+        toast.success("Category added successfully!");
         // Reset form
         setName("");
         setSlug("");
@@ -61,7 +62,7 @@ export default function AddCategoryPage() {
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong!");
+      toast.error("Something went wrong!");
     }
 
     setLoading(false);

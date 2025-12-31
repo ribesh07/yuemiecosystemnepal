@@ -12,8 +12,9 @@ export default function CategoriesListPage() {
     try {
       const res = await fetch("/api/categories");
       const data = await res.json();
+      console.log(data)
       if (data.success) {
-        setCategories(data.categories);
+        setCategories(data.data.categories);
       } else {
         alert("Failed to fetch categories!");
       }

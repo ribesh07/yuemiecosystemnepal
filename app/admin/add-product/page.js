@@ -21,6 +21,7 @@ export default function ProductUploadPage() {
     categories: "",
     brand: "",
     deliveryTargetDays: "",
+    status:1,
     weeklyProduct: false,
     flashSaleProduct: false,
     todayDeals: false,
@@ -34,6 +35,7 @@ export default function ProductUploadPage() {
     packaging: "",
     warranty: "",
     productCatalog: null,
+    mainImage:null,
     productImages: [],
   });
 
@@ -42,12 +44,13 @@ export default function ProductUploadPage() {
       try {
         const res = await fetch("/api/categories");
         const data = await res.json();
-        if (data.success) setCategories(data.categories);
+        console.log(data)
+        if (data.success) setCategories(data.data.categories);
       } catch (err) {
         console.error("Failed to fetch categories", err);
       }
     };
-    // fetchCategories();
+    fetchCategories();
   }, []);
 
   const handleInputChange = (e) => {
@@ -76,6 +79,17 @@ export default function ProductUploadPage() {
     }));
   };
 
+  const handleMainImageChange = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  setFormData((prev) => ({
+    ...prev,
+    mainImage: file,
+  }));
+};
+
+
   const handleReset = () => {
     setFormData({
       productCode: generateProductCode(),
@@ -83,6 +97,7 @@ export default function ProductUploadPage() {
       category_id: "",
       categories: "",
       brand: "",
+      status:"1",
       deliveryTargetDays: "",
       weeklyProduct: false,
       flashSaleProduct: false,
@@ -96,8 +111,9 @@ export default function ProductUploadPage() {
       keySpecifications: "",
       packaging: "",
       warranty: "",
-      productCatalog: null,
       mainImage: null,
+      productCatalog: null,
+      productImages:[]
     });
   };
 
@@ -111,6 +127,7 @@ export default function ProductUploadPage() {
         data.append(key, value);
       }
     });
+    console.log(formData)
 
     try {
       const res = await fetch("/api/products", { method: "POST", body: data });
@@ -379,7 +396,7 @@ export default function ProductUploadPage() {
 
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                Product Image & Catalogue
+                Product Image & Gallery
               </h2>
 
               <div>
@@ -398,6 +415,26 @@ export default function ProductUploadPage() {
                   <p>
                     {formData.productCatalog?.name ||
                       "Choose file or drag & drop"}
+                  </p>
+                </label>
+              </div>
+              <div>
+                <input
+                  required
+                  type="file"
+                  id="mainImage"
+                  accept="image/*"
+                     onChange={handleMainImageChange}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="mainImage"
+                  className="cursor-pointer flex flex-col items-center border-2 border-dashed border-gray-400 rounded-lg p-6 hover:border-blue-400 transition-colors"
+                >
+                  <Upload className="mx-auto h-12 w-12 text-gray-900" />
+                  <p>
+                    {formData.mainImage?.name ||
+                      "Choose MainImage Required !"}
                   </p>
                 </label>
               </div>
@@ -432,7 +469,7 @@ export default function ProductUploadPage() {
         <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex justify-end gap-3">
           <button
             onClick={handleReset}
-            className="px-6 py-2.5 border border-gray-600 rounded-md bg-gray-500 hover:bg-gray-600 flex items-center gap-2"
+            className="px-6 py-2.5 border border-gray-600 rounded-md bg-gray-300 hover:bg-gray-600 flex items-center gap-2"
           >
             <RotateCcw className="w-4 h-4" /> Reset
           </button>

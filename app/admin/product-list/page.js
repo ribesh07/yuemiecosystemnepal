@@ -23,6 +23,7 @@ export default function ProductListPage() {
       try {
         const res = await fetch(PRODUCT_API);
         const data = await res.json();
+        // console.log(data.products[0])
         setProducts(data.products || []);
       } catch (err) {
         console.error("Products fetch error:", err);
@@ -48,8 +49,8 @@ export default function ProductListPage() {
   // Filter Products by search & category
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
-      p.product_name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.product_code || "").toLowerCase().includes(search.toLowerCase());
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      (p.productCode || "").toLowerCase().includes(search.toLowerCase());
     const matchesCategory =
       selectedCategory === "" || p.categories === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -153,8 +154,8 @@ export default function ProductListPage() {
                 <td className="px-6 py-4">
                   <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-100">
                     <Image
-                      src={product.main_image || "/no-image.png"}
-                      alt={product.product_name}
+                      src={product.mainImage || "/no-image.png"}
+                      alt={product.name}
                       fill
                       className="object-cover"
                     />
@@ -164,7 +165,7 @@ export default function ProductListPage() {
                 {/* Code */}
                 <td className="px-6 py-4">
                   <span className="text-sm font-medium text-gray-900">
-                    {product.product_code}
+                    {product.productCode}
                   </span>
                 </td>
 
@@ -172,7 +173,7 @@ export default function ProductListPage() {
                 <td className="px-6 py-4">
                   <div>
                     <div className="text-sm font-semibold text-gray-900">
-                      {product.product_name}
+                      {product.brandName ||  "Yuemi"}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
                       Brand Name
@@ -183,7 +184,7 @@ export default function ProductListPage() {
                 {/* Category */}
                 <td className="px-6 py-4">
                   <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
-                    {product.categories || "Uncategorized"}
+                    {product.categoryName || "Uncategorized"}
                   </span>
                 </td>
 
@@ -191,10 +192,10 @@ export default function ProductListPage() {
                 <td className="px-6 py-4">
                   <div>
                     <div className="text-sm font-bold text-gray-900">
-                      Rs. {product.selling_price}
+                      Rs. {product.sellPrice}
                     </div>
                     <div className="text-xs text-gray-400 line-through">
-                      Rs. {product.actual_price}
+                      Rs. {product.actualPrice}
                     </div>
                   </div>
                 </td>
@@ -202,13 +203,13 @@ export default function ProductListPage() {
                 {/* Stock */}
                 <td className="px-6 py-4">
                   <span className="text-sm font-medium text-gray-900">
-                    {product.available_quantity || 0}
+                    {product.availableQuantity || 0}
                   </span>
                 </td>
 
                 {/* Status */}
                 <td className="px-6 py-4">
-                  {product.available_quantity > 0 ? (
+                  {product.status > 0 ? (
                     <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
                       Active
                     </span>

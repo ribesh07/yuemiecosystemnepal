@@ -14,3 +14,7 @@ Content-Type: application/json
 ### get categories
 GET http://localhost:3000/api/categories
 Content-Type: application/json
+
+### get prducts
+GET http://localhost:3000/api/products
+Content-Type: application/json

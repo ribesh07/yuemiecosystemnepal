@@ -8,3 +8,7 @@ npm run dev
 npx prisma migrate dev 
 npx prisma generate
 npm run dev
+
+
+# for dev guru
+npm run radhe
