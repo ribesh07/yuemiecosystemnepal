@@ -128,7 +128,7 @@ const SideHeaderBar = () => {
         { name: "Privacy Policy", path: "/admin/compliance/privacy" },
         { name: "Refund Policy", path: "/admin/compliance/refund" },
         { name: "Shipping Information", path: "/admin/compliance/shipping" },
-        { name: "Contact Us", path: "/admin/compliance/cancellation" },
+        { name: "Contact Us", path: "/admin/contact" },
 
       ],
     },
