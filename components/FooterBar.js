@@ -15,6 +15,7 @@ import { baseUrl } from "@/utils/config";
 import Link from "next/link";
 import { useEffect } from "react";
 import { apiRequest } from "@/utils/ApisafeCalls";
+import { usePathname } from "next/navigation";
 // import MobileAppDownload from "@/app/playstore/playstore";
 
 export default function FooterBar() {
@@ -27,6 +28,7 @@ export default function FooterBar() {
     primary_phone: "",
   });
   // const [gender, setGender] = useState("male");
+  const pathname = usePathname()
 
   const handleSubscribe = async (email) => {
     if (!email) {
@@ -102,6 +104,8 @@ export default function FooterBar() {
     // };
     // fetchSettings();
   }, []);
+
+  if (pathname === "/login-admin") return null;
 
   return (
     <footer className="relative w-full">

@@ -22,8 +22,10 @@ export async function POST(req: Request) {
 
   const token = signToken({
     sub: user.id.toString(),
+    role: "USER",
     type: "USER"
   });
 
   return NextResponse.json({ token });
 }
+

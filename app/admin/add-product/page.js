@@ -47,7 +47,7 @@ export default function ProductUploadPage() {
         console.error("Failed to fetch categories", err);
       }
     };
-    fetchCategories();
+    // fetchCategories();
   }, []);
 
   const handleInputChange = (e) => {
