@@ -9,13 +9,14 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
 
-    const status = searchParams.get("status");
-    const parentId = searchParams.get("parentId");
+    // const status = searchParams.get("status");
+    // const parentId = searchParams.get("parentId");
+    const status = 1;
 
     const categories = await prisma.category.findMany({
       where: {
         ...(status && { status: Number(status) }),
-        ...(parentId && { parentId: BigInt(parentId) }),
+        // ...(parentId && { parentId: BigInt(parentId) }),
       },
       orderBy: {
         createdAt: "desc",

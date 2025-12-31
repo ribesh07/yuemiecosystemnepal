@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma generate && next build",
+    "radhe":"npx prisma migrate dev && npx prisma generate && next dev",
     "start": "npx prisma generate && NODE_ENV=production node server.js",
     "lint": "next lint"
   },

@@ -182,13 +182,22 @@ model Product {
   packaging         String?
   warranty          String?
   categoryId        BigInt?
+  categoryName      String?
   brandId           Int?
+  brandName             String?
+  deliveryTargetDays  Int? @default(7)
   actualPrice       Decimal  @default(0) @map("actual_price")
   sellPrice         Decimal  @default(0) @map("sell_price")
   discount          Decimal  @default(0)
   stockQuantity     BigInt   @default(0)
   availableQuantity BigInt   @default(0)
-  status            Int
+  weeklyProduct      Boolean  @default(false)
+  flashSaleProduct  Boolean  @default(false)
+  specialProduct   Boolean  @default(false)
+  todayDeals  Boolean  @default(false)
+  status            Int   @default(1)
+  mainImage         String?
+  productCatalog    String?
   createdAt         DateTime?   @default(now())
   updatedAt         DateTime?
 
