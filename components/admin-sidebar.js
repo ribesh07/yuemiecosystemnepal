@@ -72,7 +72,7 @@ const SideHeaderBar = () => {
       icon: Tag,
       label: "Popup-Ads",
       path: "/admin/popup-ads",
-      expandable: true,
+      
     },
 
     

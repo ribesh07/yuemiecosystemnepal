@@ -33,13 +33,13 @@ export default function AdminHeaderBar() {
 
           {/* Logo */}
           <Link href="/admin" className="flex items-center">
-            <Image
+            {/* <Image
               src="/images/logo1.png"
               alt="Admin Logo"
               width={45}
               height={45}
               className="object-contain"
-            />
+            /> */}
             <span className="font-semibold text-xl ml-2 text-gray-800 hidden sm:block">
               Admin Panel
             </span>
