@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { randomCode } from "@/lib/randomCode";
 
 
 // GET all users
@@ -55,6 +56,7 @@ export async function POST(req: Request) {
         fullName,
         email,
         phone,
+        userId: randomCode('U'),
         password: hashedPassword,
         status: true
       },
@@ -62,6 +64,7 @@ export async function POST(req: Request) {
         id: true,
         fullName: true,
         email: true,
+        userId:true,
         phone: true,
         createdAt: true
       }
