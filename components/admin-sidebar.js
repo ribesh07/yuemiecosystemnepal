@@ -76,46 +76,45 @@ const SideHeaderBar = () => {
       
     },
 
-    
-
-    
-
-    {
-      icon: Tag,
-      label: "Coupons",
-      path: "/admin/coupons",
-      expandable: true,
-    },
 
     {
       icon: ShoppingCart,
       label: "Manage Orders",
-      path: "/admin/orders",
+      path: "#",
       expandable: true,
+      children: [
+        { name: "Processing Orders", path: "/admin/orders" },
+        { name: "Shipped Orders", path: "/admin/orders?status=pending" },
+        { name: "Delivered Orders", path: "/admin/orders?status=completed" },
+        { name: "Cancelled Orders", path: "/admin/orders?status=cancelled" },
+        { name: "Returned Orders", path: "/admin/orders?status=returned" },
+      ],
     },
 
     
 
     { icon: Users, label: "Customers", path: "/admin/customers" },
-    { icon: Star, label: "Reviews & Ratings", path: "/admin/reviews" },
-    { icon: MessageSquare, label: "Inquiries", path: "/admin/inquiries" },
-    { icon: FileText, label: "Grievances", path: "/admin/grievances" },
-    
-
-    {
-      icon: UserCog,
-      label: "System Users",
+    { icon: MapPin,
+      label: "Manage Address",
       path: "#",
       expandable: true,
       children: [
-        { name: "View All", path: "/admin/users" },
-        { name: "Add New", path: "/admin/users/add" },
+        { name: "Manage provinces", path: "/admin/address/countries" },
+        { name: "Set City", path: "/admin/address/states" },
+        { name: "Set Local Area", path: "/admin/address/cities" },
       ],
-    },
+     },
 
-    { icon: BarChart3, label: "Report", path: "/admin/report" },
+    { icon: Star, label: "Reviews & Ratings", path: "/admin/reviews" },
+    
+    { icon: FileText, label: "Grievances", path: "/admin/grievances" },
+    
+
+    
+
+    { icon: BarChart3, label: "Warranty Report", path: "/admin/report" },
     { icon: Truck, label: "Shipping Carriers", path: "/admin/shipping" },
-    { icon: MapPin, label: "Manage Address", path: "/admin/address" },
+    
     { icon: XCircle, label: "Return & Cancel Reasons", path: "/admin/returns" },
 
     {
@@ -124,10 +123,27 @@ const SideHeaderBar = () => {
       path: "#",
       expandable: true,
       children: [
-        { name: "Policies", path: "/admin/compliance/policies" },
-        { name: "Certificates", path: "/admin/compliance/certificates" },
+        { name: "About Us", path: "/admin/compliance/policies" },
+        { name: "Terms & Conditions", path: "/admin/compliance/certificates" },
+        { name: "Privacy Policy", path: "/admin/compliance/privacy" },
+        { name: "Refund Policy", path: "/admin/compliance/refund" },
+        { name: "Shipping Information", path: "/admin/compliance/shipping" },
+        { name: "Contact Us", path: "/admin/compliance/cancellation" },
+
       ],
     },
+    {
+      icon: MessageSquare,
+      label: "Testimonials",
+      path: "#",
+      expandable: true,
+      children: [
+        
+        { name: "Add Testimonial", path: "/admin/testimonials" },
+        { name: "View Testimonials", path: "/admin/testimonials" },
+      ],
+    },
+
   ];
      const pathname = usePathname();
   
