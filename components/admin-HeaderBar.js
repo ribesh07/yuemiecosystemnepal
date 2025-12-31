@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Menu, X, LogOut, User, Bell } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter , usePathname} from "next/navigation";
 
 export default function AdminHeaderBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,6 +16,9 @@ export default function AdminHeaderBar() {
     const admin = localStorage.getItem("admin_auth");
     setIsLoggedIn(!!admin);
   }, []);
+    const pathname = usePathname();
+
+  if (pathname === "/admin/login") return null;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm">
@@ -33,13 +36,13 @@ export default function AdminHeaderBar() {
 
           {/* Logo */}
           <Link href="/admin" className="flex items-center">
-            <Image
+            {/* <Image
               src="/images/logo1.png"
               alt="Admin Logo"
               width={45}
               height={45}
               className="object-contain"
-            />
+            /> */}
             <span className="font-semibold text-xl ml-2 text-gray-800 hidden sm:block">
               Admin Panel
             </span>

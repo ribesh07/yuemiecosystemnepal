@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
-import CookieConsentBanner from "@/components/CookieConsentBanner";
-import ClientLayout from "@/components/ClientLayut";
-import FooterBar from "@/components/FooterBar";
-import HeaderBar from "@/components/HeaderBar";
-import CartSidebar from  "@/components/CartSidebar";
+// import { Toaster } from "react-hot-toast";
+// import CookieConsentBanner from "@/components/CookieConsentBanner";
+// import ClientLayout from "@/components/ClientLayut";
+// import FooterBar from "@/components/FooterBar";
+// import HeaderBar from "@/components/HeaderBar";
+// import CartSidebar from  "@/components/CartSidebar";
+import LayoutWrapper from "@/components/LayoutWrapper";
 
 
 
@@ -39,18 +40,8 @@ export default function RootLayout({
         <link rel="icon" href="/yumei_logo.png" />
        
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-          <HeaderBar />
-          <CartSidebar />
-           <ClientLayout>{children}</ClientLayout>
-     
-        <CookieConsentBanner />
-        <FooterBar />
-        {/* <TawkToWidget /> */}
-        <Toaster position="top-right" />
-        {/* <Toast /> */}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );

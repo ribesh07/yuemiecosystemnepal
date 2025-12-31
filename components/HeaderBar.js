@@ -12,12 +12,14 @@ import {
   X,
   ArrowLeft,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 export default function Header() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProductMenuOpen, setIsProductMenuOpen] = useState(false);
+    const pathname = usePathname();
 
   const announcements = [
     "Welcome to our Exclusive Online Store!",
@@ -73,6 +75,9 @@ export default function Header() {
     setIsMobileMenuOpen(false);
     setIsProductMenuOpen(false);
   };
+
+    
+  if (pathname === "/login-admin") return null;
 
   return (
     <header className="w-full">

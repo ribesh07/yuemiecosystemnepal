@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   ChevronDown,
@@ -72,7 +73,7 @@ const SideHeaderBar = () => {
       icon: Tag,
       label: "Popup-Ads",
       path: "/admin/popup-ads",
-      expandable: true,
+      
     },
 
     
@@ -128,6 +129,9 @@ const SideHeaderBar = () => {
       ],
     },
   ];
+     const pathname = usePathname();
+  
+    if (pathname === "/admin/login") return null;
 
   return (
     <div className="w-64 bg-white h-full border-r border-gray-200 flex flex-col overflow-hidden">
