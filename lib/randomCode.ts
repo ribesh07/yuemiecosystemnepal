@@ -1,9 +1,14 @@
-export function  randomCode() {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let code = "P";
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code.toUpperCase();
+import { randomBytes } from "crypto";
+
+export function randomCode(prefix = "P", length = 8) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const bytes = randomBytes(length);
+
+  let code = prefix.toUpperCase();
+
+  for (let i = 0; i < length; i++) {
+    code += chars[bytes[i] % chars.length];
   }
+
+  return code.toUpperCase();
+}
