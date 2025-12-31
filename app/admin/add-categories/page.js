@@ -35,10 +35,12 @@ export default function AddCategoryPage() {
     try {
       const formData = new FormData();
       formData.append("name", name);
+      formData.append("status",1);
       formData.append("slug", slug);
       formData.append("description", description);
       if (image) formData.append("image", image);
 
+      console.log(formData)
       const res = await fetch("/api/categories", {
         method: "POST",
         body: formData,
