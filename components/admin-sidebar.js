@@ -124,9 +124,8 @@ const SideHeaderBar = () => {
       expandable: true,
       children: [
         { name: "About Us", path: "/admin/compliance/policies" },
-        { name: "Terms & Conditions", path: "/admin/compliance/certificates" },
-        { name: "Privacy Policy", path: "/admin/compliance/privacy" },
-        { name: "Refund Policy", path: "/admin/compliance/refund" },
+        { name: "Company Information", path: "/admin//comp-info" },
+      
         { name: "Shipping Information", path: "/admin/compliance/shipping" },
         { name: "Contact Us", path: "/admin/contact" },
 
@@ -135,13 +134,8 @@ const SideHeaderBar = () => {
     {
       icon: MessageSquare,
       label: "Testimonials",
-      path: "#",
-      expandable: true,
-      children: [
-        
-        { name: "Add Testimonial", path: "/admin/testimonials" },
-        { name: "View Testimonials", path: "/admin/testimonials" },
-      ],
+      path: "admin/testimonials",
+      
     },
 
   ];
