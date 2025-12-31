@@ -125,6 +125,9 @@ export default function ProductListPage() {
                 Image
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Catalog
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Code
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -161,6 +164,23 @@ export default function ProductListPage() {
                     />
                   </div>
                 </td>
+
+                {/* Catalog */}
+              <td className="px-6 py-4">
+                {product.productCatalog ? (
+                  <a
+                    href={product.productCatalog}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                  >
+                    📄 View Catalog
+                  </a>
+                ) : (
+                  <span className="text-xs text-gray-400">No catalog</span>
+                )}
+              </td>
+
 
                 {/* Code */}
                 <td className="px-6 py-4">

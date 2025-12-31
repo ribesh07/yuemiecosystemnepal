@@ -89,6 +89,16 @@ export default function ProductUploadPage() {
   }));
 };
 
+  const handleCatalogChange = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  setFormData((prev) => ({
+    ...prev,
+    productCatalog: file,
+  }));
+};
+
 
   const handleReset = () => {
     setFormData({
@@ -403,7 +413,7 @@ export default function ProductUploadPage() {
                 <input
                   type="file"
                   id="catalog"
-                  onChange={(e) => handleFileChange(e, "productCatalog")}
+                  onChange={handleCatalogChange}
                   className="hidden"
                   accept=".pdf,.doc,.docx"
                 />

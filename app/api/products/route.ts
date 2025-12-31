@@ -45,6 +45,10 @@ export async function POST(req: Request) {
         ? mainImageRaw
         : null;
 
+    const productCatalogRaw = formData.get("productCatalog");
+    const productCatalog = productCatalogRaw instanceof File && productCatalogRaw.size > 0
+        ? productCatalogRaw : null ;
+
     const galleryImages = formData
       .getAll("productImages") 
       .filter(
@@ -62,6 +66,7 @@ export async function POST(req: Request) {
     fs.mkdirSync(uploadDir, { recursive: true });
 
     let mainImagePath: string | null = null;
+    let productCatalogPath: string | null = null;
     const imagePaths: string[] = [];
 
     if (mainImage) {
@@ -75,6 +80,19 @@ export async function POST(req: Request) {
       );
 
       mainImagePath = `/uploads/${productCode}/images/${fileName}`;
+    }
+
+    if (productCatalog) {
+      const ext = path.extname(productCatalog.name);
+      const fileName = `catalog-${crypto.randomUUID()}${ext}`;
+      const filePath = path.join(uploadDir, fileName);
+
+      fs.writeFileSync(
+        filePath,
+        Buffer.from(await productCatalog.arrayBuffer())
+      );
+
+      productCatalogPath = `/uploads/${productCode}/images/${fileName}`;
     }
 
     for (const file of galleryImages) {
@@ -103,6 +121,7 @@ export async function POST(req: Request) {
           categoryName,
           brandName ,
           mainImage :mainImagePath ,
+          productCatalog : productCatalogPath,
           categoryId: categoryId ? BigInt(categoryId) : null,
           brandId: brandId ? Number(brandId) : null,
           actualPrice,
