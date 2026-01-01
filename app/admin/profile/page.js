@@ -81,7 +81,7 @@ export default function ProfileEdit() {
               </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-1">{formData.firstName} {formData.lastName}</h2>
               <p className="text-gray-600 mb-1">{formData.email}</p>
-              <span className="mt-2 px-4 py-1 bg-orange-500 text-white text-sm rounded-full">{formData.userType}</span>
+              <span className="mt-2 px-4 py-1 bg-orange-500 text-white text-sm rounded-full">Admin</span>
             </div>
 
             {/* Right Content */}
@@ -129,20 +129,7 @@ export default function ProfileEdit() {
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-2">User Type</label>
-                      <select
-                        name="userType"
-                        value={formData.userType}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 transition bg-white"
-                      >
-                        <option value="Admin">Admin</option>
-                        <option value="User">User</option>
-                        <option value="Manager">Manager</option>
-                        <option value="Guest">Guest</option>
-                      </select>
-                    </div>
+                    
                   </div>
                 </div>
 
