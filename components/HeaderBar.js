@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+//import Image from "next/image";
+import router from "next/router";
+
 import {
   Search,
   User,
@@ -19,7 +22,7 @@ export default function Header() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProductMenuOpen, setIsProductMenuOpen] = useState(false);
-    const pathname = usePathname();
+  const pathname = usePathname();
 
   const announcements = [
     "Welcome to our Exclusive Online Store!",
@@ -76,7 +79,6 @@ export default function Header() {
     setIsProductMenuOpen(false);
   };
 
-    
   if (pathname === "/login-admin") return null;
 
   return (
@@ -206,12 +208,9 @@ export default function Header() {
               >
                 <Search size={22} className="text-gray-700" />
               </button>
-              <button
-                className="hidden md:block p-2 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="User account"
-              >
+              <Link href="/profile" aria-label="User account">
                 <User size={22} className="text-gray-700" />
-              </button>
+              </Link>
               <button
                 onClick={() => window.dispatchEvent(new Event("openCart"))}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
