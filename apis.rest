@@ -1,5 +1,5 @@
 ###get users
-GET http://localhost:3000/api/users
+GET https://yuemi.com.np/api/users
 Content-Type: application/json
 
 ### create users
@@ -14,7 +14,7 @@ Content-Type: application/json
 }
 
 ### 
-GET https://yuemi.com.np/api/products
+GET https://yuemi.com.np/api/categories
 
 ### get categories
 GET http://localhost:3000/api/categories
