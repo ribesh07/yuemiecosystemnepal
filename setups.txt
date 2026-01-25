@@ -12,3 +12,10 @@ npm run dev
 
 # for dev guru
 npm run radhe
+
+
+# for prod
+rm -rf /tmp/*
+npx prisma generate
+npx prisma migrate deploy
+NODE_ENV=production pm2 start server.js --name yuemi-app
