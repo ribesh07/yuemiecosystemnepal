@@ -3,12 +3,14 @@ GET http://localhost:3000/api/users
 Content-Type: application/json
 
 ### create users
-POST  https://omsnepal.com/api/users
+POST  https://yuemi.com.np/api/users
 Content-Type: application/json
 
 {
-    "email" : "ak@g.co",
-    "name":"test"
+  "fullName": "John Doe",
+  "email": "john@example.com",
+  "password": "123456",
+  "phone": "9800000000"
 }
 
 ### 
