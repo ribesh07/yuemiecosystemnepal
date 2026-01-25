@@ -42,7 +42,7 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 flex items-center justify-center p-6">
       <div className="w-full max-w-3xl bg-white shadow-xl rounded-2xl p-8">
 
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
