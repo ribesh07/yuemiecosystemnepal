@@ -3,7 +3,8 @@ GET https://yuemi.com.np/api/users
 Content-Type: application/json
 
 ### create users
-POST  https://yuemi.com.np/api/users
+# POST  https://yuemi.com.np/api/users
+POST   http://localhost:3000/api/users
 Content-Type: application/json
 
 {
@@ -12,6 +13,11 @@ Content-Type: application/json
   "password": "123456",
   "phone": "9800000000"
 }
+
+### get users
+# GET  https://yuemi.com.np/api/users
+GET  http://localhost:3000/api/users
+Content-Type: application/json
 
 ### 
 GET https://yuemi.com.np/api/categories
