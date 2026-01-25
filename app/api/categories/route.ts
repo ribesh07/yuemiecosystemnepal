@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { requireAdminRole } from "@/lib/auth";

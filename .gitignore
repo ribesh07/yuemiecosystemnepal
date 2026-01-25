@@ -17,6 +17,8 @@
 /.next/
 /out/
 
+/public/uploads/categories/
+/public/uploads/
 # production
 /build
 
