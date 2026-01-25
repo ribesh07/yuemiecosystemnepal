@@ -20,7 +20,7 @@ app.prepare().then(() => {
       } else if (pathname === "/b") {
         await app.render(req, res, "/b", query);
       } else if (pathname === "/") {
-        await app.render(req, res, "/", query);
+        await app.render(req, res, "/home", query);
       } else {
         await handle(req, res, parsedUrl);
       }
@@ -31,6 +31,6 @@ app.prepare().then(() => {
     }
   }).listen(port, (err) => {
     if (err) throw err;
-    // console.log(`> Ready on http://${hostname}:${port}`);
+    console.log(`> Ready on http://${hostname}:${port}`);
   });
 });
