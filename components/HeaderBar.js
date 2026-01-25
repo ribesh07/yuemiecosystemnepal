@@ -57,7 +57,7 @@ export default function Header() {
 
   const prevSlide = () => {
     setCurrentSlide(
-      (prev) => (prev - 1 + announcements.length) % announcements.length
+      (prev) => (prev - 1 + announcements.length) % announcements.length,
     );
   };
 
@@ -212,7 +212,9 @@ export default function Header() {
                 <User size={22} className="text-gray-700" />
               </Link>
               <button
-                onClick={() => window.dispatchEvent(new Event("openCart"))}
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-cart"));
+                }}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
                 aria-label="Shopping cart"
               >
@@ -228,11 +230,13 @@ export default function Header() {
 
       {/* Mobile Menu Overlay */}
 
-      <div
-        className={`fixed inset-0 bg-transparent bg-opacity-0 z-40 transition-opacity duration-300 md:hidden 
-        `}
-        onClick={toggleMobileMenu}
-      />
+      {isMobileMenuOpen && (
+  <div
+    className="fixed inset-0 bg-transparent z-40 md:hidden"
+    onClick={toggleMobileMenu}
+  />
+)}
+
 
       {/* Main Mobile Menu - Full Screen */}
       <div

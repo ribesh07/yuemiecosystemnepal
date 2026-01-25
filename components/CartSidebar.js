@@ -8,20 +8,30 @@ export default function CartSidebar() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Load cart + listen for open event
   useEffect(() => {
     loadCart();
 
-    const handleOpenCart = () => setIsOpen(true);
-    window.addEventListener("openCart", handleOpenCart);
+    const handleOpenCart = () => {
+      setIsOpen(true);
+    };
 
-    return () => window.removeEventListener("openCart", handleOpenCart);
+    window.addEventListener("open-cart", handleOpenCart);
+
+    return () => {
+      window.removeEventListener("open-cart", handleOpenCart);
+    };
   }, []);
 
   const loadCart = async () => {
     try {
+      if (!window?.storage) return;
+
       const result = await window.storage.get("cart");
-      if (result?.value) setCartItems(JSON.parse(result.value));
-    } catch {
+      if (result?.value) {
+        setCartItems(JSON.parse(result.value));
+      }
+    } catch (err) {
       console.log("No cart found");
     } finally {
       setLoading(false);
@@ -30,31 +40,35 @@ export default function CartSidebar() {
 
   const saveCart = async (items) => {
     try {
+      if (!window?.storage) return;
       await window.storage.set("cart", JSON.stringify(items));
-    } catch (e) {
-      console.error("Save failed", e);
+    } catch (err) {
+      console.error("Save failed", err);
     }
   };
 
   const updateQuantity = (id, delta) => {
-    const updated = cartItems.map(item =>
+    const updated = cartItems.map((item) =>
       item.id === id
         ? { ...item, quantity: Math.max(1, item.quantity + delta) }
         : item
     );
+
     setCartItems(updated);
     saveCart(updated);
   };
 
   const removeItem = (id) => {
-    const updated = cartItems.filter(item => item.id !== id);
+    const updated = cartItems.filter((item) => item.id !== id);
     setCartItems(updated);
     saveCart(updated);
   };
 
   const clearCart = async () => {
     setCartItems([]);
-    await window.storage.delete("cart");
+    if (window?.storage) {
+      await window.storage.delete("cart");
+    }
   };
 
   const subtotal = cartItems.reduce(
@@ -107,15 +121,19 @@ export default function CartSidebar() {
               </div>
             ) : (
               <div className="space-y-4">
-                {cartItems.map(item => (
+                {cartItems.map((item) => (
                   <div key={item.id} className="bg-gray-50 p-4 rounded-lg">
                     <div className="flex gap-4">
-                      <div className="w-20 h-20 border rounded flex items-center justify-center">
+                      <div className="w-20 h-20 border rounded flex items-center justify-center overflow-hidden">
                         {item.image ? (
-                          <img src={item.image} className="object-cover w-full h-full" />
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="object-cover w-full h-full"
+                          />
                         ) : (
                           <span className="text-gray-400 text-xl">
-                            {item.name[0]}
+                            {item.name?.[0]}
                           </span>
                         )}
                       </div>
@@ -132,11 +150,19 @@ export default function CartSidebar() {
 
                         <div className="flex justify-between items-center mt-2">
                           <div className="flex border rounded">
-                            <button onClick={() => updateQuantity(item.id, -1)} className="px-2">
+                            <button
+                              onClick={() => updateQuantity(item.id, -1)}
+                              className="px-2"
+                            >
                               <Minus size={14} />
                             </button>
-                            <span className="px-3 text-sm">{item.quantity}</span>
-                            <button onClick={() => updateQuantity(item.id, 1)} className="px-2">
+                            <span className="px-3 text-sm">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => updateQuantity(item.id, 1)}
+                              className="px-2"
+                            >
                               <Plus size={14} />
                             </button>
                           </div>
