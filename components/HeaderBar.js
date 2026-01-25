@@ -157,7 +157,7 @@ export default function Header() {
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center space-x-8 text-[14px]">
               <a
-                href="/"
+                href="/home"
                 className="text-orange-500 font-bold hover:underline cursor-pointer hover:text-orange-600 transition-colors"
               >
                 HOME
