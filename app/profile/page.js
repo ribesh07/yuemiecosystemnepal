@@ -4,175 +4,245 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+/* -------------------- MODAL COMPONENT -------------------- */
+function Modal({ title, isOpen, onClose, children }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-xl w-full max-w-lg p-6 relative">
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-500 hover:text-black"
+        >
+          ✕
+        </button>
+
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* -------------------- MAIN PAGE -------------------- */
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
 
+  const [editAddress, setEditAddress] = useState(null);
+  const [editProfile, setEditProfile] = useState(false);
+  const [changePassword, setChangePassword] = useState(false);
+  const [editChangePassword, setEditChangePassword] = useState(false);
+
   useEffect(() => {
-    // TODO: Replace with real API calls
     setUser({
       name: "Gyanendra Sah",
       email: "gyanendra@email.com",
       phone: "+977-98XXXXXXXX",
       avatar:
-        "data:image/jpeg;base64,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",
+        "data:image/jpeg;base64,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",
       wishlistCount: 6,
     });
 
     setOrders([
-      {
-        id: "#ORD001",
-        date: "2025-01-10",
-        status: "Delivered",
-        total: "Rs. 4,500",
-      },
-      {
-        id: "#ORD002",
-        date: "2025-01-18",
-        status: "Processing",
-        total: "Rs. 2,200",
-      },
+      { id: "#ORD001", date: "2025-01-10", status: "Delivered", total: "Rs. 4,500" },
+      { id: "#ORD002", date: "2025-01-18", status: "Processing", total: "Rs. 2,200" },
     ]);
   }, []);
 
-  if (!user) return <p className="p-6">Loading profile...</p>;
+  if (!user) return <p className="p-6">Loading...</p>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
-      {/* LEFT SIDEBAR */}
-      <div className="bg-white rounded-xl shadow p-6 text-center">
-       
-        <Image
-          src={user.avatar}
-          alt="User Avatar"
-          width={120}
-          height={120}
-          className="mx-auto rounded-full"
-        />
-         
-        <h2 className="mt-4 text-xl font-semibold">{user.name}</h2>
-        <p className="text-gray-500 text-sm">{user.email}</p>
-        <p className="text-gray-500 text-sm">{user.phone}</p>
-      
+    <>
+      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        {/* SIDEBAR */}
+        <div className="bg-white rounded-xl shadow p-6 text-center">
+          <Image
+            src={user.avatar}
+            alt="Avatar"
+            width={120}
+            height={120}
+            className="mx-auto rounded-full"
+          />
 
-        <div className="mt-4 flex justify-around text-sm">
-          <div>
-            <p className="font-bold">{orders.length}</p>
-            <p className="text-gray-500">Orders</p>
-          </div>
-          <div>
-            <p className="font-bold">{user.wishlistCount}</p>
-            <p className="text-gray-500">Wishlist</p>
-          </div>
-        </div>
+          <h2 className="mt-4 text-xl font-semibold">{user.name}</h2>
+          <p className="text-gray-500 text-sm">{user.email}</p>
+          <p className="text-gray-500 text-sm">{user.phone}</p>
 
-        <button className="mt-6 w-full bg-orange-500 text-white py-2 rounded hover:bg-red-600">
-          Logout
-        </button>
-      </div>
+          <button
+            onClick={() => setEditProfile(true)}
+            className="mt-3 text-sm text-blue-600 hover:underline"
+          >
+            Edit Profile
+          </button>
 
-      {/* MAIN CONTENT */}
-      <div className="lg:col-span-3 space-y-6">
-        {/* ADDRESS SECTION */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Saved Addresses</h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Address Card */}
-            <div className="relative border rounded-lg p-4 cursor-pointer hover:border-black transition">
-              {/* Edit Button */}
-              <a
-                href="/profile/address/edit/1"
-                className="absolute top-3 right-3 text-xs text-blue-600 hover:underline"
-              >
-                Edit
-              </a>
-
-              <h4 className="font-semibold text-sm">Home</h4>
-
-              <p className="mt-2 text-gray-600 text-sm leading-relaxed">
-                Kathmandu, Nepal <br />
-                Bagmati Province <br />
-                ZIP: 44600
-              </p>
-
-              <span className="mt-3 inline-block text-xs text-green-600 font-medium">
-                Default Address
-              </span>
+          <div className="mt-4 flex justify-around text-sm">
+            <div>
+              <p className="font-bold">{orders.length}</p>
+              <p className="text-gray-500">Orders</p>
             </div>
-
-            {/* Address Card */}
-            <div className="relative border rounded-lg p-4 cursor-pointer hover:border-black transition">
-              {/* Edit Button */}
-              <a
-                href="/profile/address/edit/2"
-                className="absolute top-3 right-3 text-xs text-blue-600 hover:underline"
-              >
-                Edit
-              </a>
-
-              <h4 className="font-semibold text-sm">Office</h4>
-
-              <p className="mt-2 text-gray-600 text-sm leading-relaxed">
-                Kathmandu, Nepal <br />
-                Bagmati Province <br />
-                ZIP: 44600
-              </p>
+            <div>
+              <p className="font-bold">{user.wishlistCount}</p>
+              <p className="text-gray-500">Wishlist</p>
             </div>
           </div>
+
+          <button className="mt-6 w-full bg-orange-500 text-white py-2 rounded hover:bg-red-600">
+            Logout
+          </button>
         </div>
 
-        {/* ORDER HISTORY */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left border-b">
-                <th className="pb-2">Order ID</th>
-                <th className="pb-2">Date</th>
-                <th className="pb-2">Status</th>
-                <th className="pb-2">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order.id} className="border-b last:border-0">
-                  <td className="py-2">{order.id}</td>
-                  <td>{order.date}</td>
-                  <td>
-                    <span
-                      className={`px-2 py-1 rounded text-xs 
-                      ${order.status === "Delivered" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {order.status}
+        {/* MAIN CONTENT */}
+        <div className="lg:col-span-3 space-y-6">
+
+          {/* ADDRESSES */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-lg font-semibold mb-4">Saved Addresses</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {[
+                { type: "Home", city: "Kathmandu", state: "Bagmati", zip: "44600", default: true },
+                { type: "Office", city: "Kathmandu", state: "Bagmati", zip: "44600" },
+              ].map((addr, i) => (
+                <div
+                  key={i}
+                  className="relative border rounded-lg p-4 hover:border-black transition"
+                >
+                  <button
+                    onClick={() => setEditAddress(addr)}
+                    className="absolute top-3 right-3 text-xs text-blue-600 hover:underline"
+                  >
+                    Edit
+                  </button>
+
+                  <h4 className="font-semibold text-sm">{addr.type}</h4>
+
+                  <p className="mt-2 text-gray-600 text-sm">
+                    {addr.city}, Nepal <br />
+                    {addr.state} Province <br />
+                    ZIP: {addr.zip}
+                  </p>
+
+                  {addr.default && (
+                    <span className="mt-3 inline-block text-xs text-green-600 font-medium">
+                      Default Address
                     </span>
-                  </td>
-                  <td>{order.total}</td>
-                </tr>
+                  )}
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
 
-        {/* SECURITY */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h3 className="text-lg font-semibold">Security</h3>
-          <p className="text-gray-600 text-sm mt-1">
-            Update your password and manage sessions
-          </p>
-          <div className="mt-4 flex gap-4">
-            <Link
-              href="/profile/change-password"
-              className="bg-gray-900 text-white px-4 py-2 rounded text-sm"
-            >
-              Change Password
-            </Link>
-            <button className="border px-4 py-2 rounded text-sm">
-              Logout from all devices
-            </button>
+          {/* ORDERS */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
+
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left">
+                  <th>Order</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map(o => (
+                  <tr key={o.id} className="border-b last:border-0">
+                    <td className="py-2">{o.id}</td>
+                    <td>{o.date}</td>
+                    <td>
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          o.status === "Delivered"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {o.status}
+                      </span>
+                    </td>
+                    <td>{o.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* SECURITY */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-lg font-semibold">Security</h3>
+            <div className="mt-4 flex gap-4">
+              <button
+                onClick={() => setEditChangePassword(true)}
+                className="border px-4 py-2 rounded text-sm"
+              >
+                Change Password
+              </button>
+              <button className="border px-4 py-2 rounded text-sm">
+                Logout all devices
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* ADDRESS MODAL */}
+      <Modal
+        title={`Edit ${editAddress?.type} Address`}
+        isOpen={!!editAddress}
+        onClose={() => setEditAddress(null)}
+      >
+        <form className="space-y-4">
+          <input className="w-full border rounded px-3 py-2" defaultValue={editAddress?.city} placeholder="City" />
+          <input className="w-full border rounded px-3 py-2" defaultValue={editAddress?.state} placeholder="State" />
+          <input className="w-full border rounded px-3 py-2" defaultValue={editAddress?.zip} placeholder="ZIP" />
+          <button className="w-full bg-black text-white py-2 rounded">Save Address</button>
+        </form>
+      </Modal>
+
+      {/* PROFILE MODAL */}
+      <Modal
+        title="Edit Profile"
+        isOpen={editProfile}
+        onClose={() => setEditProfile(false)}
+      >
+        <form className="space-y-4">
+          <input className="w-full border rounded px-3 py-2" defaultValue={user.name} />
+          <input className="w-full border rounded px-3 py-2" defaultValue={user.email} />
+          <input className="w-full border rounded px-3 py-2" defaultValue={user.phone} />
+          <button className="w-full bg-black text-white py-2 rounded">Save Profile</button>
+        </form>
+      </Modal>
+
+      <Modal
+        title="Change Password"
+        isOpen={editChangePassword}
+        onClose={() => setEditChangePassword(false)}
+      >
+        <form className="space-y-4">
+          <input
+            type="password"
+            className="w-full border rounded px-3 py-2"
+            placeholder="Current Password"
+          />
+          <input
+            type="password"
+            className="w-full border rounded px-3 py-2"
+            placeholder="New Password"
+          />
+          <input
+            type="password"
+            className="w-full border rounded px-3 py-2"
+            placeholder="Confirm New Password"
+          />
+          <button className="w-full bg-black text-white py-2 rounded">Update Password</button>
+        </form>
+      </Modal>
+    </>
   );
 }
