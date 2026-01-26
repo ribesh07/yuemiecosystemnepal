@@ -141,8 +141,8 @@ export default function Header() {
               <span
                 className="
                     absolute 
-                    -bottom-1 
-                    -right-2 
+                    -bottom-2 
+                    -right-1
                     text-[8px] 
                     md:text-[10px] 
                     font-bold 
