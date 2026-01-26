@@ -179,7 +179,7 @@ export default function ProfilePage() {
             <div className="mt-4 flex gap-4">
               <button
                 onClick={() => setEditChangePassword(true)}
-                className="border px-4 py-2 rounded text-sm"
+                className="border px-4 py-2  bg-black text-white rounded text-sm"
               >
                 Change Password
               </button>
@@ -201,7 +201,7 @@ export default function ProfilePage() {
           <input className="w-full border rounded px-3 py-2" defaultValue={editAddress?.city} placeholder="City" />
           <input className="w-full border rounded px-3 py-2" defaultValue={editAddress?.state} placeholder="State" />
           <input className="w-full border rounded px-3 py-2" defaultValue={editAddress?.zip} placeholder="ZIP" />
-          <button className="w-full bg-black text-white py-2 rounded">Save Address</button>
+          <button className="w-full  bg-orange-500 text-white py-2 rounded hover:bg-red-600">Save Address</button>
         </form>
       </Modal>
 
@@ -215,7 +215,7 @@ export default function ProfilePage() {
           <input className="w-full border rounded px-3 py-2" defaultValue={user.name} />
           <input className="w-full border rounded px-3 py-2" defaultValue={user.email} />
           <input className="w-full border rounded px-3 py-2" defaultValue={user.phone} />
-          <button className="w-full bg-black text-white py-2 rounded">Save Profile</button>
+          <button className="w-full  bg-orange-500 text-white py-2 rounded hover:bg-red-600">Save Profile</button>
         </form>
       </Modal>
 
@@ -240,7 +240,7 @@ export default function ProfilePage() {
             className="w-full border rounded px-3 py-2"
             placeholder="Confirm New Password"
           />
-          <button className="w-full bg-black text-white py-2 rounded">Update Password</button>
+          <button className="w-full bg-orange-500 text-white py-2 rounded hover:bg-red-600">Update Password</button>
         </form>
       </Modal>
     </>
