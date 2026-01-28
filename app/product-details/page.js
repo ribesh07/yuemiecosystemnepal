@@ -1,11 +1,33 @@
 "use client";
 
 import { useState } from "react";
+import RelatedProduct from "../../components/relatedProduct";
+
+function RelatedProducts() {
+  return <RelatedProduct />;
+}
 
 export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState("description");
+
+  const handleImageClick = (index) => {
+    setSelectedImage(index);
+  };
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+  };
+
+  const handleQuantityChange = (event) => {
+    const newQuantity = parseInt(event.target.value);
+    setQuantity(newQuantity);
+  };
+
+  const handleAddToCart = () => {
+    // Add the product to the cart
+  };
 
   const product = {
     name: "Yuemi C-3, 1080P Dome Cap Style Rear AHD Camera",
@@ -29,7 +51,8 @@ export default function ProductDetailPage() {
   };
 
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
-  const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  const decrementQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   return (
     <div className="min-h-screen bg-white">
@@ -82,49 +105,48 @@ export default function ProductDetailPage() {
 
             {/* Rating */}
             <div className="flex items-center justify-between">
-  {/* LEFT: rating + reviews */}
-  <div className="flex items-center gap-3">
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <svg
-          key={star}
-          className={`w-5 h-5 ${
-            star <= Math.floor(product.rating)
-              ? "text-yellow-400 fill-current"
-              : star - 0.5 <= product.rating
-              ? "text-yellow-400 fill-current"
-              : "text-gray-300"
-          }`}
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-    </div>
+              {/* LEFT: rating + reviews */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className={`w-5 h-5 ${
+                        star <= Math.floor(product.rating)
+                          ? "text-yellow-400 fill-current"
+                          : star - 0.5 <= product.rating
+                            ? "text-yellow-400 fill-current"
+                            : "text-gray-300"
+                      }`}
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
 
-    <span className="text-gray-600 text-sm">
-      ({product.reviews})
-    </span>
-  </div>
+                <span className="text-gray-600 text-sm">
+                  ({product.reviews})
+                </span>
+              </div>
 
-  {/* RIGHT: share button */}
-  <button className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors duration-200">
-    <svg
-      className="w-5 h-5"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-      />
-    </svg>
-  </button>
-</div>
-
+              {/* RIGHT: share button */}
+              <button className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors duration-200">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                  />
+                </svg>
+              </button>
+            </div>
 
             {/* Price */}
             <div className="space-y-1">
@@ -139,28 +161,52 @@ export default function ProductDetailPage() {
 
             {/* Quantity Selector */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900">Quantity</label>
+              <label className="text-sm font-medium text-gray-900">
+                Quantity
+              </label>
               <div className="flex items-center gap-3">
                 <button
                   onClick={decrementQuantity}
                   className="w-10 h-10 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 active:scale-95"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20 12H4"
+                    />
                   </svg>
                 </button>
                 <input
                   type="number"
                   value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) =>
+                    setQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                  }
                   className="w-16 h-10 text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
                 <button
                   onClick={incrementQuantity}
                   className="w-10 h-10 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 active:scale-95"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
                   </svg>
                 </button>
               </div>
@@ -178,8 +224,18 @@ export default function ProductDetailPage() {
 
             {/* Shipping Info */}
             <div className="flex items-center gap-2 text-gray-700 py-4 border-t border-gray-200">
-              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-5 h-5 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               <span className="text-sm">{product.shipping}</span>
             </div>
@@ -189,10 +245,16 @@ export default function ProductDetailPage() {
               <div className="space-y-2">
                 {/* Description */}
                 <button
-                  onClick={() => setActiveTab(activeTab === "description" ? "" : "description")}
+                  onClick={() =>
+                    setActiveTab(
+                      activeTab === "description" ? "" : "description",
+                    )
+                  }
                   className="w-full flex items-center justify-between py-4 border-b border-gray-200 text-left group"
                 >
-                  <span className="text-lg font-medium text-gray-900">Description</span>
+                  <span className="text-lg font-medium text-gray-900">
+                    Description
+                  </span>
                   <svg
                     className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
                       activeTab === "description" ? "rotate-180" : ""
@@ -201,14 +263,20 @@ export default function ProductDetailPage() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
                 {activeTab === "description" && (
                   <div className="py-4 text-gray-700 space-y-3 animate-slideDown">
                     <p>
-                      The Yuemi C-3 is a premium 1080P rear view camera featuring dome cap style design
-                      with advanced AHD technology for crystal clear video quality.
+                      The Yuemi C-3 is a premium 1080P rear view camera
+                      featuring dome cap style design with advanced AHD
+                      technology for crystal clear video quality.
                     </p>
                     <ul className="space-y-2">
                       {product.features.map((feature, index) => (
@@ -223,10 +291,14 @@ export default function ProductDetailPage() {
 
                 {/* Technical Specification */}
                 <button
-                  onClick={() => setActiveTab(activeTab === "specs" ? "" : "specs")}
+                  onClick={() =>
+                    setActiveTab(activeTab === "specs" ? "" : "specs")
+                  }
                   className="w-full flex items-center justify-between py-4 border-b border-gray-200 text-left"
                 >
-                  <span className="text-lg font-medium text-gray-900">Technical Specification</span>
+                  <span className="text-lg font-medium text-gray-900">
+                    Technical Specification
+                  </span>
                   <svg
                     className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
                       activeTab === "specs" ? "rotate-180" : ""
@@ -235,7 +307,12 @@ export default function ProductDetailPage() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
                 {activeTab === "specs" && (
@@ -246,7 +323,9 @@ export default function ProductDetailPage() {
                         <p className="text-sm">1080P HD</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Field of View</p>
+                        <p className="font-medium text-gray-900">
+                          Field of View
+                        </p>
                         <p className="text-sm">160°</p>
                       </div>
                       <div>
@@ -263,10 +342,14 @@ export default function ProductDetailPage() {
 
                 {/* Shipping Information */}
                 <button
-                  onClick={() => setActiveTab(activeTab === "shipping" ? "" : "shipping")}
+                  onClick={() =>
+                    setActiveTab(activeTab === "shipping" ? "" : "shipping")
+                  }
                   className="w-full flex items-center justify-between py-4 border-b border-gray-200 text-left"
                 >
-                  <span className="text-lg font-medium text-gray-900">Shipping information</span>
+                  <span className="text-lg font-medium text-gray-900">
+                    Shipping information
+                  </span>
                   <svg
                     className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
                       activeTab === "shipping" ? "rotate-180" : ""
@@ -275,37 +358,41 @@ export default function ProductDetailPage() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
                 {activeTab === "shipping" && (
                   <div className="py-4 text-gray-700 space-y-2 animate-slideDown">
                     <p>
-                      We offer free shipping across India. Orders are typically processed within 1-2
-                      business days and delivered within 5-7 business days.
+                      We offer free shipping across India. Orders are typically
+                      processed within 1-2 business days and delivered within
+                      5-7 business days.
                     </p>
                   </div>
                 )}
               </div>
             </div>
-
           </div>
         </div>
-       <div className="">
-            <section className="relative h-[340px] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center transform transition-transform duration-700 hover:scale-105"
-          style={{
-            backgroundImage:
-              "url('/image.png')",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
-      </section>
+        <div className="">
+          <section className="relative h-[340px] overflow-hidden">
+            <div
+              className="absolute inset-0 bg-cover bg-center transform transition-transform duration-700 hover:scale-105"
+              style={{
+                backgroundImage: "url('/image.png')",
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
+          </section>
         </div>
-
+        <RelatedProducts />
       </div>
-      
+
       <style jsx>{`
         @keyframes slideDown {
           from {
@@ -326,7 +413,6 @@ export default function ProductDetailPage() {
           transform: scale(0.98);
         }
       `}</style>
-       
     </div>
   );
 }
