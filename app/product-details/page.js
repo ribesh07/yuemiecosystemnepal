@@ -291,8 +291,21 @@ export default function ProductDetailPage() {
 
           </div>
         </div>
-      </div>
+       <div className="">
+            <section className="relative h-[340px] overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center transform transition-transform duration-700 hover:scale-105"
+          style={{
+            backgroundImage:
+              "url('/image.png')",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
+      </section>
+        </div>
 
+      </div>
+      
       <style jsx>{`
         @keyframes slideDown {
           from {
@@ -313,6 +326,7 @@ export default function ProductDetailPage() {
           transform: scale(0.98);
         }
       `}</style>
+       
     </div>
   );
 }
