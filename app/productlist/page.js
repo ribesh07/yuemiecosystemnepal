@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 const PRODUCTS = [
   {
@@ -62,10 +63,11 @@ const PRODUCTS = [
 ];
 
 export default function ProductsPage() {
+  const router = useRouter();
+
   const [availability, setAvailability] = useState("all");
   const [sortBy, setSortBy] = useState("az");
   const [priceRange, setPriceRange] = useState("all");
-  const [hoveredProduct, setHoveredProduct] = useState(null);
 
   const filteredProducts = useMemo(() => {
     let data = [...PRODUCTS];
@@ -95,8 +97,13 @@ export default function ProductsPage() {
     return data;
   }, [availability, sortBy, priceRange]);
 
+  const handleProductClick = (product) => {
+    router.push(`/product-details?id=${product.id}`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Products Grid */}
       {/* Hero Banner with Overlay */}
       <section className="relative h-[480px] overflow-hidden">
         <div
@@ -108,8 +115,6 @@ export default function ProductsPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
       </section>
-
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Filter Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-10 transition-shadow duration-300 hover:shadow-md">
@@ -207,20 +212,17 @@ export default function ProductsPage() {
             </p>
           </div>
         </div>
-
-        {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product, index) => (
             <div
               key={product.id}
+              onClick={() => handleProductClick(product)}
               className="group bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
-              onMouseEnter={() => setHoveredProduct(product.id)}
-              onMouseLeave={() => setHoveredProduct(null)}
               style={{
                 animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`,
               }}
             >
-              {/* Product Image */}
+              {/* Image */}
               <div className="relative bg-gray-50 h-80 overflow-hidden">
                 <img
                   src={product.image}
@@ -229,55 +231,25 @@ export default function ProductsPage() {
                 />
                 {!product.available && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <span className="bg-white text-gray-900 px-4 py-2 rounded-full font-semibold text-sm shadow-lg">
+                    <span className="bg-white px-4 py-2 rounded-full font-semibold text-sm">
                       Sold Out
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* Product Info */}
+              {/* Info */}
               <div className="p-5">
-                <h3 className="font-semibold text-gray-900 text-base mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600">
                   {product.name}
                 </h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-gray-900">
-                    ₹{product.price.toLocaleString("en-IN")}
-                  </span>
-                  <span className="text-sm text-gray-500">MRP</span>
-                </div>
+                <span className="text-2xl font-bold text-gray-900">
+                  ₹{product.price.toLocaleString("en-IN")}
+                </span>
               </div>
             </div>
           ))}
         </div>
-
-        {/* Empty State */}
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-16">
-            <div className="inline-block p-6 bg-gray-100 rounded-full mb-4">
-              <svg
-                className="w-16 h-16 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No products found
-            </h3>
-            <p className="text-gray-600">
-              Try adjusting your filters to see more results
-            </p>
-          </div>
-        )}
       </div>
 
       <style jsx>{`
@@ -290,21 +262,6 @@ export default function ProductsPage() {
             opacity: 1;
             transform: translateY(0);
           }
-        }
-
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        .animate-fade-in {
-          animation: fade-in 1s ease-out;
         }
       `}</style>
     </div>
