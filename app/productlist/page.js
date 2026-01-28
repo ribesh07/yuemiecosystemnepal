@@ -8,49 +8,56 @@ const PRODUCTS = [
     name: "D6Ai 4K Dash Camera",
     price: 27999,
     available: true,
-    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2026-01-12at11.13.32.jpg?v=1768370208",
+    image:
+      "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2026-01-12at11.13.32.jpg?v=1768370208",
   },
   {
     id: 2,
     name: "Q5 Triple Camera Setup",
     price: 27999,
     available: true,
-    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2025-11-27at12.11.16.jpg?v=1768374675",
+    image:
+      "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2025-11-27at12.11.16.jpg?v=1768374675",
   },
   {
     id: 3,
     name: "Yuemi C3 Rear View Camera",
     price: 2499,
     available: true,
-    image: "https://yuemiecosystem.com/cdn/shop/files/Yuemi_c3_1st.jpg?v=1732186338",
+    image:
+      "https://yuemiecosystem.com/cdn/shop/files/Yuemi_c3_1st.jpg?v=1732186338",
   },
   {
     id: 4,
     name: "Yuemi C1 Rear AHD Camera",
     price: 2499,
     available: false,
-    image: "https://yuemiecosystem.com/cdn/shop/files/Rear_AHD_Camera.jpg?v=1728623892",
+    image:
+      "https://yuemiecosystem.com/cdn/shop/files/Rear_AHD_Camera.jpg?v=1728623892",
   },
   {
     id: 5,
     name: "Q5 Triple Camera Setup",
     price: 27999,
     available: true,
-    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2025-11-27at12.11.16.jpg?v=1768374675",
+    image:
+      "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2025-11-27at12.11.16.jpg?v=1768374675",
   },
   {
     id: 6,
     name: "Yuemi C3 Rear View Camera",
     price: 2499,
     available: true,
-    image: "https://yuemiecosystem.com/cdn/shop/files/Yuemi_c3_1st.jpg?v=1732186338",
+    image:
+      "https://yuemiecosystem.com/cdn/shop/files/Yuemi_c3_1st.jpg?v=1732186338",
   },
   {
     id: 7,
     name: "Yuemi C1 Rear AHD Camera",
     price: 2499,
     available: false,
-    image: "https://yuemiecosystem.com/cdn/shop/files/Rear_AHD_Camera.jpg?v=1728623892",
+    image:
+      "https://yuemiecosystem.com/cdn/shop/files/Rear_AHD_Camera.jpg?v=1728623892",
   },
 ];
 
@@ -100,16 +107,6 @@ export default function ProductsPage() {
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
-        <div className="relative h-full max-w-7xl mx-auto px-6 flex items-center">
-          <div className="text-white max-w-2xl animate-fade-in">
-            <h1 className="text-5xl font-bold mb-4 drop-shadow-lg">
-              Premium Car Safety
-            </h1>
-            <p className="text-xl text-gray-100 drop-shadow">
-              Advanced dash cameras and safety solutions
-            </p>
-          </div>
-        </div>
       </section>
 
       {/* Main Content */}
@@ -130,7 +127,11 @@ export default function ProductsPage() {
                   <option value="out">Sold Out</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -152,7 +153,11 @@ export default function ProductsPage() {
                   <option value="high">Above ₹20,000</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -176,7 +181,11 @@ export default function ProductsPage() {
                 <option value="priceHigh">Price: High to Low</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path
                     fillRule="evenodd"
                     d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -190,7 +199,10 @@ export default function ProductsPage() {
           {/* Results Count */}
           <div className="mt-4 pt-4 border-t border-gray-200">
             <p className="text-sm text-gray-600">
-              Showing <span className="font-semibold text-gray-900">{filteredProducts.length}</span>{" "}
+              Showing{" "}
+              <span className="font-semibold text-gray-900">
+                {filteredProducts.length}
+              </span>{" "}
               {filteredProducts.length === 1 ? "product" : "products"}
             </p>
           </div>
@@ -222,7 +234,6 @@ export default function ProductsPage() {
                     </span>
                   </div>
                 )}
-               
               </div>
 
               {/* Product Info */}
@@ -259,8 +270,12 @@ export default function ProductsPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600">Try adjusting your filters to see more results</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No products found
+            </h3>
+            <p className="text-gray-600">
+              Try adjusting your filters to see more results
+            </p>
           </div>
         )}
       </div>
