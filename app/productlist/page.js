@@ -123,7 +123,7 @@ export default function ProductsPage() {
             <div className="flex flex-wrap gap-4">
               <div className="relative group">
                 <select
-                  className="appearance-none bg-white border border-gray-300 px-4 py-2.5 pr-10 rounded-lg text-gray-700 font-medium cursor-pointer transition-all duration-200 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="appearance-none bg-white border border-gray-300 px-4 py-2.5 pr-10 rounded-lg text-gray-700 font-medium cursor-pointer transition-all duration-200 hover:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   value={availability}
                   onChange={(e) => setAvailability(e.target.value)}
                 >
@@ -148,7 +148,7 @@ export default function ProductsPage() {
 
               <div className="relative group">
                 <select
-                  className="appearance-none bg-white border border-gray-300 px-4 py-2.5 pr-10 rounded-lg text-gray-700 font-medium cursor-pointer transition-all duration-200 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="appearance-none bg-white border border-gray-300 px-4 py-2.5 pr-10 rounded-lg text-gray-700 font-medium cursor-pointer transition-all duration-200 hover:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   value={priceRange}
                   onChange={(e) => setPriceRange(e.target.value)}
                 >
@@ -176,7 +176,7 @@ export default function ProductsPage() {
             {/* Sort Dropdown */}
             <div className="relative group">
               <select
-                className="appearance-none bg-white border border-gray-300 px-4 py-2.5 pr-10 rounded-lg text-gray-700 font-medium cursor-pointer transition-all duration-200 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="appearance-none bg-white border border-gray-300 px-4 py-2.5 pr-10 rounded-lg text-gray-700 font-medium cursor-pointer transition-all duration-200 hover:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
@@ -240,7 +240,7 @@ export default function ProductsPage() {
 
               {/* Info */}
               <div className="p-5">
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600">
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600">
                   {product.name}
                 </h3>
                 <span className="text-2xl font-bold text-gray-900">
