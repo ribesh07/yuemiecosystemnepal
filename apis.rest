@@ -16,7 +16,7 @@ Content-Type: application/json
 
 ### get users
 # GET  https://yuemi.com.np/api/users
-GET  http://localhost:3000/api/users
+GET  http://localhost:3000/api/customers/1
 Content-Type: application/json
 
 ### 

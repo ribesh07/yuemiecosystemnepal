@@ -17,9 +17,10 @@ import { serializeBigInt } from "@/lib/serializeBigInt";
 
 export async function GET(
   _: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const userId = BigInt(params.id);
+   const { id } = await context.params;
+  const userId = BigInt(id);
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
