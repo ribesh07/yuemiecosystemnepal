@@ -86,7 +86,7 @@ export async function POST(req: Request) {
 
      category = await prisma.category.create({
         data: {
-            name,
+            category,
             status: Number(status),
             parentId: parentId ? BigInt(parentId) : null,
             top: top ? Number(top) : 0,

@@ -104,7 +104,7 @@ export async function PUT(
     const category = await prisma.category.update({
       where: { id: categoryId },
       data: {
-        ...(name && { name }),
+        ...(name && { category:name }),
         ...(status && { status: Number(status) }),
         ...(top && { top: Number(top) }),
         parentId: parentId ? BigInt(parentId) : null,

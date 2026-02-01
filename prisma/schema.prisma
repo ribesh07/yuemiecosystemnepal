@@ -145,7 +145,7 @@ model CustomerAddress {
 
 model Brand {
   id        Int      @id @default(autoincrement())
-  name      String   @map("brand_name")
+  name      String   @unique @map("brand_name")
   image     String?
   top       Int      @default(0)
   status    Int
@@ -159,7 +159,9 @@ model Brand {
 
 model Category {
   id        BigInt   @id @default(autoincrement())
-  name      String   @map("category_name")
+  category      String    @unique @map("category_name")
+  title String?
+  description String?
   parentId  BigInt?
   image     String?
   top       Int      @default(0)
@@ -209,6 +211,11 @@ model Product {
   cartItems         CartItem[]
   wishlists Wishlist[]
   orderItems        OrderItem[]
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([sellPrice])
+  @@index([status])
 
   @@map("products")
 }

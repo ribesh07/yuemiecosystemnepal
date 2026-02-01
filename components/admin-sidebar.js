@@ -54,7 +54,7 @@ const SideHeaderBar = () => {
       expandable: true,
       children: [
         { name: "View All", path: "/admin/categories-list" },
-        { name: "Add New", path: "/admin/add-categories" },
+        // { name: "Add New", path: "/admin/add-categories" },
       ],
     },
 

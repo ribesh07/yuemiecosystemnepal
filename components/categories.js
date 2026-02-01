@@ -2,71 +2,107 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-const accessories = [
+const accessoriesoffline = [
   {
     id: 1,
+    categoryId: 1,
     category: 'Car Safety',
     title: 'Dash Camera System',
     description: 'Dual-lens dashboard camera with front and rear recording',
-    image: '/categories/Car-Safety_1.webp',
+    image: '/uploads/categories/Car-Safety_1.webp',
   },
   {
     id: 2,
+    categoryId: 2,
     category: 'Car Infotainment System',
     title: 'YueMi Ecosystem Display',
     description: 'Advanced touchscreen infotainment system',
     image:
-      'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Car-Infotainment-System.jpg?v=1728630007',
+      '/uploads/categories/Car-Infotainment-System.webp',
   },
   {
     id: 3,
+    categoryId: 3,
     category: 'LED Lights',
     title: 'High-Performance LED Headlights',
     description: 'Ultra-bright LED conversion kit',
     image:
-      'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/LED-Lights.jpg?v=1727180318',
+      '/uploads/categories/Led-Lights.webp',
   },
   {
     id: 4,
+    categoryId: 4,
     category: 'Damping & Acoustics',
     title: 'Sound Deadening Materials',
     description: 'Premium acoustic dampening pads',
     image:
-      'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Damping-_-Acoustics_1.jpg?v=1728630006',
+      '/uploads/categories/Damping-_-Acoustics_1.webp',
   },
   {
     id: 5,
+    categoryId: 5,
     category: 'Amplifier',
     title: 'YueMi Class D Amplifier',
     description: '4x100W professional car audio amplifier',
     image:
-      'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Amplifier.jpg?v=1727180318',
+    '/uploads/categories/Amplifier.webp'
   },
   {
     id: 6,
+    categoryId: 6,
     category: 'Accessories',
     title: 'Car Accessories Kit',
     description: 'Essential car maintenance and styling accessories',
     image:
-      'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Accessories.jpg?v=1727180318',
+      '/uploads/categories/Accessories.webp',
   },
   {
     id: 7,
+    categoryId: 7,
     category: 'Car Care & Protection',
     title: 'Premium Car Model',
     description: 'High-performance sports car with protection package',
     image:
-      'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Car-Care-_-Protection_1.jpg?v=1729506863',
+      '/uploads/categories/Car-Care-_-Protection_1.webp',
   },
 ];
 
+
 export default function CarAccessoriesGallery() {
   const router = useRouter();
+  const [accessories , setaccessories] = useState(accessoriesoffline)
 
   const handleImageClick = (item) => {
-    router.push(`/productlist?category=${encodeURIComponent(item.category)}`);
-  };
+  router.push(`/productlist?categoryId=${item.categoryId}`);
+};
+
+// const fetchCategories = async () => {
+//     const res = await fetch('/api/categories')
+//     const data = await res.json();
+//     console.log(data)
+//     if(data.success){
+//       setaccessories(data.data.categories)
+//     }
+//     else{
+//       console.log("Using Offline Data !")
+//       setaccessories(accessoriesoffline)
+//     }
+
+// }
+
+// useEffect(()=>{
+//   fetchCategories();
+// },[])
+
+if (accessories.length < 3) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading categories...
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-white py-16 px-4">

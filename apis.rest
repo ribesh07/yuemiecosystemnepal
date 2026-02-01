@@ -14,10 +14,16 @@ Content-Type: application/json
   "phone": "9800000000"
 }
 
-### get users
-# GET  https://yuemi.com.np/api/users
-GET  http://localhost:3000/api/users
+### get all users
+GET  http://localhost:3000/api/customers/1
 Content-Type: application/json
+
+### get one user
+GET  http://localhost:3000/api/customers/1
+Content-Type: application/json
+
+###get details
+GET http://localhost:3000/api/users/me
 
 ### 
 GET https://yuemi.com.np/api/products
@@ -30,5 +36,27 @@ Content-Type: application/json
 GET http://localhost:3000/api/products
 Content-Type: application/json
 
-###
-GET https://gargdental.omsok.com/api/v1/banners/mobile
+# GET http://localhost:3000/api/products/filter?categoryId=1&minPrice=1000&maxPrice=5000&sort=price_desc
+
+### get prducts filter
+GET http://localhost:3000/api/products/filter?categoryId=1
+Content-Type: application/json
+
+### get banners
+GET http://localhost:3000/api/banners
+Content-Type: application/json
+
+### get popup-ads
+GET http://localhost:3000/api/popup-ads
+Content-Type: application/json
+
+### create popup-ads formdata
+POST http://localhost:3000/api/popup-ads
+Content-Type: application/x-www-form-urlencoded
+
+title=Hi Popup
+&colorCode=%23FF5733
+&position=1
+&isActive=1
+
+
