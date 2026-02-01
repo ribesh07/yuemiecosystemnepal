@@ -1,15 +1,7 @@
-/*
-  Warnings:
-
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropTable
-DROP TABLE `User`;
-
 -- CreateTable
 CREATE TABLE `users` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `userId` VARCHAR(191) NOT NULL,
     `full_name` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `phone` VARCHAR(191) NULL,
@@ -24,9 +16,10 @@ CREATE TABLE `users` (
     `password` VARCHAR(191) NOT NULL,
     `rememberToken` VARCHAR(191) NULL,
     `profilePhotoPath` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
+    UNIQUE INDEX `users_userId_key`(`userId`),
     UNIQUE INDEX `users_email_key`(`email`),
     UNIQUE INDEX `users_phone_key`(`phone`),
     PRIMARY KEY (`id`)
@@ -44,9 +37,10 @@ CREATE TABLE `admins` (
     `roleId` BIGINT NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `profilePhotoPath` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
+    UNIQUE INDEX `admins_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -56,7 +50,7 @@ CREATE TABLE `admin_roles` (
     `name` VARCHAR(191) NOT NULL,
     `modules` VARCHAR(191) NULL,
     `status` BOOLEAN NOT NULL DEFAULT true,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -66,7 +60,7 @@ CREATE TABLE `admin_roles` (
 CREATE TABLE `provinces` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `province_name` VARCHAR(191) NOT NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -80,7 +74,7 @@ CREATE TABLE `set_shipping` (
     `shippingCost` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `applyShipping` BOOLEAN NOT NULL DEFAULT true,
     `remarks` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -91,7 +85,7 @@ CREATE TABLE `address_zone` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `cityId` BIGINT NOT NULL,
     `zone_name` VARCHAR(191) NOT NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -111,7 +105,7 @@ CREATE TABLE `customer_address_book` (
     `addressType` ENUM('HOME', 'OFFICE', 'OTHERS') NULL DEFAULT 'HOME',
     `defaultShipping` BOOLEAN NOT NULL DEFAULT false,
     `defaultBilling` BOOLEAN NOT NULL DEFAULT false,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -124,9 +118,10 @@ CREATE TABLE `brands` (
     `image` VARCHAR(191) NULL,
     `top` INTEGER NOT NULL DEFAULT 0,
     `status` INTEGER NOT NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
+    UNIQUE INDEX `brands_brand_name_key`(`brand_name`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -134,13 +129,16 @@ CREATE TABLE `brands` (
 CREATE TABLE `categories` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `category_name` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(191) NULL,
+    `description` VARCHAR(191) NULL,
     `parentId` BIGINT NULL,
-    `image` VARCHAR(191) NOT NULL,
+    `image` VARCHAR(191) NULL,
     `top` INTEGER NOT NULL DEFAULT 0,
     `status` INTEGER NOT NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
+    UNIQUE INDEX `categories_category_name_key`(`category_name`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -155,29 +153,44 @@ CREATE TABLE `products` (
     `packaging` VARCHAR(191) NULL,
     `warranty` VARCHAR(191) NULL,
     `categoryId` BIGINT NULL,
+    `categoryName` VARCHAR(191) NULL,
     `brandId` INTEGER NULL,
+    `brandName` VARCHAR(191) NULL,
+    `deliveryTargetDays` INTEGER NULL DEFAULT 7,
     `actual_price` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `sell_price` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `discount` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `stockQuantity` BIGINT NOT NULL DEFAULT 0,
     `availableQuantity` BIGINT NOT NULL DEFAULT 0,
-    `status` INTEGER NOT NULL,
-    `createdAt` DATETIME(3) NULL,
+    `weeklyProduct` BOOLEAN NOT NULL DEFAULT false,
+    `flashSaleProduct` BOOLEAN NOT NULL DEFAULT false,
+    `specialProduct` BOOLEAN NOT NULL DEFAULT false,
+    `todayDeals` BOOLEAN NOT NULL DEFAULT false,
+    `status` INTEGER NOT NULL DEFAULT 1,
+    `mainImage` VARCHAR(191) NULL,
+    `productCatalog` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     UNIQUE INDEX `products_product_code_key`(`product_code`),
     UNIQUE INDEX `products_slug_key`(`slug`),
+    INDEX `products_categoryId_idx`(`categoryId`),
+    INDEX `products_brandId_idx`(`brandId`),
+    INDEX `products_sell_price_idx`(`sell_price`),
+    INDEX `products_status_idx`(`status`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `product_images` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `mainImage` VARCHAR(191) NULL,
     `productCode` VARCHAR(191) NOT NULL,
-    `imagePath` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NULL,
+    `imagePath` JSON NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
+    UNIQUE INDEX `product_images_productCode_key`(`productCode`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -189,7 +202,7 @@ CREATE TABLE `product_variations` (
     `price` DECIMAL(65, 30) NOT NULL,
     `stock` INTEGER NOT NULL,
     `sku` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -203,7 +216,7 @@ CREATE TABLE `cart` (
     `tax` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `shippingCost` DECIMAL(65, 30) NOT NULL DEFAULT 0,
     `status` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     UNIQUE INDEX `cart_customerId_key`(`customerId`),
@@ -218,7 +231,7 @@ CREATE TABLE `cart_items` (
     `quantity` BIGINT NOT NULL,
     `price` DECIMAL(65, 30) NOT NULL,
     `actualPrice` DECIMAL(65, 30) NOT NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -229,7 +242,7 @@ CREATE TABLE `wishlist` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `customerId` BIGINT NOT NULL,
     `productCode` VARCHAR(191) NOT NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -248,7 +261,7 @@ CREATE TABLE `orders` (
     `totalAmount` DECIMAL(65, 30) NOT NULL,
     `orderStatus` VARCHAR(191) NOT NULL DEFAULT 'processing',
     `paymentStatus` VARCHAR(191) NOT NULL DEFAULT 'unpaid',
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -262,7 +275,7 @@ CREATE TABLE `order_items` (
     `quantity` BIGINT NOT NULL,
     `price` DECIMAL(65, 30) NOT NULL,
     `subtotal` DECIMAL(65, 30) NOT NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -277,7 +290,7 @@ CREATE TABLE `order_payments` (
     `paidAmount` DECIMAL(65, 30) NOT NULL,
     `dueAmount` DECIMAL(65, 30) NOT NULL,
     `status` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
@@ -294,8 +307,40 @@ CREATE TABLE `product_reviews` (
     `review_detail` VARCHAR(191) NOT NULL,
     `rating` DECIMAL(65, 30) NOT NULL,
     `imagePath` VARCHAR(191) NULL,
-    `createdAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Banner` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(191) NULL,
+    `subtitle` VARCHAR(191) NULL,
+    `imageUrl` VARCHAR(191) NOT NULL,
+    `position` INTEGER NOT NULL DEFAULT 0,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `startAt` DATETIME(3) NULL,
+    `endAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `PopupAds` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(191) NULL,
+    `colorCode` VARCHAR(191) NULL,
+    `imageUrl` VARCHAR(191) NULL,
+    `position` INTEGER NOT NULL DEFAULT 0,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `startAt` DATETIME(3) NULL,
+    `endAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

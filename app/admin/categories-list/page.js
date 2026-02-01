@@ -34,7 +34,7 @@ export default function CategoriesListPage() {
   async function handleDelete(id) {
     if (!confirm("Are you sure you want to delete this category?")) return;
     try {
-      const res = await fetch(`/api/categories?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
         alert("Category deleted successfully!");
