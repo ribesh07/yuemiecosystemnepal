@@ -8,7 +8,7 @@ const ConfirmModal = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full px-2">
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-5000 w-full px-2">
       <div className="bg-[#7da3c7] rounded-t-xl rounded-b-lg shadow-xl mx-auto max-w-xs sm:max-w-sm w-full">
         <div className="flex flex-col items-center p-4 sm:p-6 pb-0">
           <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-full bg-[#7da3c7] mt-2">
