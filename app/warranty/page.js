@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function WarrantyPage() {
   const [activeTab, setActiveTab] = useState('register');
@@ -16,7 +17,7 @@ export default function WarrantyPage() {
     e.preventDefault();
     
     if (!registerSerial.trim()) {
-      alert('Please enter a serial number');
+      toast.error('Please enter a serial number');
       return;
     }
 
@@ -25,11 +26,11 @@ export default function WarrantyPage() {
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      alert('Warranty registered successfully!');
+      toast.success('Warranty registered successfully!');
       setRegisterSerial('');
     } catch (error) {
       console.error('Error submitting:', error);
-      alert('Error registering warranty. Please try again.');
+      toast.error('Error registering warranty. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -39,7 +40,7 @@ export default function WarrantyPage() {
     e.preventDefault();
     
     if (!checkSerial.trim()) {
-      alert('Please enter a serial number');
+      toast.error('Please enter a serial number');
       return;
     }
 
@@ -66,7 +67,7 @@ export default function WarrantyPage() {
       setShowWarrantyResult(true);
     } catch (error) {
       console.error('Error checking warranty:', error);
-      alert('Error checking warranty. Please try again.');
+      toast.error('Error checking warranty. Please try again.');
     } finally {
       setIsChecking(false);
     }

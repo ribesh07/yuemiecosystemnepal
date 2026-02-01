@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function LegalRegistrationPage() {
   const [formData, setFormData] = useState({
@@ -33,12 +34,12 @@ export default function LegalRegistrationPage() {
     e.preventDefault();
 
     if (!formData.agreed) {
-      alert('You must agree to the declaration before submitting.');
+      toast.error('You must agree to the declaration before submitting.');
       return;
     }
 
     console.log('Legal Registration Data:', formData);
-    alert('Legal registration submitted successfully.');
+    toast.success('Legal registration submitted successfully.');
   };
 
   return (

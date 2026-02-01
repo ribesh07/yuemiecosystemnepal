@@ -27,7 +27,7 @@ export default function AddCategoryPage() {
     e.preventDefault();
 
     if (!name) {
-      alert("Category name is required!");
+      toast.error("Category name is required!");
       return;
     }
 
@@ -58,7 +58,7 @@ export default function AddCategoryPage() {
         setImage(null);
         setPreview(null);
       } else {
-        alert("Error: " + data.message);
+        toast.error("Error: " + data.message);
       }
     } catch (err) {
       console.error(err);

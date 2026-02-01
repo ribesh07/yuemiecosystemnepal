@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react";
+import toast from "react-hot-toast";
 
 const API_URL = "/api/testimonials";
 
@@ -55,7 +56,7 @@ export default function TestimonialsAdmin() {
     e.preventDefault();
 
     if (!formData.name || !formData.message) {
-      alert("Name and message are required");
+      toast.error("Name and message are required");
       return;
     }
 
