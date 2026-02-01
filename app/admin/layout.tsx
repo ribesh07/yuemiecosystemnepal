@@ -19,8 +19,8 @@ export default function AdminLayout({
 
         <main className="flex-1 overflow-y-auto bg-gray-50">
           <Toaster position="top-right" /> {/* ✅ Now defined */}
-          {children}
           <Toast />
+          {children}
         </main>
       </div>
     </div>

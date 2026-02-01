@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { Edit2, Trash2, Info, Plus, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import ConfirmModal from "@/components/ConfirmModal";
+import useConfirmModalStore from "@/store/confirmModalStore";
 
+import toast from "react-hot-toast";
 
 const PRODUCT_API = "/api/products";
 const CATEGORY_API = "/api/categories";
@@ -16,6 +19,10 @@ export default function ProductListPage() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+  // const [showConfirm, setShowConfirm] = useState(false);
+  // const [deleteId, setDeleteId] = useState(null);
+  const openConfirm = useConfirmModalStore((state) => state.open);
+
 
   // Fetch Products
   useEffect(() => {
@@ -61,16 +68,32 @@ export default function ProductListPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = filteredProducts.slice(
     startIndex,
-    startIndex + itemsPerPage
+    startIndex + itemsPerPage,
   );
 
   // Delete product
-  const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+const handleDelete = (id) => {
+  openConfirm({
+    title: "Delete Product",
+    message: "Are you sure you want to delete this product? This action cannot be undone.",
+    onConfirm: async () => {
+      try {
+        await fetch(`${PRODUCT_API}/${id}`, { method: "DELETE" });
 
-    await fetch(`${PRODUCT_API}/${id}`, { method: "DELETE" });
-    setProducts(products.filter((p) => p.id !== id));
-  };
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+        toast.success("Product deleted successfully 🗑️");
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to delete product!");
+      }
+    },
+  });
+};
+
+
+
+
+ 
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -80,18 +103,23 @@ export default function ProductListPage() {
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
           <p className="text-gray-500 mt-1">Manage your product inventory</p>
         </div>
-        <Link href="/admin/add-product" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-  <Plus size={20} />
-  Add Product
-</Link>
-
+        <Link
+          href="/admin/add-product"
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          <Plus size={20} />
+          Add Product
+        </Link>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div className="flex flex-wrap gap-4">
           <div className="relative flex-1 min-w-[300px] text-gray-900 ">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={20}
+            />
             <input
               type="text"
               placeholder="Search products..."
@@ -166,21 +194,20 @@ export default function ProductListPage() {
                 </td>
 
                 {/* Catalog */}
-              <td className="px-6 py-4">
-                {product.productCatalog ? (
-                  <a
-                    href={product.productCatalog}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
-                  >
-                    📄 View Catalog
-                  </a>
-                ) : (
-                  <span className="text-xs text-gray-400">No catalog</span>
-                )}
-              </td>
-
+                <td className="px-6 py-4">
+                  {product.productCatalog ? (
+                    <a
+                      href={product.productCatalog}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                    >
+                      📄 View Catalog
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-400">No catalog</span>
+                  )}
+                </td>
 
                 {/* Code */}
                 <td className="px-6 py-4">
@@ -193,11 +220,9 @@ export default function ProductListPage() {
                 <td className="px-6 py-4">
                   <div>
                     <div className="text-sm font-semibold text-gray-900">
-                      {product.brandName ||  "Yuemi"}
+                      {product.brandName || "Yuemi"}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Brand Name
-                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Brand Name</div>
                   </div>
                 </td>
 
@@ -291,3 +316,4 @@ export default function ProductListPage() {
     </div>
   );
 }
+
