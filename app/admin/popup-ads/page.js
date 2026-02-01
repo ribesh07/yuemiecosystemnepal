@@ -20,23 +20,28 @@ export default function PopupAdsAdmin() {
     fetchAds();
   }, []);
 
-  const fetchAds = async () => {
-    try {
-      const res = await fetch(API_URL);
-      const data = await res.json();
+const fetchAds = async () => {
+  try {
+    const res = await fetch(API_URL);
+    const json = await res.json();
 
-      const parsedAds = data.map((item) => ({
-        id: item.id,
-        title: item.title || "Untitled Ad",
-        color: item.color || "#000000",
-        isActive: !!item.isActive,
-      }));
+    const parsedAds = json.data.popupAds.map((item) => ({
+      id: item.id,
+      title: item.title || "Untitled Ad",
+      color: item.colorCode || "#000000",
+      isActive: Boolean(item.isActive),
+    }));
 
-      setAds(parsedAds);
-    } catch (err) {
-      console.error("Failed to fetch ads:", err);
-    }
-  };
+    setAds(parsedAds);
+  } catch (err) {
+    console.error("Failed to fetch ads:", err);
+  }
+};
+
+  useEffect(() => {
+    fetchAds();
+  }, []);
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
