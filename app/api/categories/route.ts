@@ -70,6 +70,7 @@ export async function POST(req: Request) {
       const buffer = Buffer.from(bytes);
 
       const uploadDir = path.join(process.cwd(), "public/uploads/categories");
+      console.log("upload dir: " , uploadDir);
 
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
