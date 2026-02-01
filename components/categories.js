@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 const accessories = [
   {
     id: 1,
+    categoryId: 1,
     category: 'Car Safety',
     title: 'Dash Camera System',
     description: 'Dual-lens dashboard camera with front and rear recording',
@@ -13,6 +14,7 @@ const accessories = [
   },
   {
     id: 2,
+    categoryId: 2,
     category: 'Car Infotainment System',
     title: 'YueMi Ecosystem Display',
     description: 'Advanced touchscreen infotainment system',
@@ -21,6 +23,7 @@ const accessories = [
   },
   {
     id: 3,
+    categoryId: 3,
     category: 'LED Lights',
     title: 'High-Performance LED Headlights',
     description: 'Ultra-bright LED conversion kit',
@@ -29,6 +32,7 @@ const accessories = [
   },
   {
     id: 4,
+    categoryId: 4,
     category: 'Damping & Acoustics',
     title: 'Sound Deadening Materials',
     description: 'Premium acoustic dampening pads',
@@ -37,6 +41,7 @@ const accessories = [
   },
   {
     id: 5,
+    categoryId: 5,
     category: 'Amplifier',
     title: 'YueMi Class D Amplifier',
     description: '4x100W professional car audio amplifier',
@@ -45,6 +50,7 @@ const accessories = [
   },
   {
     id: 6,
+    categoryId: 6,
     category: 'Accessories',
     title: 'Car Accessories Kit',
     description: 'Essential car maintenance and styling accessories',
@@ -53,6 +59,7 @@ const accessories = [
   },
   {
     id: 7,
+    categoryId: 7,
     category: 'Car Care & Protection',
     title: 'Premium Car Model',
     description: 'High-performance sports car with protection package',
@@ -61,12 +68,14 @@ const accessories = [
   },
 ];
 
+
 export default function CarAccessoriesGallery() {
   const router = useRouter();
 
   const handleImageClick = (item) => {
-    router.push(`/productlist?category=${encodeURIComponent(item.category)}`);
-  };
+  router.push(`/productlist?categoryId=${item.categoryId}`);
+};
+
 
   return (
     <div className="min-h-screen bg-white py-16 px-4">
