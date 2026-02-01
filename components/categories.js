@@ -18,7 +18,8 @@ const accessories = [
     category: 'Car Infotainment System',
     title: 'YueMi Ecosystem Display',
     description: 'Advanced touchscreen infotainment system',
-    image: 'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Car-Infotainment-System.jpg?v=1728630007',
+    image:
+      '/categories/Car-Infotainment-System.webp',
   },
   {
     id: 3,
@@ -26,7 +27,8 @@ const accessories = [
     category: 'LED Lights',
     title: 'High-Performance LED Headlights',
     description: 'Ultra-bright LED conversion kit',
-    image: 'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/LED-Lights.jpg?v=1727180318',
+    image:
+      '/categories/Led-Lights.webp',
   },
   {
     id: 4,
@@ -34,7 +36,8 @@ const accessories = [
     category: 'Damping & Acoustics',
     title: 'Sound Deadening Materials',
     description: 'Premium acoustic dampening pads',
-    image: 'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Damping-_-Acoustics_1.jpg?v=1728630006',
+    image:
+      '/categories/Damping-_-Acoustics_1.webp',
   },
   {
     id: 5,
@@ -42,7 +45,8 @@ const accessories = [
     category: 'Amplifier',
     title: 'YueMi Class D Amplifier',
     description: '4x100W professional car audio amplifier',
-    image: 'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Amplifier.jpg?v=1727180318',
+    image:
+    '/categories/Amplifier.webp'
   },
   {
     id: 6,
@@ -50,7 +54,8 @@ const accessories = [
     category: 'Accessories',
     title: 'Car Accessories Kit',
     description: 'Essential car maintenance and styling accessories',
-    image: 'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Accessories.jpg?v=1727180318',
+    image:
+      '/categories/Accessories.webp',
   },
   {
     id: 7,
@@ -58,7 +63,8 @@ const accessories = [
     category: 'Car Care & Protection',
     title: 'Premium Car Model',
     description: 'High-performance sports car with protection package',
-    image: 'https://cdn.shopify.com/s/files/1/0593/0719/6512/files/Car-Care-_-Protection_1.jpg?v=1729506863',
+    image:
+      '/categories/Car-Care-_-Protection_1.webp',
   },
 ];
 

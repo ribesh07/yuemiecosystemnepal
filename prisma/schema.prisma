@@ -159,7 +159,9 @@ model Brand {
 
 model Category {
   id        BigInt   @id @default(autoincrement())
-  name      String    @unique @map("category_name")
+  category      String    @unique @map("category_name")
+  title String?
+  description String?
   parentId  BigInt?
   image     String?
   top       Int      @default(0)
