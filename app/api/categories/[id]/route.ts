@@ -125,3 +125,62 @@ export async function PUT(
     );
   }
 }
+
+
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Invalid category id" },
+        { status: 400 }
+      );
+    }
+
+    const categoryId = BigInt(id);
+
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+    });
+
+    if (!category) {
+      return NextResponse.json(
+        { success: false, message: "Category not found" },
+        { status: 404 }
+      );
+    }
+
+    /* ---------- DELETE IMAGE ---------- */
+    if (category.image) {
+      const imagePath = path.join(
+        process.cwd(),
+        "public",
+        category.image
+      );
+
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    /* ---------- DELETE DB ---------- */
+    await prisma.category.delete({
+      where: { id: categoryId },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  } catch (error) {
+    console.error("CATEGORY_DELETE_ERROR", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete category" },
+      { status: 500 }
+    );
+  }
+}
