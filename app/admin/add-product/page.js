@@ -151,6 +151,8 @@ export default function ProductUploadPage() {
     } catch (error) {
       console.error(error);
       toast.error("Upload failed!");
+    }finally{
+      handleReset()
     }
   };
 
@@ -213,7 +215,7 @@ export default function ProductUploadPage() {
                     <option value="">Select category</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
-                        {cat.name}
+                        {cat.category}
                       </option>
                     ))}
                   </select>
