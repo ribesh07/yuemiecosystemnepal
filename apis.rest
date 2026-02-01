@@ -14,10 +14,16 @@ Content-Type: application/json
   "phone": "9800000000"
 }
 
-### get users
-# GET  https://yuemi.com.np/api/users
+### get all users
 GET  http://localhost:3000/api/customers/1
 Content-Type: application/json
+
+### get one user
+GET  http://localhost:3000/api/customers/1
+Content-Type: application/json
+
+###get details
+GET http://localhost:3000/api/users/me
 
 ### 
 GET https://yuemi.com.np/api/products
@@ -30,7 +36,7 @@ Content-Type: application/json
 GET http://localhost:3000/api/products
 Content-Type: application/json
 
-# GET http://localhost:3000/api/products/filter?categoryId=1
+# GET http://localhost:3000/api/products/filter?categoryId=1&minPrice=1000&maxPrice=5000&sort=price_desc
 
 ### get prducts filter
 GET http://localhost:3000/api/products/filter?categoryId=1
