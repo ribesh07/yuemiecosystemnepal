@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Upload, Save, RotateCcw } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function ProductUploadPage() {
   const generateProductCode = () => {
@@ -21,7 +22,7 @@ export default function ProductUploadPage() {
     categories: "",
     brand: "",
     deliveryTargetDays: "",
-    status:1,
+    status: 1,
     weeklyProduct: false,
     flashSaleProduct: false,
     todayDeals: false,
@@ -35,7 +36,7 @@ export default function ProductUploadPage() {
     packaging: "",
     warranty: "",
     productCatalog: null,
-    mainImage:null,
+    mainImage: null,
     productImages: [],
   });
 
@@ -44,7 +45,7 @@ export default function ProductUploadPage() {
       try {
         const res = await fetch("/api/categories");
         const data = await res.json();
-        console.log(data)
+        console.log(data);
         if (data.success) setCategories(data.data.categories);
       } catch (err) {
         console.error("Failed to fetch categories", err);
@@ -80,25 +81,24 @@ export default function ProductUploadPage() {
   };
 
   const handleMainImageChange = (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  setFormData((prev) => ({
-    ...prev,
-    mainImage: file,
-  }));
-};
+    setFormData((prev) => ({
+      ...prev,
+      mainImage: file,
+    }));
+  };
 
   const handleCatalogChange = (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  setFormData((prev) => ({
-    ...prev,
-    productCatalog: file,
-  }));
-};
-
+    setFormData((prev) => ({
+      ...prev,
+      productCatalog: file,
+    }));
+  };
 
   const handleReset = () => {
     setFormData({
@@ -107,7 +107,7 @@ export default function ProductUploadPage() {
       category_id: "",
       categories: "",
       brand: "",
-      status:"1",
+      status: "1",
       deliveryTargetDays: "",
       weeklyProduct: false,
       flashSaleProduct: false,
@@ -123,7 +123,7 @@ export default function ProductUploadPage() {
       warranty: "",
       mainImage: null,
       productCatalog: null,
-      productImages:[]
+      productImages: [],
     });
   };
 
@@ -137,16 +137,20 @@ export default function ProductUploadPage() {
         data.append(key, value);
       }
     });
-    console.log(formData)
+    console.log(formData);
 
     try {
       const res = await fetch("/api/products", { method: "POST", body: data });
       const result = await res.json();
-      if (res.ok) alert("Product uploaded successfully!");
-      else alert(result.message);
+
+      if (res.ok) {
+        toast.success("Product uploaded successfully!");
+      } else {
+        toast.error(result.message || "Something went wrong!");
+      }
     } catch (error) {
       console.error(error);
-      alert("Upload failed!");
+      toast.error("Upload failed!");
     }
   };
 
@@ -434,7 +438,7 @@ export default function ProductUploadPage() {
                   type="file"
                   id="mainImage"
                   accept="image/*"
-                     onChange={handleMainImageChange}
+                  onChange={handleMainImageChange}
                   className="hidden"
                 />
                 <label
@@ -443,8 +447,7 @@ export default function ProductUploadPage() {
                 >
                   <Upload className="mx-auto h-12 w-12 text-gray-900" />
                   <p>
-                    {formData.mainImage?.name ||
-                      "Choose MainImage Required !"}
+                    {formData.mainImage?.name || "Choose MainImage Required !"}
                   </p>
                 </label>
               </div>
