@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     // const productCode = randomCode();
     const uploadDir = path.join(
       process.cwd(),
-      "public/uploads",
+      "public/uploads/products",
       productCode,
       "images"
     );
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
         Buffer.from(await mainImage.arrayBuffer())
       );
 
-      mainImagePath = `/uploads/${productCode}/images/${fileName}`;
+      mainImagePath = `/uploads/products/${productCode}/images/${fileName}`;
     }
 
     if (productCatalog) {
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
         Buffer.from(await productCatalog.arrayBuffer())
       );
 
-      productCatalogPath = `/uploads/${productCode}/images/${fileName}`;
+      productCatalogPath = `/uploads/products/${productCode}/images/${fileName}`;
     }
 
     for (const file of galleryImages) {
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
         Buffer.from(await file.arrayBuffer())
       );
 
-      imagePaths.push(`/uploads/${productCode}/images/${fileName}`);
+      imagePaths.push(`/uploads/products/${productCode}/images/${fileName}`);
     }
 
     const product = await prisma.$transaction(async (tx) => {

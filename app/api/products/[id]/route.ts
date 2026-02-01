@@ -54,7 +54,7 @@ export async function PUT(
 
     const uploadDir = path.join(
       process.cwd(),
-      "public/uploads",
+      "public/uploads/products",
       existingProduct.productCode,
       "images"
     );
@@ -79,7 +79,7 @@ export async function PUT(
         Buffer.from(await newMainImage.arrayBuffer())
       );
 
-      mainImagePath = `/uploads/${existingProduct.productCode}/images/${fileName}`;
+      mainImagePath = `/uploads/products/${existingProduct.productCode}/images/${fileName}`;
     }
 
     // ➕ Add new gallery images
@@ -96,7 +96,7 @@ export async function PUT(
       );
 
       galleryImages.push(
-        `/uploads/${existingProduct.productCode}/images/${fileName}`
+        `/uploads/products/${existingProduct.productCode}/images/${fileName}`
       );
     }
 

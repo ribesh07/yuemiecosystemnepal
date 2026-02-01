@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-const accessories = [
+const accessoriesoffline = [
   {
     id: 1,
     categoryId: 1,
     category: 'Car Safety',
     title: 'Dash Camera System',
     description: 'Dual-lens dashboard camera with front and rear recording',
-    image: '/categories/Car-Safety_1.webp',
+    image: '/uploads/categories/Car-Safety_1.webp',
   },
   {
     id: 2,
@@ -19,7 +20,7 @@ const accessories = [
     title: 'YueMi Ecosystem Display',
     description: 'Advanced touchscreen infotainment system',
     image:
-      '/categories/Car-Infotainment-System.webp',
+      '/uploads/categories/Car-Infotainment-System.webp',
   },
   {
     id: 3,
@@ -28,7 +29,7 @@ const accessories = [
     title: 'High-Performance LED Headlights',
     description: 'Ultra-bright LED conversion kit',
     image:
-      '/categories/Led-Lights.webp',
+      '/uploads/categories/Led-Lights.webp',
   },
   {
     id: 4,
@@ -37,7 +38,7 @@ const accessories = [
     title: 'Sound Deadening Materials',
     description: 'Premium acoustic dampening pads',
     image:
-      '/categories/Damping-_-Acoustics_1.webp',
+      '/uploads/categories/Damping-_-Acoustics_1.webp',
   },
   {
     id: 5,
@@ -46,7 +47,7 @@ const accessories = [
     title: 'YueMi Class D Amplifier',
     description: '4x100W professional car audio amplifier',
     image:
-    '/categories/Amplifier.webp'
+    '/uploads/categories/Amplifier.webp'
   },
   {
     id: 6,
@@ -55,7 +56,7 @@ const accessories = [
     title: 'Car Accessories Kit',
     description: 'Essential car maintenance and styling accessories',
     image:
-      '/categories/Accessories.webp',
+      '/uploads/categories/Accessories.webp',
   },
   {
     id: 7,
@@ -64,18 +65,44 @@ const accessories = [
     title: 'Premium Car Model',
     description: 'High-performance sports car with protection package',
     image:
-      '/categories/Car-Care-_-Protection_1.webp',
+      '/uploads/categories/Car-Care-_-Protection_1.webp',
   },
 ];
 
 
 export default function CarAccessoriesGallery() {
   const router = useRouter();
+  const [accessories , setaccessories] = useState(accessoriesoffline)
 
   const handleImageClick = (item) => {
   router.push(`/productlist?categoryId=${item.categoryId}`);
 };
 
+// const fetchCategories = async () => {
+//     const res = await fetch('/api/categories')
+//     const data = await res.json();
+//     console.log(data)
+//     if(data.success){
+//       setaccessories(data.data.categories)
+//     }
+//     else{
+//       console.log("Using Offline Data !")
+//       setaccessories(accessoriesoffline)
+//     }
+
+// }
+
+// useEffect(()=>{
+//   fetchCategories();
+// },[])
+
+if (accessories.length < 3) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading categories...
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-white py-16 px-4">
