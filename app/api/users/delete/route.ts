@@ -3,10 +3,11 @@ import { prisma } from "@/prisma/prisma-client";
 
 export async function DELETE(
   _: Request,
-  { params }: { params: { id: string } }
+      context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = BigInt(params.id);
+  const { id } = await context.params;
+  const userId = BigInt(id);
 
     // 1️⃣ Check processing orders
     const processingOrderCount = await prisma.order.count({

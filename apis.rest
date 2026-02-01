@@ -30,6 +30,12 @@ Content-Type: application/json
 GET http://localhost:3000/api/products
 Content-Type: application/json
 
+# GET http://localhost:3000/api/products/filter?categoryId=1
+
+### get prducts filter
+GET http://localhost:3000/api/products/filter?categoryId=1
+Content-Type: application/json
+
 ### get banners
 GET http://localhost:3000/api/banners
 Content-Type: application/json
@@ -48,5 +54,3 @@ title=Hi Popup
 &isActive=1
 
 
-###
-GET https://gargdental.omsok.com/api/v1/banners/mobile
