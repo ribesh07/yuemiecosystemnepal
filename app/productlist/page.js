@@ -1,11 +1,20 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiRequest } from "@/utils/ApisafeCalls"
 
+import { Suspense } from "react";
 
-export default function ProductsPage() {
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductsPage />
+    </Suspense>
+  );
+}
+
+ function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("categoryId");
@@ -31,7 +40,6 @@ export default function ProductsPage() {
         `/products/filter?categoryId=${categoryId}`,
         false
       );
-
       setProducts(result?.data?.products || []);
     } catch (err) {
       console.error("Failed to fetch products:", err);
@@ -181,7 +189,7 @@ export default function ProductsPage() {
             >
               <div className="relative bg-gray-50 h-80 overflow-hidden">
                 <img
-                  src={product.image}
+                  src={product.mainImage}
                   alt={product.name}
                   className="w-full h-full object-contain p-6 group-hover:scale-110 transition"
                 />
@@ -200,7 +208,7 @@ export default function ProductsPage() {
                   {product.name}
                 </h3>
                 <span className="text-2xl font-bold">
-                  ₹{Number(product.price).toLocaleString("en-IN")}
+                  ₹{Number(product.sellPrice).toLocaleString("en-IN")}
                 </span>
               </div>
             </div>
