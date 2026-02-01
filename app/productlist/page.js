@@ -4,8 +4,6 @@ import { useState, useMemo, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiRequest } from "@/utils/ApisafeCalls"
 
-import { Suspense } from "react";
-
 export default function Page() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
