@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Edit2, Trash2, Info, Plus, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import ConfirmModal from "@/components/ConfirmModal";
 import useConfirmModalStore from "@/store/confirmModalStore";
 
 import toast from "react-hot-toast";
