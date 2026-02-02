@@ -18,7 +18,8 @@
 /out/
 
 /public/uploads/products/
-/public/uploads/
+/public/uploads/popup-ads/
+/public/uploads/banners/
 # production
 /build
 
