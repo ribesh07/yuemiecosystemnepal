@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react';
 import { ArrowLeft, User, Upload, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function ProfileEdit() {
   const [formData, setFormData] = useState({
@@ -47,11 +48,11 @@ export default function ProfileEdit() {
 
   const handleSubmit = () => {
     if (formData.newPassword !== formData.confirmPassword) {
-      alert('New passwords do not match!');
+      toast.error('New passwords do not match!');
       return;
     }
     console.log('Profile updated:', formData);
-    alert('Profile saved successfully!');
+    toast.success('Profile saved successfully!');
   };
 
   return (

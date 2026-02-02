@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {  Plus, Edit2, Trash2, ImageIcon } from "lucide-react";
+import toast from "react-hot-toast";
+
 
 const API_URL = "/api/popup-ads";
 
@@ -55,7 +57,7 @@ const fetchAds = async () => {
     e.preventDefault();
 
     if (!formData.title) {
-      alert("Please enter the ad title");
+      toast.error("Please enter the ad title");
       return;
     }
 
