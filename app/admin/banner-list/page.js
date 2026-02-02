@@ -1,9 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import toast from "react-hot-toast";
+import useConfirmModalStore from "@/store/confirmModalStore";
 
 export default function BannerList() {
   const [banners, setBanners] = useState([]);
+  const openConfirm = useConfirmModalStore((state) => state.open);
 
   const fetchBanners = async () => {
     const res = await fetch("/api/banner");
@@ -21,13 +24,26 @@ export default function BannerList() {
     });
 
     const data = await res.json();
+    openConfirm({
+      title: "Delete Banner",
+      message: "Are you sure you want to delete this banner? This action cannot be undone.",
+      onConfirm: async () => {
+        if (data.success) {
+          toast.success("Banner removed successfully");
+          fetchBanners();
+        } else {
+          toast.error("Failed to delete banner");
+        }
+      },
+    }); 
 
-    if (data.success) {
-      alert("Banner removed successfully");
-      fetchBanners();
-    } else {
-      alert("Failed to delete banner");
-    }
+
+    // if (data.success) {
+    //   toast.success("Banner removed successfully");
+    //   fetchBanners();
+    // } else {
+    //   toast.error("Failed to delete banner");
+    // }
   };
 
   const handleEdit = (id) => {

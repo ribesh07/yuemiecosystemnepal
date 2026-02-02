@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import useConfirmModalStore from "@/store/confirmModalStore";
+import toast from "react-hot-toast";
 
 
 export default function CategoriesListPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const openConfirm = useConfirmModalStore((state) => state.open);
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -32,20 +35,26 @@ export default function CategoriesListPage() {
 
   // Delete category
   async function handleDelete(id) {
-    if (!confirm("Are you sure you want to delete this category?")) return;
-    try {
-      const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (data.success) {
-        alert("Category deleted successfully!");
-        setCategories(categories.filter((cat) => cat.id !== id));
-      } else {
-        alert("Failed to delete category!");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong while deleting!");
-    }
+    
+    openConfirm({
+      title: "Delete Category",
+      message: "Are you sure you want to delete this category? This action cannot be undone.",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
+          const data = await res.json();
+          if (data.success) {
+            toast.success("Category deleted successfully!");
+            setCategories(categories.filter((cat) => cat.id !== id));
+          } else {
+            toast.error("Failed to delete category!");
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error("Something went wrong while deleting!");
+        }
+      },
+    });
   }
 
   if (loading) return <p className="text-center mt-10">Loading categories...</p>;

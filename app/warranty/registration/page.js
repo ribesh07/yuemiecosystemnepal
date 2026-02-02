@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function WarrantyRegisterPage() {
   const [formData, setFormData] = useState({
@@ -29,12 +30,12 @@ export default function WarrantyRegisterPage() {
 
   const handleSubmit = () => {
     if (!formData.serialNumber) {
-      alert("Serial number is required");
+      toast.error("Serial number is required");
       return;
     }
 
     console.log("Warranty Registration Data:", formData);
-    alert("Warranty registered successfully!");
+    toast.success("Warranty registered successfully!");
   };
 
   return (
