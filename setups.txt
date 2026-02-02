@@ -11,6 +11,7 @@ npm run dev
 
 
 # for dev guru
+npm run setups
 npm run radhe
 
 
