@@ -18,4 +18,4 @@ npm run radhe
 rm -rf /tmp/*
 npx prisma generate
 npx prisma migrate deploy
-NODE_ENV=production pm2 start server.js --name yuemi-app
+NODE_ENV=production pm2 start server.js --name yuemi-app or pm2 start ecosystem.config.js

@@ -7,6 +7,7 @@ module.exports = {
       cwd: "/home/yuemicom/yuemicom",
       env: {
         NODE_ENV: "production",
+        PORT:4445
       },
     },
   ],
