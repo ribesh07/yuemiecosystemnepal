@@ -1,12 +1,13 @@
 module.exports = {
   apps: [
     {
-      name: "nextjs-app",
+      name: "yuemi",
       script: "npm",
       args: "run start",
-      cwd: "/home/yuemicom/yuemicom",
+      cwd: "/home/sanjaya/development/yuemiecosystemnepal",
       env: {
         NODE_ENV: "production",
+        PORT:4445
       },
     },
   ],
