@@ -135,8 +135,8 @@ const handleDelete = (id) => {
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.name}>
-                {cat.name}
+              <option key={cat.id} value={cat.catrgory}>
+                {cat.category}
               </option>
             ))}
           </select>

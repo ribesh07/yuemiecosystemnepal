@@ -29,7 +29,7 @@ GET http://localhost:3000/api/users/me
 GET https://yuemi.com.np/api/products
 
 ### get categories
-GET http://localhost:3000/api/categories
+GET http://localhost:4445/api/categories
 Content-Type: application/json
 
 ### get prducts

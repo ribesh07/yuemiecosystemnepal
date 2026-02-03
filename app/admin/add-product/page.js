@@ -17,9 +17,9 @@ export default function ProductUploadPage() {
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     productCode: generateProductCode(),
-    productName: "",
+    name: "",
     category_id: "",
-    categories: "",
+    categoryName: "",
     brand: "",
     deliveryTargetDays: "",
     status: 1,
@@ -68,7 +68,7 @@ export default function ProductUploadPage() {
     setFormData((prev) => ({
       ...prev,
       category_id: selectedId,
-      categories: selectedCat?.name || "",
+      categoryName: selectedCat?.category || "",
     }));
   };
 
@@ -103,9 +103,9 @@ export default function ProductUploadPage() {
   const handleReset = () => {
     setFormData({
       productCode: generateProductCode(),
-      productName: "",
+      name: "",
       category_id: "",
-      categories: "",
+      categoryName: "",
       brand: "",
       status: "1",
       deliveryTargetDays: "",
@@ -194,8 +194,8 @@ export default function ProductUploadPage() {
                   </label>
                   <input
                     type="text"
-                    name="productName"
-                    value={formData.productName}
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter product name"
                     className="w-full px-3 py-2 border text-gray-900 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
