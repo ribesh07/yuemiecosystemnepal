@@ -383,17 +383,90 @@ export default function ProfilePage() {
         </form>
       </Modal>
       {/* ORDER MODAL */}
-      <Modal
-        title={`Order Details - ${editOrder?.id}`}
-        isOpen={!!editOrder}
-        onClose={() => setEditOrder(null)}
-      >
-        <div className="space-y-4">
-          <p><strong>Order ID:</strong> {editOrder?.id}</p>
-          <p><strong>Date:</strong> {editOrder?.date}</p>
-        </div>
+       <Modal
+  title={`Order Details - #${editOrder?.id}`}
+  isOpen={!!editOrder}
+  onClose={() => setEditOrder(null)}
+>
+  <div className="space-y-6">
 
-      </Modal> 
+    {/* Order Meta */}
+    <div className="grid grid-cols-2 gap-4 text-sm">
+      <p><strong>Order ID:</strong> #{editOrder?.id}</p>
+      <p><strong>Order Date:</strong> {editOrder?.date}</p>
+      <p>
+        <strong>Status:</strong>{" "}
+        <span className={`px-2 py-1 rounded text-white text-xs
+          ${editOrder?.status === "Delivered" && "bg-green-500"}
+          ${editOrder?.status === "Pending" && "bg-yellow-500"}
+          ${editOrder?.status === "Cancelled" && "bg-red-500"}
+          ${editOrder?.status === "Shipped" && "bg-blue-500"}
+        `}>
+          {editOrder?.status}
+        </span>
+      </p>
+      <p><strong>Payment:</strong> {editOrder?.paymentMethod || "Cash on Delivery"}</p>
+    </div>
+
+    {/* Product Section */}
+    <div className="border-t pt-4 space-y-4">
+
+      <h3 className="font-semibold text-lg">Products</h3>
+
+      {editOrder?.products?.map((product, index) => (
+        <div
+          key={index}
+          className="flex gap-4 border rounded-lg p-3 items-center"
+        >
+          {/* Product Image */}
+          <img
+            src={product.image || "/product-placeholder.png"}
+            alt={product.name}
+            className="w-20 h-20 object-cover rounded border"
+          />
+
+          {/* Product Info */}
+          <div className="flex-1 space-y-1 text-sm">
+            <p className="font-medium">{product.name}</p>
+            <p className="text-gray-500">Product ID: {product.id}</p>
+            <p className="text-gray-500">
+              Category: {product.category || "General"}
+            </p>
+            <p className="text-gray-500">
+              Quantity: {product.quantity || 1}
+            </p>
+          </div>
+
+          {/* Price */}
+          <div className="text-right text-sm">
+            <p className="font-semibold">
+              Rs. {product.price?.toLocaleString()}
+            </p>
+            <p className="text-gray-500 text-xs">per item</p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Order Summary */}
+    <div className="border-t pt-4 space-y-2 text-sm">
+      <div className="flex justify-between">
+        <span>Subtotal</span>
+        <span>Rs. {editOrder?.subtotal?.toLocaleString()}</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Delivery Charge</span>
+        <span>Rs. {editOrder?.deliveryCharge || 0}</span>
+      </div>
+      <div className="flex justify-between font-semibold text-base">
+        <span>Total</span>
+        <span>Rs. {editOrder?.total?.toLocaleString()}</span>
+      </div>
+    </div>
+
+  </div>
+</Modal>
+
       {/* REVIEW MODAL */}
       <Modal
         title={`Review Product - ${editReview?.id}`}
