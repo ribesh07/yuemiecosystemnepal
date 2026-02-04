@@ -47,13 +47,11 @@ const accessories = [
   },
 ];
 
-
-async function main() {
+async function categoryseed (){
   console.log("🌱 Seeding categories...");
-
   const categories = await prisma.category.findMany();
   // console.log(categories)
- 
+  
   if(categories.length>3){
     console.log("Already Added Categories !!")
     return
@@ -80,8 +78,33 @@ async function main() {
       },
     });
   }
-
   console.log("✅ Categories seeded successfully");
+}
+
+async function brandSeed() {
+  console.log("Seeding Brands ...")
+  const brands = await prisma.brand.findMany()
+  if(brands.length>0){
+     console.log("Already Added Brands !!")
+    return
+  }
+  await prisma.brand.create({
+    data : {
+      name : "Yuemi",
+      status : 1
+    }
+  })
+  console.log("Seeded Successfully ")
+}
+
+
+async function main() {
+  console.log("🌱 Seeding ...");
+
+ await categoryseed()
+ await brandSeed()
+
+  console.log("✅ Seeded successfully");
 }
 
 main()

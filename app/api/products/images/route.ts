@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import fs from "fs";
 import path from "path";
+import {  GET_UPLOAD_BASE_DIR } from "../../../../utils/imageUpload"
 
 export async function DELETE(req: Request) {
   try {
@@ -27,7 +28,7 @@ export async function DELETE(req: Request) {
       );
     }
 
-    const filePath = path.join(process.cwd(), "public", imagePath);
+    const filePath = path.join(GET_UPLOAD_BASE_DIR, imagePath);
 
     // 🗑️ Delete file from disk
     if (fs.existsSync(filePath)) {

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import fs from "fs";
 import path from "path";
+import { GET_UPLOAD_BASE_DIR, UPLOAD_BASE_DIR } from "@/utils/imageUpload";
 // import { requireAdminRole } from "@/lib/auth"; // enable later
 
 /**
@@ -58,10 +59,16 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    // const uploadDir = path.join(
+    //   process.cwd(),
+    //   "public/uploads/banners"
+    // );
     const uploadDir = path.join(
-      process.cwd(),
-      "public/uploads/banners"
+      UPLOAD_BASE_DIR,
+      "banners"
     );
+
+   
 
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -92,7 +99,7 @@ export async function POST(req: Request) {
   } catch (error) {
     /* ---------- CLEANUP ---------- */
     if (imagePath) {
-      const filePath = path.join(process.cwd(), "public", imagePath);
+      const filePath = path.join(GET_UPLOAD_BASE_DIR, imagePath);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }

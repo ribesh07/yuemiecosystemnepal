@@ -4,6 +4,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 import { randomCode } from "@/lib/randomCode";
+import {
+  getProductImageDir,
+  getPublicImageUrl,
+} from "@/utils/imageUpload";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
@@ -14,23 +18,29 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     console.log(formData)
 
-    const name = formData.get("productName")?.toString();
+    const name = formData.get("name")?.toString();
     const productCode = formData.get("productCode")?.toString();
     const slug = formData.get("slug")?.toString() || null;
-    const description = formData.get("description")?.toString() || null;
-    const specifications = formData.get("specifications")?.toString() || null;
+    const description = formData.get("productDescription")?.toString() || null;
+    const specifications = formData.get("keySpecifications")?.toString() || null;
     const packaging = formData.get("packaging")?.toString() || null;
     const warranty = formData.get("warranty")?.toString() || null;
-    const categoryId = formData.get("category_id")?.toString() || null;
-    const categoryName = formData.get("categories")?.toString() || null;
-    const brandId = formData.get("brand_id")?.toString() || null;
-    const brandName= formData.get("brand")?.toString() || null;
+    const categoryId = formData.get("categoryId")?.toString() || null;
+    const categoryName = formData.get("categoryName")?.toString() || null;
+    const brandId = formData.get("brandId")?.toString() || null;
+    const brandName= formData.get("brandName")?.toString() || null;
     const actualPrice = formData.get("actualPrice")?.toString();
     const sellPrice = formData.get("sellingPrice")?.toString();
     const discount = formData.get("discount")?.toString() || "0";
     const stockQuantity = formData.get("stockQuantity")?.toString();
     const availableQuantity = formData.get("availableQuantity")?.toString();
     const status = formData.get("status")?.toString();
+    const raw = formData.get("deliveryTargetDays")?.toString()
+    const deliveryTargetDays = raw ? Number(raw) : null
+    const weeklyProduct = formData.get("weeklyProduct")?.toString();
+    const flashSaleProduct = formData.get("flashSaleProduct")?.toString();
+    const todayDeals = formData.get("todayDeals")?.toString();
+    const specialProduct = formData.get("specialProduct")?.toString();
 
     if (!name || !productCode || !actualPrice || !sellPrice || !status) {
       return NextResponse.json(
@@ -57,12 +67,14 @@ export async function POST(req: Request) {
       );
 
     // const productCode = randomCode();
-    const uploadDir = path.join(
-      process.cwd(),
-      "public/uploads/products",
-      productCode,
-      "images"
-    );
+    // const uploadDir = path.join(
+    //   process.cwd(),
+    //   "public/uploads/products",
+    //   productCode,
+    //   "images"
+    // );
+
+    const uploadDir = getProductImageDir(productCode);
     fs.mkdirSync(uploadDir, { recursive: true });
 
     let mainImagePath: string | null = null;
@@ -80,6 +92,8 @@ export async function POST(req: Request) {
       );
 
       mainImagePath = `/uploads/products/${productCode}/images/${fileName}`;
+      // mainImagePath = getPublicImageUrl(productCode, fileName);
+
     }
 
     if (productCatalog) {
@@ -119,6 +133,11 @@ export async function POST(req: Request) {
           packaging,
           warranty,
           categoryName,
+          deliveryTargetDays,
+          weeklyProduct:weeklyProduct === 'true' ,   
+          flashSaleProduct : flashSaleProduct  === 'true' ,
+          todayDeals : todayDeals  === 'true' ,
+          specialProduct : specialProduct  === 'true' ,
           brandName ,
           mainImage :mainImagePath ,
           productCatalog : productCatalogPath,

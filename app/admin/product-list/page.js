@@ -183,7 +183,7 @@ const handleDelete = (id) => {
                 {/* Image */}
                 <td className="px-6 py-4">
                   <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-100">
-                    <Image
+                    <img
                       src={product.mainImage || "/no-image.png"}
                       alt={product.name}
                       fill

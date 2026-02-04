@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import fs from "fs";
 import path from "path";
+import { UPLOAD_BASE_DIR } from "@/utils/imageUpload";
 // import { requireAdminRole } from "@/lib/auth";
 
 /**
@@ -55,8 +56,8 @@ export async function POST(req: Request) {
       const buffer = Buffer.from(await file.arrayBuffer());
 
       const uploadDir = path.join(
-        process.cwd(),
-        "public/uploads/popup-ads"
+        UPLOAD_BASE_DIR,
+        "popup-ads"
       );
 
       if (!fs.existsSync(uploadDir)) {
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
       const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "")}`;
       fs.writeFileSync(path.join(uploadDir, fileName), buffer);
 
-      imagePath = `/uploads/popup-ads/${fileName}`;
+      imagePath = `/popup-ads/${fileName}`;
     }
 
     /* ---------- DB CREATE ---------- */
@@ -90,7 +91,7 @@ export async function POST(req: Request) {
   } catch (error) {
     /* ---------- CLEANUP ---------- */
     if (imagePath) {
-      const filePath = path.join(process.cwd(), "public", imagePath);
+      const filePath = path.join(UPLOAD_BASE_DIR, imagePath);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 
