@@ -17,10 +17,11 @@ export default function ProductUploadPage() {
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     productCode: generateProductCode(),
-    productName: "",
-    category_id: "",
-    categories: "",
-    brand: "",
+    name: "",
+    categoryId: "",
+    categoryName: "",
+    brandName: "Yuemi",
+    brandId:1,
     deliveryTargetDays: "",
     status: 1,
     weeklyProduct: false,
@@ -67,8 +68,8 @@ export default function ProductUploadPage() {
     const selectedCat = categories.find((c) => c.id.toString() === selectedId);
     setFormData((prev) => ({
       ...prev,
-      category_id: selectedId,
-      categories: selectedCat?.name || "",
+      categoryId: selectedId,
+      categoryName: selectedCat?.category || "",
     }));
   };
 
@@ -103,10 +104,11 @@ export default function ProductUploadPage() {
   const handleReset = () => {
     setFormData({
       productCode: generateProductCode(),
-      productName: "",
-      category_id: "",
-      categories: "",
-      brand: "",
+      name: "",
+      categoryId: "",
+      categoryName: "",
+      brandName: "Yuemi",
+      brandId:1,
       status: "1",
       deliveryTargetDays: "",
       weeklyProduct: false,
@@ -142,8 +144,9 @@ export default function ProductUploadPage() {
     try {
       const res = await fetch("/api/products", { method: "POST", body: data });
       const result = await res.json();
-
+      console.log(result)
       if (res.ok) {
+        handleReset()
         toast.success("Product uploaded successfully!");
       } else {
         toast.error(result.message || "Something went wrong!");
@@ -152,7 +155,7 @@ export default function ProductUploadPage() {
       console.error(error);
       toast.error("Upload failed!");
     }finally{
-      handleReset()
+      // handleReset()
     }
   };
 
@@ -194,8 +197,8 @@ export default function ProductUploadPage() {
                   </label>
                   <input
                     type="text"
-                    name="productName"
-                    value={formData.productName}
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter product name"
                     className="w-full px-3 py-2 border text-gray-900 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -207,8 +210,8 @@ export default function ProductUploadPage() {
                     Category
                   </label>
                   <select
-                    name="category_id"
-                    value={formData.category_id}
+                    name="categoryId"
+                    value={formData.categoryId}
                     onChange={handleCategoryChange}
                     className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >

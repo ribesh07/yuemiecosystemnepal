@@ -92,14 +92,14 @@ export default function ProfilePage() {
           </button>
 
           <div className="mt-4 flex justify-around text-sm">
-            <div>
+            {/* <div>
               <p className="font-bold">{orders.length}</p>
               <p className="text-gray-500">Orders</p>
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <p className="font-bold">{user.wishlistCount}</p>
               <p className="text-gray-500">Wishlist</p>
-            </div>
+            </div> */}
           </div>
 
           <button className="mt-6 w-full bg-orange-500 text-white py-2 rounded hover:bg-red-600">
@@ -219,31 +219,144 @@ export default function ProfilePage() {
 
       {/* ADDRESS MODAL */}
       <Modal
-        title={`Edit ${editAddress?.type} Address`}
-        isOpen={!!editAddress}
-        onClose={() => setEditAddress(null)}
-      >
-        <form className="space-y-4">
-          <input className="w-full border rounded px-3 py-2" defaultValue={editAddress?.city} placeholder="City" />
-          <input className="w-full border rounded px-3 py-2" defaultValue={editAddress?.state} placeholder="State" />
-          <input className="w-full border rounded px-3 py-2" defaultValue={editAddress?.zip} placeholder="ZIP" />
-          <button className="w-full  bg-orange-500 text-white py-2 rounded hover:bg-red-600">Save Address</button>
-        </form>
-      </Modal>
+  title={`Edit ${editAddress?.type || "Shipping"} Address`}
+  isOpen={!!editAddress}
+  onClose={() => setEditAddress(null)}
+>
+  <form className="space-y-4">
+
+    {/* Full Name */}
+    <input
+      className="w-full border rounded px-3 py-2"
+      defaultValue={editAddress?.fullName}
+      placeholder="Full Name (Receiver)"
+    />
+
+    {/* Phone */}
+    <input
+      className="w-full border rounded px-3 py-2"
+      defaultValue={editAddress?.phone}
+      placeholder="Mobile Number"
+    />
+
+    {/* Province */}
+    <select
+      className="w-full border rounded px-3 py-2"
+      defaultValue={editAddress?.province}
+    >
+      <option value="">Select Province</option>
+      <option value="Koshi">Koshi Province</option>
+      <option value="Madhesh">Madhesh Province</option>
+      <option value="Bagmati">Bagmati Province</option>
+      <option value="Gandaki">Gandaki Province</option>
+      <option value="Lumbini">Lumbini Province</option>
+      <option value="Karnali">Karnali Province</option>
+      <option value="Sudurpashchim">Sudurpashchim Province</option>
+    </select>
+
+    {/* District */}
+    <input
+      className="w-full border rounded px-3 py-2"
+      defaultValue={editAddress?.district}
+      placeholder="District (e.g. Kathmandu, Lalitpur, Sunsari)"
+    />
+
+    {/* Municipality */}
+    <input
+      className="w-full border rounded px-3 py-2"
+      defaultValue={editAddress?.municipality}
+      placeholder="Municipality / Rural Municipality"
+    />
+
+    {/* Ward */}
+    <input
+      className="w-full border rounded px-3 py-2"
+      defaultValue={editAddress?.ward}
+      placeholder="Ward No."
+    />
+
+    {/* Area / Tole */}
+    <input
+      className="w-full border rounded px-3 py-2"
+      defaultValue={editAddress?.area}
+      placeholder="Area / Tole / Landmark"
+    />
+
+    {/* Optional ZIP (rarely used but sometimes needed) */}
+    <input
+      className="w-full border rounded px-3 py-2"
+      defaultValue={editAddress?.postalCode}
+      placeholder="Postal Code (Optional)"
+    />
+
+    <button className="w-full bg-orange-500 text-white py-2 rounded hover:bg-red-600">
+      Save Delivery Address
+    </button>
+  </form>
+</Modal>
+
 
       {/* PROFILE MODAL */}
       <Modal
-        title="Edit Profile"
-        isOpen={editProfile}
-        onClose={() => setEditProfile(false)}
-      >
-        <form className="space-y-4">
-          <input className="w-full border rounded px-3 py-2" defaultValue={user.name} />
-          <input className="w-full border rounded px-3 py-2" defaultValue={user.email} />
-          <input className="w-full border rounded px-3 py-2" defaultValue={user.phone} />
-          <button className="w-full  bg-orange-500 text-white py-2 rounded hover:bg-red-600">Save Profile</button>
-        </form>
-      </Modal>
+  title="Edit Profile"
+  isOpen={editProfile}
+  onClose={() => setEditProfile(false)}
+>
+  <form className="space-y-4">
+
+    {/* Profile Image Upload */}
+    <div className="flex items-center gap-4">
+      <img
+        src={user.profileImage || "/avatar-placeholder.png"}
+        alt="Profile"
+        className="w-20 h-20 rounded-full object-cover border"
+      />
+
+      <label className="cursor-pointer bg-gray-100 px-4 py-2 rounded border hover:bg-gray-200 text-sm">
+        Change Photo
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              // You can preview or upload to server here
+              console.log("Selected file:", file);
+            }
+          }}
+        />
+      </label>
+    </div>
+
+    {/* Full Name */}
+    <input
+      className="w-full border rounded px-3 py-2"
+      defaultValue={user.name}
+      placeholder="Full Name"
+    />
+
+    {/* Email (Disabled) */}
+    <input
+      className="w-full border rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+      defaultValue={user.email}
+      disabled
+      title="Email cannot be changed"
+    />
+
+    {/* Phone */}
+    <input
+      className="w-full border rounded px-3 py-2"
+      defaultValue={user.phone}
+      placeholder="Mobile Number"
+    />
+
+    <button className="w-full bg-orange-500 text-white py-2 rounded hover:bg-red-600">
+      Save Profile
+    </button>
+  </form>
+</Modal>
+
 
       <Modal
         title="Change Password"
@@ -270,17 +383,90 @@ export default function ProfilePage() {
         </form>
       </Modal>
       {/* ORDER MODAL */}
-      <Modal
-        title={`Order Details - ${editOrder?.id}`}
-        isOpen={!!editOrder}
-        onClose={() => setEditOrder(null)}
-      >
-        <div className="space-y-4">
-          <p><strong>Order ID:</strong> {editOrder?.id}</p>
-          <p><strong>Date:</strong> {editOrder?.date}</p>
-        </div>
+       <Modal
+  title={`Order Details - #${editOrder?.id}`}
+  isOpen={!!editOrder}
+  onClose={() => setEditOrder(null)}
+>
+  <div className="space-y-6">
 
-      </Modal> 
+    {/* Order Meta */}
+    <div className="grid grid-cols-2 gap-4 text-sm">
+      <p><strong>Order ID:</strong> #{editOrder?.id}</p>
+      <p><strong>Order Date:</strong> {editOrder?.date}</p>
+      <p>
+        <strong>Status:</strong>{" "}
+        <span className={`px-2 py-1 rounded text-white text-xs
+          ${editOrder?.status === "Delivered" && "bg-green-500"}
+          ${editOrder?.status === "Pending" && "bg-yellow-500"}
+          ${editOrder?.status === "Cancelled" && "bg-red-500"}
+          ${editOrder?.status === "Shipped" && "bg-blue-500"}
+        `}>
+          {editOrder?.status}
+        </span>
+      </p>
+      <p><strong>Payment:</strong> {editOrder?.paymentMethod || "Cash on Delivery"}</p>
+    </div>
+
+    {/* Product Section */}
+    <div className="border-t pt-4 space-y-4">
+
+      <h3 className="font-semibold text-lg">Products</h3>
+
+      {editOrder?.products?.map((product, index) => (
+        <div
+          key={index}
+          className="flex gap-4 border rounded-lg p-3 items-center"
+        >
+          {/* Product Image */}
+          <img
+            src={product.image || "/product-placeholder.png"}
+            alt={product.name}
+            className="w-20 h-20 object-cover rounded border"
+          />
+
+          {/* Product Info */}
+          <div className="flex-1 space-y-1 text-sm">
+            <p className="font-medium">{product.name}</p>
+            <p className="text-gray-500">Product ID: {product.id}</p>
+            <p className="text-gray-500">
+              Category: {product.category || "General"}
+            </p>
+            <p className="text-gray-500">
+              Quantity: {product.quantity || 1}
+            </p>
+          </div>
+
+          {/* Price */}
+          <div className="text-right text-sm">
+            <p className="font-semibold">
+              Rs. {product.price?.toLocaleString()}
+            </p>
+            <p className="text-gray-500 text-xs">per item</p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Order Summary */}
+    <div className="border-t pt-4 space-y-2 text-sm">
+      <div className="flex justify-between">
+        <span>Subtotal</span>
+        <span>Rs. {editOrder?.subtotal?.toLocaleString()}</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Delivery Charge</span>
+        <span>Rs. {editOrder?.deliveryCharge || 0}</span>
+      </div>
+      <div className="flex justify-between font-semibold text-base">
+        <span>Total</span>
+        <span>Rs. {editOrder?.total?.toLocaleString()}</span>
+      </div>
+    </div>
+
+  </div>
+</Modal>
+
       {/* REVIEW MODAL */}
       <Modal
         title={`Review Product - ${editReview?.id}`}

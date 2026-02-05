@@ -135,8 +135,8 @@ const handleDelete = (id) => {
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.name}>
-                {cat.name}
+              <option key={cat.id} value={cat.catrgory}>
+                {cat.category}
               </option>
             ))}
           </select>
@@ -183,7 +183,7 @@ const handleDelete = (id) => {
                 {/* Image */}
                 <td className="px-6 py-4">
                   <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-100">
-                    <Image
+                    <img
                       src={product.mainImage || "/no-image.png"}
                       alt={product.name}
                       fill

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import fs from "fs";
 import path from "path";
+import { GET_UPLOAD_BASE_DIR } from "@/utils/imageUpload";
 
 export async function DELETE(
   req: Request,
@@ -42,8 +43,7 @@ export async function DELETE(
     /* ---------- DELETE IMAGE ---------- */
     if (banner.imageUrl) {
       const imagePath = path.join(
-        process.cwd(),
-        "public",
+        GET_UPLOAD_BASE_DIR,
         banner.imageUrl
       );
 

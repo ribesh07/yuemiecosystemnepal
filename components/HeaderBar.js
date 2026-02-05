@@ -168,23 +168,12 @@ export default function Header() {
               >
                 ABOUT US
               </a>
-              <div className="relative group">
-                <button className="flex items-center space-x-1 text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors">
-                  <span>PRODUCT</span>
-                  <ChevronDown size={16} />
-                </button>
-                <div className="absolute top-full text-[14px] left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg  z-50 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  {products.map((product, index) => (
-                    <a
-                      key={index}
-                      href={product.href}
-                      className="block px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-500 hover:underline  "
-                    >
-                      {product.name}
-                    </a>
-                  ))}
-                </div>
-              </div>
+              <a
+                href="/all-product"
+                className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors"
+              >
+                BROWSE PRODUCT
+              </a>
               <a
                 href="/contact"
                 className="text-gray-700 font-bold hover:text-orange-500 hover:underline cursor-pointer transition-colors"
