@@ -21,7 +21,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+ 
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https", //for server host for local change to http
@@ -32,6 +34,12 @@ const nextConfig: NextConfig = {
         protocol: "http", //for server host for local change to http
         hostname: "localhost", //for server host for local change api url
         port: "3000",
+        pathname: "/**",
+      },
+      {
+        protocol: "http", //for server host for local change to http
+        hostname: "localhost", //for server host for local change api url
+        port: "4445",
         pathname: "/**",
       },
       {

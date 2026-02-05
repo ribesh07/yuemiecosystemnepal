@@ -1,36 +1,43 @@
-const { createServer } = require("http");
-const { parse } = require("url");
 const next = require("next");
+const express = require("express");
 
 const dev = process.env.NODE_ENV !== "production";
-// console.log(dev)
-const hostname = "localhost";
 const port = process.env.PORT || 4445;
+const hostname = "localhost";
+
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
-  createServer(async (req, res) => {
-    try {
-      const parsedUrl = parse(req.url, true);
-      const { pathname, query } = parsedUrl;
+  const server = express();
 
-      if (pathname === "/a") {
-        await app.render(req, res, "/a", query);
-      } else if (pathname === "/b") {
-        await app.render(req, res, "/b", query);
-      } else if (pathname === "/") {
-        await app.render(req, res, "/home", query);
-      } else {
-        await handle(req, res, parsedUrl);
-      }
-    } catch (err) {
-      // console.error("Error occurred handling", req.url, err);
-      res.statusCode = 500;
-      res.end("internal server error");
-    }
-  }).listen(port, (err) => {
-    if (err) throw err;
+  // ✅ Serve uploaded files
+ server.use(
+  "/uploads",
+  express.static("/var/www/yuemi/uploads", {
+    maxAge: "7d",
+    immutable: false,
+  })
+);
+
+  // (optional) custom routes
+  server.get("/", (req, res) => {
+    return app.render(req, res, "/home");
+  });
+
+  server.get("/a", (req, res) => {
+    return app.render(req, res, "/a");
+  });
+
+  server.get("/b", (req, res) => {
+    return app.render(req, res, "/b");
+  });
+
+  // ✅ Everything else → Next.js
+  server.use((req, res) => {
+    return handle(req, res);
+  });
+  server.listen(port, () => {
     console.log(`> Ready on http://${hostname}:${port}`);
   });
 });

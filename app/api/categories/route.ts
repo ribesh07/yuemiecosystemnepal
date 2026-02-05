@@ -7,6 +7,7 @@ import { requireAdminRole } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
 import { serializeBigInt } from "@/lib/serializeBigInt";
+import { GET_UPLOAD_BASE_DIR, UPLOAD_BASE_DIR } from "@/utils/imageUpload";
 
 export async function GET(req: Request) {
   try {
@@ -69,7 +70,7 @@ export async function POST(req: Request) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const uploadDir = path.join(process.cwd(), "public/uploads/categories");
+      const uploadDir = path.join(UPLOAD_BASE_DIR, "categories");
       console.log("upload dir: " , uploadDir);
 
       if (!fs.existsSync(uploadDir)) {
@@ -101,7 +102,7 @@ export async function POST(req: Request) {
         });
   } catch (error) {
      if (imagePath) {
-    const filePath = path.join(process.cwd(), "public", imagePath);
+    const filePath = path.join(GET_UPLOAD_BASE_DIR, imagePath);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
