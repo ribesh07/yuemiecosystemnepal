@@ -75,7 +75,7 @@ export default function CarAccessoriesGallery() {
   const [accessories , setaccessories] = useState(accessoriesoffline)
 
   const handleImageClick = (item) => {
-  router.push(`/productlist?categoryId=${item.categoryId}`);
+  router.push(`/cate-productlist?categoryId=${item.categoryId}`);
 };
 
 // const fetchCategories = async () => {
