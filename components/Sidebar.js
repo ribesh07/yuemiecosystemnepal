@@ -110,7 +110,7 @@ export default function Sidebar({ filters, setFilters }) {
       </div>
 
       {/* Scrollable Content */}
-      <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
+      <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar ">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -270,7 +270,7 @@ export default function Sidebar({ filters, setFilters }) {
         </div>
 
         {/* Promotion Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <button
             onClick={() => toggleSection("promo")}
             className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
@@ -354,7 +354,7 @@ export default function Sidebar({ filters, setFilters }) {
               ))}
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Price Range Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
