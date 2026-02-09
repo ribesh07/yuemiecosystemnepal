@@ -7,7 +7,7 @@ const products = [
     category: "PPF",
     price: 540,
     promo: "discount",
-    image: "/products/p1.jpg",
+    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2026-01-12at11.13.32.jpg?v=1768370208",
   },
   {
     id: 2,
@@ -15,7 +15,7 @@ const products = [
     category: "I Series Tint Film",
     price: 4500,
     promo: "wholesale",
-    image: "/products/p2.jpg",
+    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2026-01-10at19.20.14.jpg?v=1768378204",
   },
   {
     id: 3,
@@ -23,7 +23,7 @@ const products = [
     category: "M Series Tint Film",
     price: 4200,
     promo: "addon",
-    image: "/products/p3.jpg",
+    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2025-06-12at12.11.25.jpg?v=1749808876",
   },
   {
     id: 4,
@@ -31,7 +31,7 @@ const products = [
     category: "E Series Tint Film",
     price: 3800,
     promo: "discount",
-    image: "/products/p4.jpg",
+    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2025-05-10at12.21.45_1.jpg?v=1746869508",
   },
 ];
 

@@ -26,12 +26,12 @@ export default function Sidebar({ filters, setFilters }) {
   });
 
   const categories = [
-    { name: "Y Series Tint Film", count: 24, icon: "🎨" },
-    { name: "U Series Tint Film", count: 18, icon: "🌟" },
-    { name: "E Series Tint Film", count: 32, icon: "⚡" },
-    { name: "M Series Tint Film", count: 15, icon: "💎" },
-    { name: "I Series Tint Film", count: 21, icon: "✨" },
-    { name: "PPF", count: 12, icon: "🛡️" },
+    { name: "Amplifier", count: 24, icon: "🎨" },
+    { name: "Led-lights", count: 18, icon: "🌟" },
+    { name: "Car-safety", count: 32, icon: "⚡" },
+    { name: "Accessories", count: 15, icon: "💎" },
+    { name: "Car-infotainment-system", count: 21, icon: "✨" },
+    { name: "Car-care-protection", count: 12, icon: "🛡️" },
   ];
 
   const sortOptions = [
