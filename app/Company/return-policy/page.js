@@ -1,27 +1,15 @@
 export default function ReturnPolicy() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Your Store</h1>
-            <nav className="hidden md:flex space-x-8 text-sm">
-              <a href="/shop" className="text-gray-600 hover:text-gray-900">Shop</a>
-              <a href="/about" className="text-gray-600 hover:text-gray-900">About</a>
-              <a href="/contact" className="text-gray-600 hover:text-gray-900">Contact</a>
-            </nav>
-          </div>
-        </div>
-      </div>
-
+      
+      
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-orange-600 to-red-600 text-white">
         <div className="max-w-6xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
           <div className="relative z-10">
             <h1 className="text-5xl md:text-6xl font-bold mb-4">Return Policy</h1>
             <p className="text-xl text-blue-100 max-w-2xl">
-              Your satisfaction is our priority. Easy returns within 30 days.
+              Your satisfaction is our priority. Easy returns within 7 days.
             </p>
           </div>
         </div>
@@ -39,7 +27,7 @@ export default function ReturnPolicy() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-2">30 Days</h3>
+            <h3 className="text-3xl font-bold text-gray-900 mb-2">7 Days</h3>
             <p className="text-gray-600">Return Window</p>
           </div>
           
@@ -205,20 +193,20 @@ export default function ReturnPolicy() {
             Our customer service team is here to assist you with any questions about returns or refunds.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="mailto:support@example.com" className="inline-flex items-center px-8 py-4 bg-white text-orange-600 rounded-full font-semibold hover:bg-blue-50 transition-colors">
+            <a href="mailto:yuemiecosystemnepal@gmail.com" className="inline-flex items-center px-8 py-4 bg-white text-orange-600 rounded-full font-semibold hover:bg-blue-50 transition-colors">
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               Email Support
             </a>
-            <a href="tel:1-800-123-4567" className="inline-flex items-center px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-colors">
+            <a href="tel:9802341806" className="inline-flex items-center px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-colors">
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
-              1-800-123-4567
+              9802341806
             </a>
           </div>
-          <p className="text-blue-100 mt-6 text-sm">Monday-Friday, 9AM-6PM EST</p>
+          <p className="text-blue-100 mt-6 text-sm">Sunday-Friday, 9AM-6PM </p>
         </div>
       </div>
 
