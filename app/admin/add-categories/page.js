@@ -89,7 +89,7 @@ export default function AddCategoryPage() {
           </label>
           <input
             type="text"
-            placeholder="e.g. Spices, Masala, Flour"
+            placeholder="Enter category name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full border text-black rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
@@ -102,7 +102,7 @@ export default function AddCategoryPage() {
           <label className="block text-gray-700 font-medium mb-2">Slug</label>
           <input
             type="text"
-            placeholder="e.g. spices, masala"
+            placeholder="Enter slug (optional)"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
             className="w-full border rounded-lg px-4 py-2 text-black outline-none focus:ring-2 focus:ring-blue-500"
