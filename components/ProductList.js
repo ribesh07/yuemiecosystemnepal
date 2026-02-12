@@ -1,81 +1,83 @@
-import Image from "next/image";
+"use client";
 
-const products = [
-  {
-    id: 1,
-    title: "Titanium SunRoof PPF",
-    category: "PPF",
-    price: 540,
-    promo: "discount",
-    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2026-01-12at11.13.32.jpg?v=1768370208",
-  },
-  {
-    id: 2,
-    title: "Large MPV - I Series",
-    category: "I Series Tint Film",
-    price: 4500,
-    promo: "wholesale",
-    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2026-01-10at19.20.14.jpg?v=1768378204",
-  },
-  {
-    id: 3,
-    title: "Mini MPV / SUV - M Series",
-    category: "M Series Tint Film",
-    price: 4200,
-    promo: "addon",
-    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2025-06-12at12.11.25.jpg?v=1749808876",
-  },
-  {
-    id: 4,
-    title: "Large Saloon Car - E Series",
-    category: "E Series Tint Film",
-    price: 3800,
-    promo: "discount",
-    image: "https://yuemiecosystem.com/cdn/shop/files/WhatsAppImage2025-05-10at12.21.45_1.jpg?v=1746869508",
-  },
-];
+import Image from "next/image";
+import { useState, useEffect, useMemo } from "react";
+import { apiRequest } from "@/utils/ApisafeCalls"; // your API helper
 
 export default function ProductList({ filters }) {
-  let filtered = products.filter((p) => {
-    const matchSearch = p.title
-      .toLowerCase()
-      .includes(filters.search.toLowerCase());
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const matchCategory =
-      !filters.category || p.category === filters.category;
+  // =========================
+  // Fetch products from API
+  // =========================
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const result = await apiRequest("/products", false); // GET /api/products
+        const apiProducts = result?.products || [];
 
-    const matchPromo =
-      !filters.promo || p.promo === filters.promo;
+        const mappedProducts = apiProducts.map((p) => ({
+          id: p.id,
+          title: p.name || "Unnamed Product",
+          category: p.categoryName || "Uncategorized",
+          price: Number(p.sellPrice) || 0,
+          promo: p.flashSaleProduct
+            ? "flashSale"
+            : p.todayDeals
+            ? "todayDeals"
+            : p.specialProduct
+            ? "special"
+            : "none",
+          image:
+            p.mainImage ||
+            (p.images?.[0]?.mainImage ? p.images[0].mainImage : "/images/default-product.jpg"),
+        }));
 
-    const matchMin =
-      !filters.minPrice || p.price >= Number(filters.minPrice);
+        setProducts(mappedProducts);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const matchMax =
-      !filters.maxPrice || p.price <= Number(filters.maxPrice);
+    fetchProducts();
+  }, []);
 
-    return (
-      matchSearch &&
-      matchCategory &&
-      matchPromo &&
-      matchMin &&
-      matchMax
-    );
-  });
+  // =========================
+  // Filter & Sort
+  // =========================
+  const filtered = useMemo(() => {
+    let data = [...products];
 
-  // Sorting
-  if (filters.sort === "priceLow") {
-    filtered.sort((a, b) => a.price - b.price);
-  }
-  if (filters.sort === "priceHigh") {
-    filtered.sort((a, b) => b.price - a.price);
+    // Filter
+    data = data.filter((p) => {
+      const matchSearch = p.title.toLowerCase().includes(filters.search?.toLowerCase() || "");
+      const matchCategory = !filters.category || p.category === filters.category;
+      const matchPromo = !filters.promo || p.promo === filters.promo;
+      const matchMin = !filters.minPrice || p.price >= Number(filters.minPrice);
+      const matchMax = !filters.maxPrice || p.price <= Number(filters.maxPrice);
+      return matchSearch && matchCategory && matchPromo && matchMin && matchMax;
+    });
+
+    // Sort
+    if (filters.sort === "priceLow") data.sort((a, b) => a.price - b.price);
+    if (filters.sort === "priceHigh") data.sort((a, b) => b.price - a.price);
+
+    return data;
+  }, [products, filters]);
+
+  if (loading) {
+    return <p className="text-center py-8 text-gray-500">Loading products...</p>;
   }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {filtered.length === 0 && (
-        <p className="col-span-full text-center text-gray-500">
-          No products found.
-        </p>
+        <p className="col-span-full text-center text-gray-500">No products found.</p>
       )}
 
       {filtered.map((product) => (
@@ -84,24 +86,15 @@ export default function ProductList({ filters }) {
           className="border rounded-lg overflow-hidden hover:shadow-lg transition"
         >
           <div className="relative w-full h-48 bg-gray-100">
-            <Image
-              src={product.image}
-              alt={product.title}
-              fill
-              className="object-cover"
-            />
+            <Image src={product.image} alt={product.title} fill className="object-cover" />
           </div>
 
           <div className="p-3 text-center">
-            <h3 className="font-medium text-sm mb-1">
-              {product.title}
-            </h3>
+            <h3 className="font-medium text-sm mb-1">{product.title}</h3>
             <p className="text-orange-600 font-semibold text-sm">
               Rs {product.price.toLocaleString()}
             </p>
-            <p className="text-xs text-gray-500">
-              {product.category}
-            </p>
+            <p className="text-xs text-gray-500">{product.category}</p>
           </div>
         </div>
       ))}

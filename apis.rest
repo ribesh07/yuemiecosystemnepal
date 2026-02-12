@@ -33,7 +33,7 @@ GET http://localhost:3000/api/categories
 Content-Type: application/json
 
 ### get prducts
-GET http://localhost:4445/api/products
+GET http://localhost:3000/api/products
 Content-Type: application/json
 
 # GET http://localhost:3000/api/products/filter?categoryId=1&minPrice=1000&maxPrice=5000&sort=price_desc
