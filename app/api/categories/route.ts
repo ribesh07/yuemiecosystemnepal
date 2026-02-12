@@ -1,26 +1,27 @@
 export const runtime = "nodejs";
 
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
-import { requireAdminRole } from "@/lib/auth";
+// import { requireAdminRole } from "@/lib/auth"; // TEMP disabled for local
 import fs from "fs";
 import path from "path";
 import { serializeBigInt } from "@/lib/serializeBigInt";
-import { GET_UPLOAD_BASE_DIR, UPLOAD_BASE_DIR } from "@/utils/imageUpload";
+
+const LOCAL_UPLOAD_BASE = path.join(process.cwd(), "public", "uploads");
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
 
-    // const status = searchParams.get("status");
-    // const parentId = searchParams.get("parentId");
-    const status = 1;
+    const statusParam = searchParams.get("status");
+    const parentId = searchParams.get("parentId");
+
+    const status = statusParam ? Number(statusParam) : 1;
 
     const categories = await prisma.category.findMany({
       where: {
-        ...(status && { status: Number(status) }),
-        // ...(parentId && { parentId: BigInt(parentId) }),
+        ...(status !== undefined && { status }),
+        ...(parentId && { parentId: BigInt(parentId) }),
       },
       orderBy: {
         createdAt: "desc",
@@ -30,7 +31,8 @@ export async function GET(req: Request) {
     return NextResponse.json({
       success: true,
       data: {
-        categories : serializeBigInt(categories)},
+        categories: serializeBigInt(categories),
+      },
     });
   } catch (error) {
     console.error("CATEGORY_GET_ERROR", error);
@@ -41,13 +43,14 @@ export async function GET(req: Request) {
   }
 }
 
-
-
 export async function POST(req: Request) {
-      let imagePath: string | null = null;
-      let category: any | null = null;
-    try {
-      //   requireAdminRole("ADMIN");     //later use enable
+  let imagePath: string | null = null;
+  let createdCategory: any | null = null;
+
+  try {
+    // if (process.env.NODE_ENV === "production") {
+    //   await requireAdminRole("ADMIN");
+    // }
 
     const formData = await req.formData();
 
@@ -64,18 +67,15 @@ export async function POST(req: Request) {
       );
     }
 
-  
+    // ✅ LOCAL SAFE UPLOAD DIR
+    const uploadDir = path.join(LOCAL_UPLOAD_BASE, "categories");
+    console.log("upload dir:", uploadDir);
+
+    fs.mkdirSync(uploadDir, { recursive: true });
 
     if (file) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-
-      const uploadDir = path.join(UPLOAD_BASE_DIR, "categories");
-      console.log("upload dir: " , uploadDir);
-
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
 
       const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "")}`;
       const fullPath = path.join(uploadDir, fileName);
@@ -85,40 +85,42 @@ export async function POST(req: Request) {
       imagePath = `/uploads/categories/${fileName}`;
     }
 
-     category = await prisma.category.create({
-        data: {
-            category,
-            status: Number(status),
-            parentId: parentId ? BigInt(parentId) : null,
-            top: top ? Number(top) : 0,
-            image: imagePath,
-        },
-        });
+    // ❌ BUG FIX: you had `category,` instead of `name`
+    createdCategory = await prisma.category.create({
+      data: {
+        category: name, // ✅ FIXED
+        status: Number(status),
+        parentId: parentId ? BigInt(parentId) : null,
+        top: top ? Number(top) : 0,
+        image: imagePath,
+      },
+    });
 
     return NextResponse.json({
-        success: true,
-        message: "Category created successfully",
-        data: serializeBigInt(category), 
-        });
+      success: true,
+      message: "Category created successfully",
+      data: serializeBigInt(createdCategory),
+    });
   } catch (error) {
-     if (imagePath) {
-    const filePath = path.join(GET_UPLOAD_BASE_DIR, imagePath);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // 🧹 Cleanup uploaded file if DB failed
+    if (imagePath) {
+      const filePath = path.join(process.cwd(), "public", imagePath);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
-  }
-  if(category){
-    const cleanup = await prisma.category.delete({
-        where : {
-            id : category.id
-        }
-    })
-  }
 
-  console.error("CATEGORY_POST_ERROR", error);
-  return NextResponse.json(
-    { success: false, message: "Category creation failed" },
-    { status: 500 }
-  );
+    // 🧹 Cleanup DB if partially created
+    if (createdCategory) {
+      await prisma.category.delete({
+        where: { id: createdCategory.id },
+      });
+    }
+
+    console.error("CATEGORY_POST_ERROR", error);
+    return NextResponse.json(
+      { success: false, message: "Category creation failed" },
+      { status: 500 }
+    );
   }
 }

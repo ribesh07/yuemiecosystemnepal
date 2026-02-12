@@ -6,6 +6,7 @@ import FeaturedCollections from "@/components/FeaturedCollection";
 import Bestseller from "@/components/BestSeller";
 import Testimonials from "@/components/Testimonials";
 import Support from "@/components/Support";
+import YuemiCategories from "@/components/YuemiCategories";
 
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
     <main>
        <ImageSlider />
        <CarAccessoriesGallery />
+      <YuemiCategories />
        <FeaturedCollections />
        <ImageSlider />
        <Bestseller /> 

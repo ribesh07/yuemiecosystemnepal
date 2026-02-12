@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { apiRequest } from "@/utils/ApisafeCalls"
+import { apiRequest } from "@/utils/ApisafeCalls";
 
 export default function Page() {
   return (
@@ -12,7 +12,7 @@ export default function Page() {
   );
 }
 
- function ProductsPage() {
+function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("categoryId");
@@ -25,31 +25,42 @@ export default function Page() {
   const [priceRange, setPriceRange] = useState("all");
 
   // =========================
-  // FETCH FROM API
+  // FETCH PRODUCTS FROM API
   // =========================
   useEffect(() => {
-  if (!categoryId) return;
+    if (!categoryId) return;
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const result = await apiRequest(`/products/filter?categoryId=${categoryId}`, false);
+        const apiProducts = result?.data?.products || [];
 
-      const result = await apiRequest(
-        `/products/filter?categoryId=${categoryId}`,
-        false
-      );
-      setProducts(result?.data?.products || []);
-    } catch (err) {
-      console.error("Failed to fetch products:", err);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+        // Map API data to the shape your UI expects
+        const mappedProducts = apiProducts.map((p) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          sellPrice: Number(p.sellPrice),
+          actualPrice: Number(p.actualPrice),
+          stockQuantity: Number(p.stockQuantity),
+          availableQuantity: Number(p.availableQuantity),
+          available: Number(p.availableQuantity) > 0,
+          mainImage: p.mainImage || (p.images[0]?.mainImage || "/images/default-product.jpg"),
+          brandName: p.brand?.name || "",
+        }));
 
-  fetchProducts();
-}, [categoryId]);
+        setProducts(mappedProducts);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchProducts();
+  }, [categoryId]);
 
   // =========================
   // CLIENT-SIDE FILTERING
@@ -57,31 +68,21 @@ export default function Page() {
   const filteredProducts = useMemo(() => {
     let data = [...products];
 
+    // Availability filter
     if (availability !== "all") {
-      data = data.filter(
-        (p) => p.available === (availability === "in")
-      );
+      data = data.filter((p) => p.available === (availability === "in"));
     }
 
-    if (priceRange === "low") {
-      data = data.filter((p) => p.price <= 5000);
-    } else if (priceRange === "mid") {
-      data = data.filter(
-        (p) => p.price > 5000 && p.price <= 20000
-      );
-    } else if (priceRange === "high") {
-      data = data.filter((p) => p.price > 20000);
-    }
+    // Price filter
+    if (priceRange === "low") data = data.filter((p) => p.sellPrice <= 5000);
+    else if (priceRange === "mid") data = data.filter((p) => p.sellPrice > 5000 && p.sellPrice <= 20000);
+    else if (priceRange === "high") data = data.filter((p) => p.sellPrice > 20000);
 
-    if (sortBy === "az") {
-      data.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortBy === "za") {
-      data.sort((a, b) => b.name.localeCompare(a.name));
-    } else if (sortBy === "priceLow") {
-      data.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "priceHigh") {
-      data.sort((a, b) => b.price - a.price);
-    }
+    // Sorting
+    if (sortBy === "az") data.sort((a, b) => a.name.localeCompare(b.name));
+    else if (sortBy === "za") data.sort((a, b) => b.name.localeCompare(a.name));
+    else if (sortBy === "priceLow") data.sort((a, b) => a.sellPrice - b.sellPrice);
+    else if (sortBy === "priceHigh") data.sort((a, b) => b.sellPrice - a.sellPrice);
 
     return data;
   }, [products, availability, sortBy, priceRange]);
@@ -90,9 +91,6 @@ export default function Page() {
     router.push(`/product-details?id=${product.id}`);
   };
 
-  // =========================
-  // LOADING STATE
-  // =========================
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-xl font-semibold">
@@ -101,9 +99,6 @@ export default function Page() {
     );
   }
 
-  // =========================
-  // UI (UNCHANGED MOSTLY)
-  // =========================
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Banner */}
@@ -123,7 +118,6 @@ export default function Page() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-10">
           <div className="flex flex-wrap gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-4">
-              {/* Availability */}
               <select
                 className="border px-4 py-2.5 rounded-lg"
                 value={availability}
@@ -134,7 +128,6 @@ export default function Page() {
                 <option value="out">Sold Out</option>
               </select>
 
-              {/* Price */}
               <select
                 className="border px-4 py-2.5 rounded-lg"
                 value={priceRange}
@@ -147,7 +140,6 @@ export default function Page() {
               </select>
             </div>
 
-            {/* Sort */}
             <select
               className="border px-4 py-2.5 rounded-lg"
               value={sortBy}
@@ -179,7 +171,7 @@ export default function Page() {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product, index) => (
+          {filteredProducts.map((product) => (
             <div
               key={product.id}
               onClick={() => handleProductClick(product)}
@@ -192,7 +184,7 @@ export default function Page() {
                   className="w-full h-full object-contain p-6 group-hover:scale-110 transition"
                 />
 
-                {product.available === false && (
+                {!product.available && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <span className="bg-white px-4 py-2 rounded-full font-semibold text-sm">
                       Sold Out
