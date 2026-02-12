@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import RelatedProduct from "../../components/relatedProduct";
+import Link from "next/link";
 
 function RelatedProducts() {
   return <RelatedProduct />;
@@ -217,9 +218,12 @@ export default function ProductDetailPage() {
               <button className="w-full py-4 bg-white border-2 border-gray-900 rounded-full text-gray-900 font-semibold text-lg hover:bg-gray-50 transition-all duration-300 active:scale-98">
                 ADD TO CART
               </button>
-              <button className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full text-white font-semibold text-lg hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-98">
-                BUY IT NOW
-              </button>
+              import Link from "next/link";
+              <Link href="/Checkout">
+                <button className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full text-white font-semibold text-lg hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-98">
+                  BUY IT NOW
+                </button>
+              </Link>
             </div>
 
             {/* Shipping Info */}
