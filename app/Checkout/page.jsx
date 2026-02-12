@@ -1,6 +1,7 @@
 "use client";
 import Image from 'next/image';
 import { useState } from 'react';
+import toast from "react-hot-toast";
 
 const CheckoutPage = () => {
   const [selectedAddress, setSelectedAddress] = useState('');
@@ -57,12 +58,12 @@ const CheckoutPage = () => {
     e.preventDefault();
     
     if (!selectedAddress && !showAddressForm) {
-      alert('Please select or add a delivery address');
+      toast.error('Please select or add a delivery address');
       return;
     }
     
     if (!paymentMethod) {
-      alert('Please select a payment method');
+      toast.error('Please select a payment method');
       return;
     }
 
@@ -71,7 +72,7 @@ const CheckoutPage = () => {
       paymentMethod
     });
     
-    alert('Order placed successfully!');
+    toast.success('Order placed successfully!');
   };
 
   const subtotal = product.price * product.quantity;
