@@ -53,6 +53,24 @@ const CheckoutPage = () => {
       [name]: value
     }));
   };
+    const handleAddAddress = () => {    
+    if (newAddress.label && newAddress.fullName && newAddress.phone && newAddress.address && newAddress.city) {
+        const newId = savedAddresses.length + 1;
+        const newAddressWithId = { ...newAddress, id: newId };
+        savedAddresses.push(newAddressWithId);
+        setSelectedAddress(newAddressWithId);
+        setShowAddressForm(false);
+        setNewAddress({
+          label: '',
+          fullName: '',
+          phone: '',
+          address: '',
+          city: ''
+        });
+      } else {    
+        toast.error('Please fill in all the required fields');
+      }     
+    }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -193,7 +211,7 @@ const CheckoutPage = () => {
                           value={newAddress.fullName}
                           onChange={handleAddressChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
-                          placeholder="John Doe"
+                          placeholder="Enter your full name"
                           required
                         />
                       </div>
@@ -208,7 +226,7 @@ const CheckoutPage = () => {
                           value={newAddress.phone}
                           onChange={handleAddressChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
-                          placeholder="+977 9876543210"
+                          placeholder="+977 98xxxxxxxx"
                           required
                         />
                       </div>
@@ -223,7 +241,7 @@ const CheckoutPage = () => {
                           value={newAddress.address}
                           onChange={handleAddressChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
-                          placeholder="Street, Apartment, Building"
+                          placeholder="Enter full address"
                           required
                         />
                       </div>
@@ -242,6 +260,10 @@ const CheckoutPage = () => {
                           required
                         />
                       </div>
+                      <div className="text-sm text-gray-500 mt-2">
+                        <button onClick={handleAddAddress}  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-semibold text-base sm:text-lg cursor-pointer">Add Address</button>
+                        </div>
+
                     </div>
                   </div>
                 )}

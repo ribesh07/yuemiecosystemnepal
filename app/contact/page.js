@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -42,7 +43,17 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen bg-white py-12 px-4">
+      <div className="relative w-full h-64 md:h-[450px]">
+                <Image
+                  src="/banner.png"
+                  alt="Banner"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
       <div className="max-w-5xl mx-auto">
+        
         {/* Contact Header */}
         <section className="mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-6">Contact</h1>
