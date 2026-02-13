@@ -455,11 +455,11 @@ export default function AllProductPage() {
                     {/* Pricing */}
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-bold text-gray-900">
-                        ₹{product.price.toLocaleString()}
+                        Rs. {product.price.toLocaleString()}
                       </span>
                       {discount > 0 && (
                         <span className="text-xs text-gray-500 line-through">
-                          ₹{product.actualPrice.toLocaleString()}
+                          Rs. {product.actualPrice.toLocaleString()}
                         </span>
                       )}
                     </div>
@@ -553,15 +553,15 @@ export default function AllProductPage() {
                         {/* Pricing */}
                         <div className="flex items-center gap-3">
                           <span className="text-3xl font-bold text-gray-900">
-                            ₹{product.price.toLocaleString()}
+                            Rs. {product.price.toLocaleString()}
                           </span>
                           {discount > 0 && (
                             <>
                               <span className="text-lg text-gray-500 line-through">
-                                ₹{product.actualPrice.toLocaleString()}
+                                Rs. {product.actualPrice.toLocaleString()}
                               </span>
                               <span className="px-2 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded">
-                                Save ₹{(product.actualPrice - product.price).toLocaleString()}
+                                Save Rs. {(product.actualPrice - product.price).toLocaleString()}
                               </span>
                             </>
                           )}

@@ -289,15 +289,15 @@ export default function ProductDetailPage() {
             <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-6 border border-orange-100">
               <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-4xl font-bold text-gray-900">
-                  ₹{Number(product.sellPrice).toLocaleString("en-IN")}
+                  Rs. {Number(product.sellPrice).toLocaleString("en-IN")}
                 </span>
                 {discount > 0 && (
                   <>
                     <span className="text-xl text-gray-500 line-through">
-                      ₹{Number(product.actualPrice).toLocaleString("en-IN")}
+                      Rs. {Number(product.actualPrice).toLocaleString("en-IN")}
                     </span>
                     <span className="px-2 py-1 bg-green-500 text-white text-sm font-bold rounded">
-                      Save ₹{(Number(product.actualPrice) - Number(product.sellPrice)).toLocaleString("en-IN")}
+                      Save Rs. {(Number(product.actualPrice) - Number(product.sellPrice)).toLocaleString("en-IN")}
                     </span>
                   </>
                 )}
@@ -601,7 +601,7 @@ export default function ProductDetailPage() {
                   </svg>
                   <div>
                     <p className="font-medium text-gray-900">Free Shipping</p>
-                    <p className="text-sm text-gray-600">We offer free shipping across India</p>
+                    <p className="text-sm text-gray-600">We offer free shipping across kathmandu valley.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">

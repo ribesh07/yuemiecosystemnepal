@@ -9,7 +9,7 @@ const Bestseller = () => {
       tag: 'Sold out',
       name: 'YuéMi E1 2GB+64GB Multimedia Player with CarPlay AndroidAuto DDR 2GB(DDR4)',
       image: '/categories/pro4.jpg',
-      mrp: '₹15,999.00',
+      mrp: 'Rs. 15,999.00',
       rating: 0,
       isSoldOut: true
     },
@@ -18,7 +18,7 @@ const Bestseller = () => {
       badge: 'YueMi Ecosystem',
       name: 'YuéMi M1 Pro Car Infotainment System 4+64GB(DSP)',
       image: '/categories/pro3.jpg',
-      mrp: '₹24,999.00',
+      mrp: 'Rs. 24,999.00',
       rating: 4.5,
       reviews: 2
     },
@@ -27,7 +27,7 @@ const Bestseller = () => {
       badge: 'YueMi Ecosystem',
       name: 'YuéMi M11 4GB+64GB Digital Knob Car Infotainment System',
       image: '/categories/pro2.jpg',
-      mrp: '₹49,999.00',
+      mrp: 'Rs. 49,999.00',
       rating: 0,
       reviews: 0
     },
@@ -36,7 +36,7 @@ const Bestseller = () => {
       badge: 'YueMi Ecosystem',
       name: 'YuéMi M2 2GB+32 GB Multimedia Player with 360° Birdview Support & DSP (DDR 4 RAM)',
       image: '/categories/pro1.jpg',
-      mrp: '₹29,999.00',
+      mrp: 'Rs. 29,999.00',
       rating: 4.5,
       reviews: 2
     }

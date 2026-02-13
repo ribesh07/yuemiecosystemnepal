@@ -123,7 +123,7 @@ function ProductCard({ product, onClick }) {
 
       {/* Price */}
       <p className="text-base font-semibold text-gray-900">
-        MRP ₹{product.price.toLocaleString("en-IN")}
+        MRP Rs. {product.price.toLocaleString("en-IN")}
       </p>
     </div>
   );

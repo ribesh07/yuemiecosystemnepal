@@ -270,9 +270,9 @@ export default function CategoryProductsPage({
                 className="px-4 py-2 border border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none cursor-pointer"
               >
                 <option value="all">All Prices</option>
-                <option value="low">Under ₹5,000</option>
-                <option value="mid">₹5,000 - ₹20,000</option>
-                <option value="high">Above ₹20,000</option>
+                <option value="low">Under Rs. 5,000</option>
+                <option value="mid">Rs. 5,000 - Rs. 20,000</option>
+                <option value="high">Above Rs. 20,000</option>
               </select>
 
               {/* Availability */}
@@ -396,11 +396,11 @@ export default function CategoryProductsPage({
                     {/* Pricing */}
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-2xl font-bold text-gray-900">
-                        ₹{product.sellPrice.toLocaleString()}
+                        Rs. {product.sellPrice.toLocaleString()}
                       </span>
                       {discount > 0 && (
                         <span className="text-sm text-gray-500 line-through">
-                          ₹{product.actualPrice.toLocaleString()}
+                          Rs. {product.actualPrice.toLocaleString()}
                         </span>
                       )}
                     </div>
