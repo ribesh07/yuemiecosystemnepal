@@ -56,9 +56,12 @@ export async function POST(req: Request) {
 
     const name = formData.get("name") as string;
     const status = formData.get("status") as string;
+    const description = formData.get("description") as string | null;
+    const slug = formData.get("slug") as string | null;
     const parentId = formData.get("parentId") as string | null;
     const top = formData.get("top") as string | null;
     const file = formData.get("image") as File | null;
+    const createdAt = new Date();
 
     if (!name || !status) {
       return NextResponse.json(
@@ -88,7 +91,10 @@ export async function POST(req: Request) {
     // ❌ BUG FIX: you had `category,` instead of `name`
     createdCategory = await prisma.category.create({
       data: {
-        category: name, // ✅ FIXED
+        category: name, 
+        description,
+        // slug,
+        createdAt,
         status: Number(status),
         parentId: parentId ? BigInt(parentId) : null,
         top: top ? Number(top) : 0,
