@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 interface Province {
   id: number;
-  province_name: string;
+  name: string;
 }
 
 interface City {
@@ -17,7 +17,7 @@ interface City {
 
 interface Zone {
   id: number;
-  zone_name: string;
+  zoneName: string;
   cityId: number;
 }
 
@@ -86,7 +86,7 @@ export default function ShippingAdminPage() {
   };
 
   const getProvinceName = (provinceId: number) => {
-    return provinces.find((p) => p.id === provinceId)?.province_name || "N/A";
+    return provinces.find((p) => p.id === provinceId)?.name || "N/A";
   };
 
   const getCityName = (cityId: number) => {
@@ -279,7 +279,8 @@ export default function ShippingAdminPage() {
                             {p.id}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {p.province_name}
+                            {p.name}
+
                           </td>
                         </tr>
                       ))
@@ -359,7 +360,7 @@ export default function ShippingAdminPage() {
                         ID
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zone Name
+                        Local Area Name
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         City, Province
@@ -380,8 +381,8 @@ export default function ShippingAdminPage() {
                             {z.id}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {z.zone_name}
-                          </td>
+                        {z.zoneName}
+                      </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                             {getCityWithProvince(z.cityId)}
                           </td>
