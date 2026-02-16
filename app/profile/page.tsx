@@ -31,7 +31,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
 
-  const [editAddress, setEditAddress] = useState(null);
+  //const [editAddress, setEditAddress] = useState(null);
   const [editProfile, setEditProfile] = useState(false);
   //const [changePassword, setChangePassword] = useState(false);
   const [editChangePassword, setEditChangePassword] = useState(false);
@@ -41,6 +41,63 @@ export default function ProfilePage() {
   const [reviewText, setReviewText] = useState("");
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+
+
+const [addresses, setAddresses] = useState<Address[]>([]);
+const [editAddress, setEditAddress] = useState<Address | null>(null);
+const [provinces, setProvinces] = useState<any[]>([]);
+const [cities, setCities] = useState<any[]>([]);
+const [zones, setZones] = useState<any[]>([]);
+
+
+useEffect(() => {
+  fetchAddresses();
+  fetchProvinces();
+}, []);
+
+const fetchAddresses = async () => {
+  const res = await fetch("/api/customer/addresses");
+  const data = await res.json();
+  setAddresses(data);
+};
+
+const fetchProvinces = async () => {
+  const res = await fetch("/api/admin/provinces");
+  const data = await res.json();
+  setProvinces(data);
+};
+
+{addresses.map((addr) => (
+  <div
+    key={addr.id}
+    className="border rounded-lg p-4 relative"
+  >
+    <button
+      onClick={() => setEditAddress(addr)}
+      className="absolute top-2 right-2 text-xs text-blue-600"
+    >
+      Edit
+    </button>
+
+    <h4 className="font-semibold text-sm">{addr.fullName}</h4>
+
+    <p className="text-sm text-gray-600 mt-2">
+      {addr.zone?.zoneName}, {addr.city?.city} <br />
+      {addr.province?.name} Province <br />
+      {addr.address}
+    </p>
+
+    {addr.defaultShipping && (
+      <span className="text-xs text-green-600 mt-2 inline-block">
+        Default Address
+      </span>
+    )}
+  </div>
+))}
+
+
+
   
   const updateProgress = () => {
     return 65;
@@ -241,39 +298,68 @@ export default function ProfilePage() {
 
     {/* Province */}
     <select
-      className="w-full border rounded px-3 py-2"
-      defaultValue={editAddress?.province}
-    >
-      <option value="">Select Province</option>
-      <option value="Koshi">Koshi Province</option>
-      <option value="Madhesh">Madhesh Province</option>
-      <option value="Bagmati">Bagmati Province</option>
-      <option value="Gandaki">Gandaki Province</option>
-      <option value="Lumbini">Lumbini Province</option>
-      <option value="Karnali">Karnali Province</option>
-      <option value="Sudurpashchim">Sudurpashchim Province</option>
-    </select>
+  value={editAddress?.provinceId || ""}
+  onChange={async (e) => {
+    const provinceId = e.target.value;
+
+    setEditAddress({ ...editAddress!, provinceId, cityId: "", zoneId: "" });
+
+    const res = await fetch(
+      `/api/admin/cities?provinceId=${provinceId}`
+    );
+    const data = await res.json();
+    setCities(data);
+    setZones([]);
+  }}
+  className="w-full border rounded px-3 py-2"
+>
+  <option value="">Select Province</option>
+  {provinces.map((p) => (
+    <option key={p.id} value={p.id}>
+      {p.name}
+    </option>
+  ))}
+</select>
+
 
     {/* District */}
-    <input
-      className="w-full border rounded px-3 py-2"
-      defaultValue={editAddress?.district}
-      placeholder="District (e.g. Kathmandu, Lalitpur, Sunsari)"
-    />
+    <select
+  value={editAddress?.cityId || ""}
+  onChange={async (e) => {
+    const cityId = e.target.value;
+
+    setEditAddress({ ...editAddress!, cityId, zoneId: "" });
+
+    const res = await fetch(`/api/admin/zones?cityId=${cityId}`);
+    const data = await res.json();
+    setZones(data);
+  }}
+  className="w-full border rounded px-3 py-2"
+>
+  <option value="">Select City</option>
+  {cities.map((c) => (
+    <option key={c.id} value={c.id}>
+      {c.city}
+    </option>
+  ))}
+</select>
+
 
     {/* Municipality */}
-    <input
-      className="w-full border rounded px-3 py-2"
-      defaultValue={editAddress?.municipality}
-      placeholder="Municipality / Rural Municipality"
-    />
-
-    {/* Ward */}
-    <input
-      className="w-full border rounded px-3 py-2"
-      defaultValue={editAddress?.ward}
-      placeholder="Ward No."
-    />
+    <select
+  value={editAddress?.zoneId || ""}
+  onChange={(e) =>
+    setEditAddress({ ...editAddress!, zoneId: e.target.value })
+  }
+  className="w-full border rounded px-3 py-2"
+>
+  <option value="">Select Area / Zone</option>
+  {zones.map((z) => (
+    <option key={z.id} value={z.id}>
+      {z.zoneName}
+    </option>
+  ))}
+</select>
 
     {/* Area / Tole */}
     <input
@@ -289,9 +375,23 @@ export default function ProfilePage() {
       placeholder="Postal Code (Optional)"
     />
 
-    <button className="w-full bg-orange-500 text-white py-2 rounded hover:bg-red-600">
-      Save Delivery Address
-    </button>
+   <button
+  type="button"
+  onClick={async () => {
+    await fetch(`/api/customer/addresses/${editAddress?.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editAddress),
+    });
+
+    setEditAddress(null);
+    fetchAddresses();
+  }}
+  className="w-full bg-orange-500 text-white py-2 rounded"
+>
+  Save Delivery Address
+</button>
+
   </form>
 </Modal>
 

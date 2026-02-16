@@ -99,9 +99,9 @@ const SideHeaderBar = () => {
       path: "#",
       expandable: true,
       children: [
-        { name: "Manage provinces", path: "/admin/address/countries" },
-        { name: "Set City", path: "/admin/address/states" },
-        { name: "Set Local Area", path: "/admin/address/cities" },
+        { name: "Set Address & Shipping", path: "/admin/shipping" },
+        { name: "Manage Address & Shipping", path: "/admin/shipping/manage" },
+        
       ],
      },
 
