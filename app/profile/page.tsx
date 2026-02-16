@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+
 /* -------------------- MODAL COMPONENT -------------------- */
 function Modal({ title, isOpen, onClose, children }) {
   if (!isOpen) return null;
@@ -322,7 +323,7 @@ const fetchProvinces = async () => {
 </select>
 
 
-    {/* District */}
+    {/* City */}
     <select
   value={editAddress?.cityId || ""}
   onChange={async (e) => {
@@ -345,7 +346,7 @@ const fetchProvinces = async () => {
 </select>
 
 
-    {/* Municipality */}
+    {/* Area / Zone */}
     <select
   value={editAddress?.zoneId || ""}
   onChange={(e) =>

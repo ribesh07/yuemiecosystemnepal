@@ -24,7 +24,7 @@ function Page() {
           <div className="grid md:grid-cols-2 gap-14 items-center mb-28">
             <div className="relative w-full h-64 md:h-96">
               <Image
-                src="/Group_1_1_2.webp"
+                src="/pro17.jpg"
                 alt="Premium Dental Chair"
                 fill
                 className="object-cover rounded-xl shadow-lg"
