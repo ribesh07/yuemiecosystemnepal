@@ -63,7 +63,7 @@ const ContactPage = () => {
           </p>
 
           <div className="space-y-2 text-gray-700">
-            <p className="font-medium">Autozone Private Limited</p>
+            <p className="font-medium">Autozone Traders</p>
             <p>
               <span className="font-semibold">Address:</span> Universiry RD, Kuleshwor-14, kathmandu, Nepal
             </p>
@@ -180,7 +180,7 @@ const ContactPage = () => {
 
           <div className="mt-4 text-sm text-gray-600">
             <p>
-              <strong>Autozone Private Limited</strong>
+              <strong>Autozone Traders</strong>
             </p>
             <p>Universiry RD, Kuleshwor-14, Kathmandu</p>
             <p>Nepal</p>
