@@ -30,18 +30,25 @@ export default function ProfileInfo() {
   const [address, setAddress] = useState(null);
   const [editAddress, setEditAddress] = useState(false);
 
+  useEffect(() => {
+    setUser({
+      name: "Gyanendra Sah",
+      email: "gyanendra@email.com",
+      phone: "+977-98XXXXXXXX",
+      avatar: "/employee.jpeg",
+    });
+  }, []);
 
- useEffect(() => {
-  setUser({
-    name: "Gyanendra Sah",
-    email: "gyanendra@email.com",
-    phone: "+977-98XXXXXXXX",
-    avatar: "/avatar-placeholder.png",
-  });
-
- 
-}, []);
-
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUser((prev) => ({ ...prev, avatar: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   if (!user) return null;
 
@@ -66,9 +73,6 @@ export default function ProfileInfo() {
         Edit Profile
       </button>
 
-     
-
-
       {/* Edit Profile Modal */}
       <Modal
         title="Edit Profile"
@@ -89,15 +93,16 @@ export default function ProfileInfo() {
           />
 
           <input
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2 bg-gray-100"
             defaultValue={user.phone}
-            placeholder="Phone"
+            disabled
           />
 
           <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
             className="w-full border rounded px-3 py-2"
-            defaultValue={user.avatar}
-            placeholder="Avatar URL"
           />
 
           <button className="w-full bg-orange-500 text-white py-2 rounded">
@@ -107,8 +112,6 @@ export default function ProfileInfo() {
       </Modal>
 
       {/* Address Modal */}
-
-
     </div>
   );
 }

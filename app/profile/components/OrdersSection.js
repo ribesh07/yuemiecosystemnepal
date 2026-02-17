@@ -71,6 +71,14 @@ export default function OrdersSection() {
       >
         <p>Status: {editOrder?.status}</p>
         <p>Total: {editOrder?.total}</p>
+        <p>Date: {editOrder?.date}</p>
+        <p className="mt-2">Product: {editOrder?.product}</p>
+        <button
+          onClick={() => setEditOrder(null)}
+          className="mt-4 bg-gray-200 hover:bg-red-400 px-4 py-2 rounded"
+        >
+           Close
+        </button>
       </Modal>
     </div>
   );
