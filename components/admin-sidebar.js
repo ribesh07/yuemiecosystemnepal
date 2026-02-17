@@ -80,15 +80,9 @@ const SideHeaderBar = () => {
     {
       icon: ShoppingCart,
       label: "Manage Orders",
-      path: "#",
-      expandable: true,
-      children: [
-        { name: "Processing Orders", path: "/admin/orders" },
-        { name: "Shipped Orders", path: "/admin/orders?status=pending" },
-        { name: "Delivered Orders", path: "/admin/orders?status=completed" },
-        { name: "Cancelled Orders", path: "/admin/orders?status=cancelled" },
-        { name: "Returned Orders", path: "/admin/orders?status=returned" },
-      ],
+      path: "/admin/ordermanagement",
+      
+    
     },
 
     

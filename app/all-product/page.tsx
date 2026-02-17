@@ -59,7 +59,7 @@ export default function AllProductPage() {
           categoryId: p.categoryId || "",
           price: Number(p.sellPrice) || 0,
           actualPrice: Number(p.actualPrice) || 0,
-          image: p.mainImage || p.images?.[0]?.mainImage || "/images/default-product.jpg",
+          image: p.mainImage || p.images?.[0]?.mainImage || "/yumei_logo.png",
           brandName: p.brandName || "",
           available: Number(p.availableQuantity) > 0,
           availableQuantity: Number(p.availableQuantity) || 0,
@@ -76,7 +76,7 @@ export default function AllProductPage() {
         const mappedCategories: Category[] = apiCategories.map((c: any) => ({
           id: c.id,
           category: c.category,
-          image: c.image || "/images/default-category.jpg",
+          image: c.image || "/yumei_logo.png",
         }));
 
         setCategories(mappedCategories);
