@@ -161,7 +161,7 @@ export default function ShippingAdminPage() {
                     <option value="">Select Province</option>
                     {provinces.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.province_name}
+                        {p.name}
                       </option>
                     ))}
                   </select>
