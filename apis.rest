@@ -60,3 +60,8 @@ title=Hi Popup
 &isActive=1
 
 
+### provinces
+GET http://localhost:3000/api/admin/provinces
+Content-Type: application/json
+
+

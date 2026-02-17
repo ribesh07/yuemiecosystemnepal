@@ -1,21 +1,35 @@
-import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { prisma } from "@/prisma/prisma-client";
 
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-export async function GET(req: Request) {
-  const userId = 1; // replace with real session user id
+export async function POST(req) {
+  try {
+    const body = await req.json();
 
-  const addresses = await prisma.customerAddress.findMany({
-    where: { customerId: BigInt(userId) },
-    include: {
-      province: true,
-      city: true,
-      zone: true,
-    },
-  });
+    const address = await prisma.customerAddress.create({
+      data: {
+        customerId: BigInt(body.customerId),
+        fullName: body.fullName,
+        phone: body.phone,
+        provinceId: BigInt(body.provinceId),
+        cityId: BigInt(body.cityId),
+        zoneId: BigInt(body.zoneId),
+        address: body.address,
+        landmark: body.landmark,
+        addressType: body.addressType || "HOME",
+        defaultShipping: body.defaultShipping || false,
+        defaultBilling: body.defaultBilling || false,
+      },
+    });
 
-  return NextResponse.json(addresses);
+    return new Response(JSON.stringify(address), { status: 200 });
+  } catch (error) {
+    console.error("Error creating address:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to create address" }),
+      { status: 500 }
+    );
+  }
 }
