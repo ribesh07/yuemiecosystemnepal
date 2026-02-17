@@ -532,36 +532,7 @@ function ExportModal({ onClose }) {
   );
 }
 
-// ─── BULK BAR ─────────────────────────────────────────────────────────────────
-function BulkBar({ count, onBulkStatus, onClear }) {
-  if(!count)return null;
-  const acts=[
-    {l:"⚙️ Processing",s:"processing",c:C.processing.color,bg:C.processing.bg,bd:C.processing.border},
-    {l:"🚚 Shipped",   s:"shipped",   c:C.shipped.color,   bg:C.shipped.bg,   bd:C.shipped.border},
-    {l:"✅ Delivered", s:"delivered", c:C.delivered.color, bg:C.delivered.bg, bd:C.delivered.border},
-    {l:"✕ Cancel",    s:"cancelled", c:C.cancelled.color, bg:C.cancelled.bg, bd:C.cancelled.border},
-    {l:"↩ Return",    s:"returns",   c:C.returns.color,   bg:C.returns.bg,   bd:C.returns.border},
-  ];
-  return(
-    <div style={{position:"fixed",bottom:"22px",left:"50%",transform:"translateX(-50%)",background:C.surface,border:`2px solid ${C.primary}`,borderRadius:"16px",padding:"12px 18px",display:"flex",alignItems:"center",gap:"10px",boxShadow:`0 8px 32px ${C.primary}30`,zIndex:500,animation:"bulkInL 0.3s cubic-bezier(0.34,1.56,0.64,1)",flexWrap:"wrap"}}>
-      <div style={{display:"flex",alignItems:"center",gap:"7px"}}>
-        <div style={{background:C.primary,color:"#fff",borderRadius:"50%",width:"26px",height:"26px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"800"}}>{count}</div>
-        <span style={{color:C.text,fontSize:"12px",fontWeight:"700"}}>selected</span>
-      </div>
-      <div style={{width:"1px",height:"22px",background:C.border}}/>
-      <div style={{display:"flex",gap:"5px",flexWrap:"wrap"}}>
-        {acts.map(a=>(
-          <button key={a.s} onClick={()=>onBulkStatus(a.s)} style={{background:a.bg,border:`1.5px solid ${a.bd}`,borderRadius:"9px",padding:"6px 11px",color:a.c,fontSize:"11px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}
-            onMouseEnter={e=>{e.currentTarget.style.background=a.c;e.currentTarget.style.color="#fff";}}
-            onMouseLeave={e=>{e.currentTarget.style.background=a.bg;e.currentTarget.style.color=a.c;}}
-          >{a.l}</button>
-        ))}
-      </div>
-      <div style={{width:"1px",height:"22px",background:C.border}}/>
-      <button onClick={onClear} style={{background:C.surfaceAlt,border:`1.5px solid ${C.border}`,borderRadius:"8px",padding:"6px 12px",color:C.textMid,fontSize:"11px",cursor:"pointer",fontFamily:"inherit"}}>Clear</button>
-    </div>
-  );
-}
+
 
 // ─── PAGINATION ───────────────────────────────────────────────────────────────
 function Pager({ cur, total, onPage, totalItems, pp }) {
@@ -724,18 +695,15 @@ export default function App() {
         {/* Pagination */}
         {totalPg>1&&<Pager cur={page} total={totalPg} onPage={p=>{setPage(p);setSel([]);}} totalItems={filtered.length} pp={PP}/>}
 
-        {/* Footer */}
-        <div style={{marginTop:"24px",textAlign:"center",color:C.textSoft,fontSize:"11px"}}>
-          OrderHub Admin · {new Date().getFullYear()} · <span style={{color:C.primary,fontWeight:"600"}}>v2.1.0</span>
-        </div>
+        
       </div>
 
       {/* Modals */}
       {activeO&&<DetailModal order={activeO} onClose={()=>setActiveO(null)} onStatus={onStatusChange}/>}
       {showExp&&<ExportModal onClose={()=>setShowExp(false)}/>}
 
-      {/* Bulk bar */}
-      <BulkBar count={sel.length} onBulkStatus={onBulk} onClear={()=>setSel([])}/>
+      
+      
 
       {/* Toast notification */}
       {notif&&(
