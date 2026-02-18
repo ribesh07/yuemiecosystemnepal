@@ -1,13 +1,14 @@
 import { prisma } from "@/prisma/prisma-client";
 import { NextResponse, NextRequest } from "next/server";
+import type { RouteHandler } from "next/dist/server/app-render";
 
+// Fix BigInt JSON
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
-  const { params } = context;
-
+// Type-safe PUT handler
+export const PUT: RouteHandler = async (req: NextRequest, { params }: { params: { id: string } }) => {
   try {
     const { city, shippingCost, applyShipping, provinceId } = await req.json();
 
@@ -38,11 +39,10 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
     console.error("Error updating city:", error);
     return NextResponse.json({ error: "Failed to update city" }, { status: 500 });
   }
-}
+};
 
-export async function DELETE(_: NextRequest, context: { params: { id: string } }) {
-  const { params } = context;
-
+// Type-safe DELETE handler
+export const DELETE: RouteHandler = async (_: NextRequest, { params }: { params: { id: string } }) => {
   try {
     const zonesCount = await prisma.addressZone.count({
       where: { cityId: BigInt(params.id) },
@@ -61,4 +61,4 @@ export async function DELETE(_: NextRequest, context: { params: { id: string } }
     console.error("Error deleting city:", error);
     return NextResponse.json({ error: "Failed to delete city" }, { status: 500 });
   }
-}
+};
