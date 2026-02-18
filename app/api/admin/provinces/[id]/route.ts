@@ -1,15 +1,15 @@
 import { prisma } from "@/prisma/prisma-client";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
+import type { RouteHandler } from "next/dist/server/app-render";
 
+// Fix BigInt JSON
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export const PUT: RouteHandler = async (req: NextRequest, context) => {
   try {
+    const params = await context.params; // ✅ unwrap params
     const { name } = await req.json();
 
     const updatedProvince = await prisma.province.update({
@@ -22,27 +22,21 @@ export async function PUT(
 
     return NextResponse.json(updatedProvince);
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to update province" },
-      { status: 500 }
-    );
+    console.error("Error updating province:", error);
+    return NextResponse.json({ error: "Failed to update province" }, { status: 500 });
   }
-}
+};
 
-export async function DELETE(
-  _: Request,
-  { params }: { params: { id: string } }
-) {
+export const DELETE: RouteHandler = async (_: NextRequest, context) => {
   try {
+    const params = await context.params; // ✅ unwrap params
     await prisma.province.delete({
       where: { id: BigInt(params.id) },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to delete province" },
-      { status: 500 }
-    );
+    console.error("Error deleting province:", error);
+    return NextResponse.json({ error: "Failed to delete province" }, { status: 500 });
   }
-}
+};
