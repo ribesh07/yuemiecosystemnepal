@@ -1,14 +1,20 @@
 import { prisma } from "@/prisma/prisma-client";
+import { NextResponse, NextRequest } from "next/server";
+import type { RouteHandler } from "next/dist/server/app-render";
 
+// BigInt JSON fix
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-export async function POST(req) {
+// PUT handler
+export const PUT: RouteHandler = async (req: NextRequest, context) => {
   try {
+    const params = await context.params; // ✅ unwrap params
     const body = await req.json();
 
-    const address = await prisma.customerAddress.create({
+    const updatedAddress = await prisma.customerAddress.update({
+      where: { id: BigInt(params.id) },
       data: {
         customerId: BigInt(body.customerId),
         fullName: body.fullName,
@@ -21,15 +27,29 @@ export async function POST(req) {
         addressType: body.addressType || "HOME",
         defaultShipping: body.defaultShipping || false,
         defaultBilling: body.defaultBilling || false,
+        updatedAt: new Date(),
       },
     });
 
-    return new Response(JSON.stringify(address), { status: 200 });
+    return NextResponse.json(updatedAddress);
   } catch (error) {
-    console.error("Error creating address:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to create address" }),
-      { status: 500 }
-    );
+    console.error("Error updating address:", error);
+    return NextResponse.json({ error: "Failed to update address" }, { status: 500 });
   }
-}
+};
+
+// DELETE handler
+export const DELETE: RouteHandler = async (_: NextRequest, context) => {
+  try {
+    const params = await context.params; // ✅ unwrap params
+
+    await prisma.customerAddress.delete({
+      where: { id: BigInt(params.id) },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting address:", error);
+    return NextResponse.json({ error: "Failed to delete address" }, { status: 500 });
+  }
+};
