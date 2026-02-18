@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from "next/server";
 import type { RouteHandler } from "next/dist/server/app-render";
 
 // BigInt JSON fix
-BigInt.prototype.toJSON = function () {
+(BigInt.prototype as any).toJSON = function () {
   return this.toString();
 };
 

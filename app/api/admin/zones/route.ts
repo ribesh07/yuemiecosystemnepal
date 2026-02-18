@@ -1,9 +1,10 @@
 import { prisma } from "@/prisma/prisma-client";
 import { NextResponse } from "next/server";
 
-BigInt.prototype.toJSON = function () {
+(BigInt.prototype as any).toJSON = function () {
   return this.toString();
 };
+
 
 export async function GET() {
   const zones = await prisma.addressZone.findMany({
