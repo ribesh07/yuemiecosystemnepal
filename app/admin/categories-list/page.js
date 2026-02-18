@@ -88,7 +88,8 @@ export default function CategoriesListPage() {
               categories.map((cat) => (
                 <tr key={cat.id} className="hover:bg-gray-50">
                   <td className="px-4 py-2 border-b">{cat.id}</td>
-                  <td className="px-4 py-2 border-b">{cat.name}</td>
+                  {/* <td className="px-4 py-2 border-b">{cat.}</td> */}
+                  <td className="px-4 py-2 border-b">{cat.category}</td>
                   <td className="px-4 py-2 border-b">{cat.slug}</td>
                   <td className="px-4 py-2 border-b">{cat.description}</td>
                   <td className="px-4 py-2 border-b">
@@ -102,7 +103,7 @@ export default function CategoriesListPage() {
                       "No Image"
                     )}
                   </td>
-                  <td className="px-4 py-2 border-b">{new Date(cat.created_at).toLocaleString()}</td>
+                  <td className="px-4 py-2 border-b">{new Date(cat.createdAt).toLocaleString()}</td>
                   <td className="px-4 py-2 border-b text-center space-x-2">
                     <button
                       onClick={() => alert(JSON.stringify(cat, null, 2))}

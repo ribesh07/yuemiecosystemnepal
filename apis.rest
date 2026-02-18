@@ -29,17 +29,17 @@ GET http://localhost:3000/api/users/me
 GET https://yuemi.com.np/api/products
 
 ### get categories
-GET http://localhost:4445/api/categories
+GET http://localhost:3000/api/categories
 Content-Type: application/json
 
 ### get prducts
-GET http://localhost:4445/api/products
+GET http://localhost:3000/api/products
 Content-Type: application/json
 
 # GET http://localhost:3000/api/products/filter?categoryId=1&minPrice=1000&maxPrice=5000&sort=price_desc
 
 ### get prducts filter
-GET http://localhost:4445/api/products/filter?categoryId=1
+GET http://localhost:3000/api/products/filter?categoryId=4
 Content-Type: application/json
 
 ### get banners
@@ -58,5 +58,10 @@ title=Hi Popup
 &colorCode=%23FF5733
 &position=1
 &isActive=1
+
+
+### provinces
+GET http://localhost:3000/api/admin/provinces
+Content-Type: application/json
 
 

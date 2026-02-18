@@ -3,21 +3,16 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { serializeBigInt } from "@/lib/serializeBigInt";
-import { randomCode } from "@/lib/randomCode";
-import {
-  getProductImageDir,
-  getPublicImageUrl,
-} from "@/utils/imageUpload";
+import { getProductImageDir } from "@/utils/imageUpload";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
-
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    console.log(formData)
 
+    // --- Required product fields ---
     const name = formData.get("name")?.toString();
     const productCode = formData.get("productCode")?.toString();
     const slug = formData.get("slug")?.toString() || null;
@@ -27,16 +22,14 @@ export async function POST(req: Request) {
     const warranty = formData.get("warranty")?.toString() || null;
     const categoryId = formData.get("categoryId")?.toString() || null;
     const categoryName = formData.get("categoryName")?.toString() || null;
-    const brandId = formData.get("brandId")?.toString() || null;
-    const brandName= formData.get("brandName")?.toString() || null;
     const actualPrice = formData.get("actualPrice")?.toString();
     const sellPrice = formData.get("sellingPrice")?.toString();
     const discount = formData.get("discount")?.toString() || "0";
     const stockQuantity = formData.get("stockQuantity")?.toString();
     const availableQuantity = formData.get("availableQuantity")?.toString();
     const status = formData.get("status")?.toString();
-    const raw = formData.get("deliveryTargetDays")?.toString()
-    const deliveryTargetDays = raw ? Number(raw) : null
+    const raw = formData.get("deliveryTargetDays")?.toString();
+    const deliveryTargetDays = raw ? Number(raw) : null;
     const weeklyProduct = formData.get("weeklyProduct")?.toString();
     const flashSaleProduct = formData.get("flashSaleProduct")?.toString();
     const todayDeals = formData.get("todayDeals")?.toString();
@@ -49,6 +42,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // --- Handle files ---
     const mainImageRaw = formData.get("mainImage");
     const mainImage =
       mainImageRaw instanceof File && mainImageRaw.size > 0
@@ -56,24 +50,16 @@ export async function POST(req: Request) {
         : null;
 
     const productCatalogRaw = formData.get("productCatalog");
-    const productCatalog = productCatalogRaw instanceof File && productCatalogRaw.size > 0
-        ? productCatalogRaw : null ;
+    const productCatalog =
+      productCatalogRaw instanceof File && productCatalogRaw.size > 0
+        ? productCatalogRaw
+        : null;
 
     const galleryImages = formData
-      .getAll("productImages") 
-      .filter(
-        (f): f is File =>
-          f instanceof File && f.size > 0 && f.type.startsWith("image/")
-      );
+      .getAll("productImages")
+      .filter((f): f is File => f instanceof File && f.size > 0 && f.type.startsWith("image/"));
 
-    // const productCode = randomCode();
-    // const uploadDir = path.join(
-    //   process.cwd(),
-    //   "public/uploads/products",
-    //   productCode,
-    //   "images"
-    // );
-
+    // --- Ensure upload directory exists ---
     const uploadDir = getProductImageDir(productCode);
     fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -85,27 +71,15 @@ export async function POST(req: Request) {
       const ext = path.extname(mainImage.name);
       const fileName = `main-${crypto.randomUUID()}${ext}`;
       const filePath = path.join(uploadDir, fileName);
-
-      fs.writeFileSync(
-        filePath,
-        Buffer.from(await mainImage.arrayBuffer())
-      );
-
+      fs.writeFileSync(filePath, Buffer.from(await mainImage.arrayBuffer()));
       mainImagePath = `/uploads/products/${productCode}/images/${fileName}`;
-      // mainImagePath = getPublicImageUrl(productCode, fileName);
-
     }
 
     if (productCatalog) {
       const ext = path.extname(productCatalog.name);
       const fileName = `catalog-${crypto.randomUUID()}${ext}`;
       const filePath = path.join(uploadDir, fileName);
-
-      fs.writeFileSync(
-        filePath,
-        Buffer.from(await productCatalog.arrayBuffer())
-      );
-
+      fs.writeFileSync(filePath, Buffer.from(await productCatalog.arrayBuffer()));
       productCatalogPath = `/uploads/products/${productCode}/images/${fileName}`;
     }
 
@@ -113,57 +87,68 @@ export async function POST(req: Request) {
       const ext = path.extname(file.name);
       const fileName = `${crypto.randomUUID()}${ext}`;
       const filePath = path.join(uploadDir, fileName);
-
-      fs.writeFileSync(
-        filePath,
-        Buffer.from(await file.arrayBuffer())
-      );
-
+      fs.writeFileSync(filePath, Buffer.from(await file.arrayBuffer()));
       imagePaths.push(`/uploads/products/${productCode}/images/${fileName}`);
     }
 
-    const product = await prisma.$transaction(async (tx) => {
-      const createdProduct = await tx.product.create({
-        data: {
-          productCode,
-          name,
-          slug,
-          description,
-          specifications,
-          packaging,
-          warranty,
-          categoryName,
-          deliveryTargetDays,
-          weeklyProduct:weeklyProduct === 'true' ,   
-          flashSaleProduct : flashSaleProduct  === 'true' ,
-          todayDeals : todayDeals  === 'true' ,
-          specialProduct : specialProduct  === 'true' ,
-          brandName ,
-          mainImage :mainImagePath ,
-          productCatalog : productCatalogPath,
-          categoryId: categoryId ? BigInt(categoryId) : null,
-          brandId: brandId ? Number(brandId) : null,
-          actualPrice,
-          sellPrice,
-          discount,
-          stockQuantity: stockQuantity ? BigInt(stockQuantity) : BigInt(0),
-          availableQuantity: availableQuantity
-            ? BigInt(availableQuantity)
-            : BigInt(0),
-          status: Number(status),
-        },
-      });
+    // --- Ensure brand "Yuemi" exists and always use it ---
+    // --- Ensure brand "Yuemi" exists and always use it ---
+const yuemiBrand = await prisma.brand.upsert({
+  where: { name: "Yuemi" },
+  update: {},
+  create: { name: "Yuemi", status: 1 },
+});
 
-      await tx.productImage.create({
-        data: {
-          productCode,
-          mainImage: mainImagePath,
-          imagePath: imagePaths,
-        },
-      });
+// brandId must be Int
+const brandIdNum = yuemiBrand.id; // just a number, no BigInt
+const categoryIdNum = categoryId ? Number(categoryId) : null; // convert to Int if needed
 
-      return createdProduct;
-    });
+// --- Create product inside a transaction ---
+// --- Create product inside a transaction ---
+const product = await prisma.$transaction(async (tx) => {
+  const createdProduct = await tx.product.create({
+    data: {
+      productCode,
+      name,
+      slug,
+      description,
+      specifications,
+      packaging,
+      warranty,
+      categoryName,
+      deliveryTargetDays,
+      weeklyProduct: weeklyProduct === "true",
+      flashSaleProduct: flashSaleProduct === "true",
+      todayDeals: todayDeals === "true",
+      specialProduct: specialProduct === "true",
+      brandName: "Yuemi",  // ✅ hardcoded brand name
+      brandId: brandIdNum, // ✅ always use Yuemi's ID
+      categoryId: categoryIdNum,
+      mainImage: mainImagePath,
+      productCatalog: productCatalogPath,
+      actualPrice,
+      sellPrice,
+      discount,
+      stockQuantity: stockQuantity ? BigInt(stockQuantity) : BigInt(0),
+      availableQuantity: availableQuantity
+        ? BigInt(availableQuantity)
+        : BigInt(0),
+      status: Number(status),
+    },
+  });
+
+  await tx.productImage.create({
+    data: {
+      productCode,
+      mainImage: mainImagePath,
+      imagePath: imagePaths,
+    },
+  });
+
+  return createdProduct;
+});
+
+
 
     return NextResponse.json({
       success: true,
@@ -179,16 +164,17 @@ export async function POST(req: Request) {
   }
 }
 
+// --- GET all products ---
 export async function GET() {
   const products = await prisma.product.findMany({
-  include: {
-    images: true,
-    category: true,
-    brand: true,
-    variations: true,
-    reviews: true,
-  },
-});
+    include: {
+      images: true,
+      category: true,
+      brand: true,
+      variations: true,
+      reviews: true,
+    },
+  });
 
   return NextResponse.json({
     success: true,

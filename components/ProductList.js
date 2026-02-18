@@ -1,91 +1,66 @@
-import Image from "next/image";
+"use client";
 
-const products = [
-  {
-    id: 1,
-    title: "Titanium SunRoof PPF",
-    category: "PPF",
-    price: 540,
-    promo: "discount",
-    image: "/products/p1.jpg",
-  },
-  {
-    id: 2,
-    title: "Large MPV - I Series",
-    category: "I Series Tint Film",
-    price: 4500,
-    promo: "wholesale",
-    image: "/products/p2.jpg",
-  },
-  {
-    id: 3,
-    title: "Mini MPV / SUV - M Series",
-    category: "M Series Tint Film",
-    price: 4200,
-    promo: "addon",
-    image: "/products/p3.jpg",
-  },
-  {
-    id: 4,
-    title: "Large Saloon Car - E Series",
-    category: "E Series Tint Film",
-    price: 3800,
-    promo: "discount",
-    image: "/products/p4.jpg",
-  },
-];
+import Image from "next/image";
+import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { apiRequest } from "@/utils/ApisafeCalls";
 
 export default function ProductList({ filters }) {
-  let filtered = products.filter((p) => {
-    const matchSearch = p.title
-      .toLowerCase()
-      .includes(filters.search.toLowerCase());
+  const router = useRouter(); // ✅ add this
 
-    const matchCategory =
-      !filters.category || p.category === filters.category;
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const matchPromo =
-      !filters.promo || p.promo === filters.promo;
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const result = await apiRequest("/products", false);
+        const apiProducts = result?.products || [];
 
-    const matchMin =
-      !filters.minPrice || p.price >= Number(filters.minPrice);
+        const mappedProducts = apiProducts.map((p) => ({
+          id: p.id,
+          title: p.name || "Unnamed Product",
+          category: p.categoryName || "Uncategorized",
+          price: Number(p.sellPrice) || 0,
+          image:
+            p.mainImage ||
+            p.images?.[0]?.mainImage ||
+            "/images/default-product.jpg",
+        }));
 
-    const matchMax =
-      !filters.maxPrice || p.price <= Number(filters.maxPrice);
+        setProducts(mappedProducts);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return (
-      matchSearch &&
-      matchCategory &&
-      matchPromo &&
-      matchMin &&
-      matchMax
-    );
-  });
+    fetchProducts();
+  }, []);
 
-  // Sorting
-  if (filters.sort === "priceLow") {
-    filtered.sort((a, b) => a.price - b.price);
-  }
-  if (filters.sort === "priceHigh") {
-    filtered.sort((a, b) => b.price - a.price);
+  const filtered = useMemo(() => {
+    let data = [...products];
+    return data;
+  }, [products]);
+
+  if (loading) {
+    return <p className="text-center py-8">Loading...</p>;
   }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {filtered.length === 0 && (
-        <p className="col-span-full text-center text-gray-500">
-          No products found.
-        </p>
-      )}
-
       {filtered.map((product) => (
         <div
           key={product.id}
-          className="border rounded-lg overflow-hidden hover:shadow-lg transition"
+          onClick={() => router.push(`/products/${product.id}`)} // ✅ Navigate
+          className="border rounded-lg overflow-hidden hover:shadow-lg transition cursor-pointer"
         >
           <div className="relative w-full h-48 bg-gray-100">
             <Image
-              src={product.image}
+              src={`http://localhost:3000${product.image}`}
               alt={product.title}
               fill
               className="object-cover"
@@ -98,9 +73,6 @@ export default function ProductList({ filters }) {
             </h3>
             <p className="text-orange-600 font-semibold text-sm">
               Rs {product.price.toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-500">
-              {product.category}
             </p>
           </div>
         </div>

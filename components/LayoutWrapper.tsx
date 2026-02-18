@@ -7,6 +7,7 @@ import Footer from "@/components/FooterBar";
 import CartSidebar from "@/components/CartSidebar";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import { Toaster } from "react-hot-toast";
+import TawkToWidget from "./TawkToWidget";
 
 interface LayoutWrapperProps {
   children: ReactNode;
@@ -25,6 +26,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
 
       {!isAdminRoute && <CookieConsentBanner />}
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <TawkToWidget />  }
       {!isAdminRoute && <Toaster position="top-right" />}
     </>
   );

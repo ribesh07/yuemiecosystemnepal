@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -42,7 +43,17 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen bg-white py-12 px-4">
+      <div className="relative w-full h-64 md:h-[450px]">
+                <Image
+                  src="/banner.png"
+                  alt="Banner"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
       <div className="max-w-5xl mx-auto">
+        
         {/* Contact Header */}
         <section className="mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-6">Contact</h1>
@@ -52,15 +63,12 @@ const ContactPage = () => {
           </p>
 
           <div className="space-y-2 text-gray-700">
-            <p className="font-medium">Abbtron Next Gen Private Limited</p>
+            <p className="font-medium">Autozone Traders</p>
             <p>
-              <span className="font-semibold">Address:</span> 25, SMA, GT Karnal
-              Rd, Block E, Jahangirpuri Industrial Area, Jahangirpuri, Delhi,
-              110033
+              <span className="font-semibold">Address:</span> Universiry RD, Kuleshwor-14, kathmandu, Nepal
             </p>
             <p>
-              <span className="font-semibold">Phone Number:</span> 8448486201,
-              18002025200
+              <span className="font-semibold">Phone Number:</span> 9802341806 
             </p>
             <p>
               <span className="font-semibold">Email Address:</span>{" "}
@@ -68,7 +76,7 @@ const ContactPage = () => {
                 href="mailto:support@yuemiecosystem.com"
                 className="text-blue-600 hover:underline"
               >
-                support@yuemiecosystem.com
+                yuemiecosystemnepal@gmail.com
               </a>
             </p>
           </div>
@@ -155,14 +163,15 @@ const ContactPage = () => {
 
           <div className="relative w-full h-96 bg-gray-200 rounded-lg overflow-hidden">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3499.2547824181845!2d77.16593731508236!3d28.728881282394855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d0157c1c1c1c1%3A0x1c1c1c1c1c1c1c1!2sJahangirpuri%20Industrial%20Area%2C%20Delhi%2C%20110033!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
+              src="https://www.google.com/maps?q=27.6918056,85.2987335&output=embed
+"
               width="100%"
               height="100%"
               style={{ border: 0 }}
               allowFullScreen=""
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="Abbtron Next Gen Private Limited Location"
+              title="Autozone Private Limited Location"
             />
             <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded shadow text-sm text-blue-600 hover:underline cursor-pointer">
               View larger map
@@ -171,10 +180,10 @@ const ContactPage = () => {
 
           <div className="mt-4 text-sm text-gray-600">
             <p>
-              <strong>Abbtron Next Gen Private Limited</strong>
+              <strong>Autozone Traders</strong>
             </p>
-            <p>25, SMA, GT Karnal Rd, Block E, Jahangirpuri Industrial Area</p>
-            <p>Jahangirpuri, Delhi, 110033</p>
+            <p>Universiry RD, Kuleshwor-14, Kathmandu</p>
+            <p>Nepal</p>
           </div>
         </section>
       </div>

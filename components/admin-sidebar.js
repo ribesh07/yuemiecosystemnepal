@@ -54,7 +54,7 @@ const SideHeaderBar = () => {
       expandable: true,
       children: [
         { name: "View All", path: "/admin/categories-list" },
-        // { name: "Add New", path: "/admin/add-categories" },
+        { name: "Add New", path: "/admin/add-categories" },
       ],
     },
 
@@ -80,15 +80,9 @@ const SideHeaderBar = () => {
     {
       icon: ShoppingCart,
       label: "Manage Orders",
-      path: "#",
-      expandable: true,
-      children: [
-        { name: "Processing Orders", path: "/admin/orders" },
-        { name: "Shipped Orders", path: "/admin/orders?status=pending" },
-        { name: "Delivered Orders", path: "/admin/orders?status=completed" },
-        { name: "Cancelled Orders", path: "/admin/orders?status=cancelled" },
-        { name: "Returned Orders", path: "/admin/orders?status=returned" },
-      ],
+      path: "/admin/ordermanagement",
+      
+    
     },
 
     
@@ -99,9 +93,9 @@ const SideHeaderBar = () => {
       path: "#",
       expandable: true,
       children: [
-        { name: "Manage provinces", path: "/admin/address/countries" },
-        { name: "Set City", path: "/admin/address/states" },
-        { name: "Set Local Area", path: "/admin/address/cities" },
+        { name: "Set Address & Shipping", path: "/admin/shipping" },
+        { name: "Manage Address & Shipping", path: "/admin/shipping/manage" },
+        
       ],
      },
 

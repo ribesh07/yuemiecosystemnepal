@@ -22,13 +22,13 @@ export default function FooterBar() {
   const [email, setEmail] = useState("");
   const [settings, setSettings] = useState({
     company_logo_footer: null,
-    company_name: "Garg Dental",
-    address: "",
-    primary_email: "",
-    primary_phone: "",
+    company_name: "Autozone Traders",
+    address: "Autozone Traders, Kathmandu, Nepal",
+    primary_email: "yuemiecosystemnepal@gmail.com",
+    primary_phone: "9802341806",
   });
   // const [gender, setGender] = useState("male");
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const handleSubscribe = async (email) => {
     if (!email) {
@@ -81,7 +81,6 @@ export default function FooterBar() {
     //       primary_email,
     //       address,
     //     } = response.settings;
-
     //     const footerLogo = company_logo_footer?.footer_logo_full_url || "";
     //     const primaryPhone = primary_phone?.value || "";
     //     const primaryEmail = primary_email?.value || "";
@@ -94,7 +93,6 @@ export default function FooterBar() {
     //       primary_email: primaryEmail,
     //       address: addressData,
     //     });
-
     //     console.log("settings", response.settings);
     //   } else {
     //     console.error("Failed to fetch settings:", response.error);
@@ -111,7 +109,7 @@ export default function FooterBar() {
     <footer className="relative w-full">
       {/* Main Footer */}
       <div className="bg-white text-black">
-      {/* <div className="bg-gradient-to-r from-[#FF930F] via-[#FF930F] to-[#FF930F] text-white"> */}
+        {/* <div className="bg-gradient-to-r from-[#FF930F] via-[#FF930F] to-[#FF930F] text-white"> */}
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {/* Contact Us Section */}
@@ -125,16 +123,16 @@ export default function FooterBar() {
                     <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mt-1 text-orange-200 flex-shrink-0" />
                     {settings.address ? (
                       <a
-                        href={`https://www.google.com/maps/search/?q=${encodeURIComponent(settings.address)}`}
-                        target="_blank"
+                        href="https://maps.app.goo.gl/dmRRS9RkCUmvj53G7"
+                        target=""
                         rel="noopener noreferrer"
-                        className="text-xs sm:text-sm leading-relaxed  hover:underline "
+                        className="text-xs sm:text-sm leading-relaxed hover:underline"
                       >
                         {settings.address}
                       </a>
                     ) : (
                       <span className="text-xs sm:text-sm leading-relaxed">
-                        No address provided
+                        Autozone Traders, Kathmandu, Nepal
                       </span>
                     )}
                   </div>
@@ -184,8 +182,6 @@ export default function FooterBar() {
                   <Instagram className="w-4 h-4" />
                 </Link>
               </div>
-
-              
             </div>
 
             {/* Information Section */}
@@ -193,7 +189,7 @@ export default function FooterBar() {
               <h3 className="Main-Footer-title text-base sm:text-xl font-semibold mb-3 sm:mb-6 ml-10">
                 Information
               </h3>
-              <ul className="space-y-2 sm:space-y-3 Main-Footer-title Bottom-list-margin">
+              <ul className="space-y-2 sm:space-y-3 Main-Footer-title Bottom-list-margin ml-9">
                 <li className="footer-list">
                   <Link
                     href="/CompanyInfo"
@@ -202,14 +198,14 @@ export default function FooterBar() {
                     Company Info
                   </Link>
                 </li>
-                <li className="footer-list">
+                {/* <li className="footer-list">
                   <Link
                     href="/legal-registration"
                     className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Legal Registration
                   </Link>
-                </li>
+                </li> */}
                 {/* <li className="footer-list">
                   <Link
                     href="/MedicalCertification"
@@ -243,7 +239,7 @@ export default function FooterBar() {
               <h3 className="Main-Footer-title text-base sm:text-xl font-semibold mb-3 sm:mb-6 ml-9">
                 Our Company
               </h3>
-              <ul className="space-y-2 sm:space-y-3 Main-Footer-title Bottom-list-margin">
+              <ul className="space-y-2 sm:space-y-3 Main-Footer-title Bottom-list-margin ml-9">
                 <li className="footer-list">
                   <Link
                     href="/about"
@@ -261,14 +257,14 @@ export default function FooterBar() {
                   </Link>
                 </li>
 
-                <li className="footer-list">
+                {/* <li className="footer-list">
                   <Link
                     href="/Company/term-condition"
                     className="text-xs sm:text-sm hover:text-orange-200 transition-colors"
                   >
                     Terms and Conditions
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </div>
 
@@ -328,31 +324,30 @@ export default function FooterBar() {
               </p>
               <div className="flex space-x-4 pt-10 ">
                 {/* <MobileAppDownload /> */}
+              </div>
             </div>
-            
           </div>
         </div>
-      </div>
 
-      {/* Bottom Footer */}
-      <div className="bg-slate-800 text-gray-300 py-2 sm:py-4">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-xs sm:text-sm text-center sm:text-left">
-              Copyright © 2025 Yuemi Ecosystem Nepal All Right Reserved
-            </p>
+        {/* Bottom Footer */}
+        <div className="bg-slate-800 text-gray-300 py-2 sm:py-4">
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+            <div className="flex flex-col sm:flex-row justify-between items-center">
+              <p className="text-xs sm:text-sm text-center sm:text-left">
+                Copyright © 2025 Yuemi Ecosystem Nepal All Right Reserved
+              </p>
 
-            {/* Back to Top Button */}
-            <button
-              onClick={scrollToTop}
-              className="mt-2 sm:mt-0 w-8 sm:w-10 h-8 sm:h-10 bg-orange-600 hover:bg-orange-700 text-white rounded-md flex items-center justify-center transition-colors"
-              aria-label="Back to top"
-            >
-              <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
+              {/* Back to Top Button */}
+              <button
+                onClick={scrollToTop}
+                className="mt-2 sm:mt-0 w-8 sm:w-10 h-8 sm:h-10 bg-orange-600 hover:bg-orange-700 text-white rounded-md flex items-center justify-center transition-colors"
+                aria-label="Back to top"
+              >
+                <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </footer>
   );

@@ -24,7 +24,7 @@ function Page() {
           <div className="grid md:grid-cols-2 gap-14 items-center mb-28">
             <div className="relative w-full h-64 md:h-96">
               <Image
-                src="/Group_1_1_2.webp"
+                src="/pro17.jpg"
                 alt="Premium Dental Chair"
                 fill
                 className="object-cover rounded-xl shadow-lg"
@@ -36,9 +36,7 @@ function Page() {
                 YueMi About Us
               </h3>
               <p className="text-gray-700 leading-relaxed text-lg mb-8">
-                Welcome to YueMi Ecosystem, a pioneering brand under Beijing YueMi Technology Co. Ltd., part of the globally renowned Xiaomi Ecological Chain. Known for its cuttingedge innovation and top-notch quality, Xiaomi has consistently revolutionized the tech industry with products that inspire and empower millions across the globe.
-
-From smartphones to smart homes, Xiaomi has become a trusted name, synonymous with excellence and customer satisfaction. Now, Xiaomi's innovative spirit extends into the automotive industry through the YueMi Ecosystem, offering a comprehensive range of high-quality automotive accessories and electronics.
+                YueMi Ecosystem, a pioneering brand under Beijing YueMi Technology Co. Ltd., is part of the globally renowned Xiaomi Ecological Chain. The company was established on May 5, 2015, Invest in the Xiaomi ecological chain company founded by internal employees for Xiaomi. In 2021, Yuemi brand officially entered the field of automotive electronics, and developed a lot of fine products in the fields of Android navigation, driving recorder, LED lights, car fragrance, audio speakers, body film, etc. Yuemi adheres to the core business philosophy of Xiaomi ecological chain enterprises: the pursuit of the ultimate, the pursuit of cost-effective. As a result, once the series of automotive electronic products of Yuemi brand are listed, they have received consistent praise from the world. Users around the world are also constantly providing more consumer demands to Yuemi, hoping that through the in-depth customization of Yuemi, they can use more perfect vehicle products and enjoy more intelligent cabin space. 
               </p>
               
             </div>
@@ -58,9 +56,9 @@ From smartphones to smart homes, Xiaomi has become a trusted name, synonymous wi
             <div>
               
               <p className="text-gray-700 leading-relaxed text-lg mb-8">
-                Designed to enhance your driving experience with intelligent solutions, YueMi Ecosystem brings the perfect blend of advanced technology, durability, and style. We are committed to reshaping the future of automotive experiences with smart, reliable, and user-friendly products.
+                We respect the concept of "design a good life", and hope that every product we launch can bring you a more pleasant and good life. 
 
-In India, Abbtron NextGen Private Limited is the exclusive seller of YueMi Ecosystem, delivering these world-class automotive innovations to the Indian market with a promise of exceptional quality and customer service.
+In Nepal, AutoZone Traders is the Exclusive seller of Yuemi Ecosystem, delivering these world class Automotive innovations to the Nepali Automotive Market with a promise of exceptional quality and customer service. 
               </p>
               
             </div>
