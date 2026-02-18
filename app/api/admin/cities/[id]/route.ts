@@ -7,9 +7,9 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-// Type-safe PUT handler
-export const PUT: RouteHandler = async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const PUT: RouteHandler = async (req: NextRequest, context) => {
   try {
+    const params = await context.params; // ✅ unwrap params
     const { city, shippingCost, applyShipping, provinceId } = await req.json();
 
     if (!city || city.trim() === "") {
@@ -41,9 +41,9 @@ export const PUT: RouteHandler = async (req: NextRequest, { params }: { params: 
   }
 };
 
-// Type-safe DELETE handler
-export const DELETE: RouteHandler = async (_: NextRequest, { params }: { params: { id: string } }) => {
+export const DELETE: RouteHandler = async (_: NextRequest, context) => {
   try {
+    const params = await context.params; // ✅ unwrap params
     const zonesCount = await prisma.addressZone.count({
       where: { cityId: BigInt(params.id) },
     });
