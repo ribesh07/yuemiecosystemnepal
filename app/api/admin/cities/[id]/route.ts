@@ -1,64 +1,58 @@
 import { prisma } from "@/prisma/prisma-client";
-import { NextResponse, NextRequest } from "next/server";
-import type { RouteHandler } from "next/dist/server/app-render";
+import { NextRequest, NextResponse } from "next/server";
 
-// Fix BigInt JSON
-BigInt.prototype.toJSON = function () {
+// BigInt JSON fix
+(BigInt.prototype as any).toJSON = function () {
   return this.toString();
 };
 
-export const PUT: RouteHandler = async (req: NextRequest, context) => {
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const params = await context.params; // ✅ unwrap params
-    const { city, shippingCost, applyShipping, provinceId } = await req.json();
-
-    if (!city || city.trim() === "") {
-      return NextResponse.json({ error: "City name is required" }, { status: 400 });
-    }
-
-    if (shippingCost === undefined || shippingCost < 0) {
-      return NextResponse.json({ error: "Valid shipping cost is required" }, { status: 400 });
-    }
-
-    const updateData: any = {
-      city: city.trim(),
-      shippingCost: Number(shippingCost),
-      applyShipping: Boolean(applyShipping),
-      updatedAt: new Date(),
-    };
-
-    if (provinceId) updateData.provinceId = BigInt(provinceId);
+    const { id } = await context.params;
+    const { city, shippingCost, applyShipping, provinceId } =
+      await req.json();
 
     const updatedCity = await prisma.shippingCity.update({
-      where: { id: BigInt(params.id) },
-      data: updateData,
+      where: { id: BigInt(id) },
+      data: {
+        city: city?.trim(),
+        shippingCost: Number(shippingCost),
+        applyShipping: Boolean(applyShipping),
+        provinceId: provinceId ? BigInt(provinceId) : undefined,
+        updatedAt: new Date(),
+      },
     });
 
     return NextResponse.json(updatedCity);
   } catch (error) {
     console.error("Error updating city:", error);
-    return NextResponse.json({ error: "Failed to update city" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update city" },
+      { status: 500 }
+    );
   }
-};
+}
 
-export const DELETE: RouteHandler = async (_: NextRequest, context) => {
+export async function DELETE(
+  _: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const params = await context.params; // ✅ unwrap params
-    const zonesCount = await prisma.addressZone.count({
-      where: { cityId: BigInt(params.id) },
-    });
-
-    if (zonesCount > 0) {
-      return NextResponse.json({ error: "Cannot delete city with existing zones" }, { status: 400 });
-    }
+    const { id } = await context.params;
 
     await prisma.shippingCity.delete({
-      where: { id: BigInt(params.id) },
+      where: { id: BigInt(id) },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting city:", error);
-    return NextResponse.json({ error: "Failed to delete city" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete city" },
+      { status: 500 }
+    );
   }
-};
+}
