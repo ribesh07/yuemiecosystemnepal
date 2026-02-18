@@ -1,6 +1,6 @@
 "use client";
 import  ProfileInfo  from "./components/ProfileInfo";
-import AddressSection from "./components/AddressSection"
+//import AddressSection from "./components/AddressSection"
 
 import  OrdersSection  from "./components/OrdersSection"
 import  SecuritySection  from "./components/SecuritySection";
@@ -12,7 +12,7 @@ export default function ProfilePage() {
       <ProfileInfo />
 
       <div className="lg:col-span-3 space-y-6">
-        <AddressSection />
+        {/* <AddressSection /> */}
         <OrdersSection />
         <SecuritySection />
       </div>
