@@ -1,19 +1,20 @@
 import { prisma } from "@/prisma/prisma-client";
-import { NextResponse, NextRequest } from "next/server";
-import type { RouteHandler } from "next/dist/server/app-render";
+import { NextRequest, NextResponse } from "next/server";
 
-// Fix BigInt JSON
-BigInt.prototype.toJSON = function () {
+(BigInt.prototype as any).toJSON = function () {
   return this.toString();
 };
 
-export const PUT: RouteHandler = async (req: NextRequest, context) => {
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const params = await context.params; // ✅ unwrap params
+    const { id } = await context.params;
     const { zoneName, cityId } = await req.json();
 
     const updatedZone = await prisma.addressZone.update({
-      where: { id: BigInt(params.id) },
+      where: { id: BigInt(id) },
       data: {
         zoneName,
         cityId: BigInt(cityId),
@@ -22,22 +23,30 @@ export const PUT: RouteHandler = async (req: NextRequest, context) => {
     });
 
     return NextResponse.json(updatedZone);
-  } catch (error) {
-    console.error("Error updating zone:", error);
-    return NextResponse.json({ error: "Failed to update zone" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to update zone" },
+      { status: 500 }
+    );
   }
-};
+}
 
-export const DELETE: RouteHandler = async (_: NextRequest, context) => {
+export async function DELETE(
+  _: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const params = await context.params; // ✅ unwrap params
+    const { id } = await context.params;
+
     await prisma.addressZone.delete({
-      where: { id: BigInt(params.id) },
+      where: { id: BigInt(id) },
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting zone:", error);
-    return NextResponse.json({ error: "Failed to delete zone" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to delete zone" },
+      { status: 500 }
+    );
   }
-};
+}

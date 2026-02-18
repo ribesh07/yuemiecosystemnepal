@@ -1,7 +1,6 @@
 import { prisma } from "@/prisma/prisma-client";
 import { NextRequest, NextResponse } from "next/server";
 
-// Fix BigInt JSON
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
 };
@@ -33,8 +32,7 @@ export async function PUT(
     });
 
     return NextResponse.json(updatedAddress);
-  } catch (error) {
-    console.error("Error updating address:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to update address" },
       { status: 500 }
@@ -54,8 +52,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting address:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to delete address" },
       { status: 500 }
