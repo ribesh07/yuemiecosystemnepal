@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 function Modal({ title, isOpen, onClose, children }) {
   if (!isOpen) return null;
@@ -26,6 +27,21 @@ function Modal({ title, isOpen, onClose, children }) {
 export default function SecuritySection() {
   const [changePassword, setChangePassword] = useState(false);
 
+  const handleLogout = async () => {
+    if (!confirm("Are you sure you want to logout?")) return;
+
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        sessionStorage.removeItem("token");
+        window.dispatchEvent(new CustomEvent("auth-change"));
+        toast.success("Logged out successfully!");
+      }
+    } catch (err) {
+      toast.error("Logout failed. Try again.");
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow p-6">
       <h3 className="text-lg font-semibold mb-4">Security</h3>
@@ -38,7 +54,10 @@ export default function SecuritySection() {
           Change Password
         </button>
 
-        <button className="border px-4 py-2 rounded text-sm">
+        <button
+          onClick={handleLogout}
+          className="border px-4 py-2 rounded text-sm"
+        >
           Logout
         </button>
       </div>
