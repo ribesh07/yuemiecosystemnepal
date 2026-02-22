@@ -17,6 +17,12 @@ interface Product {
   brandName: string;
 }
 
+function resolveImageUrl(imageUrl?: string | null) {
+  if (!imageUrl) return "/images/default-product.jpg";
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+}
+
 export default function CategoryProductsPage({
   params,
 }: {
@@ -353,7 +359,7 @@ export default function CategoryProductsPage({
                   {/* Image Container */}
                   <div className="relative aspect-square bg-gray-50 overflow-hidden">
                     <img
-                      src={`http://localhost:3000${product.mainImage}`}
+                      src={resolveImageUrl(product.mainImage)}
                       alt={product.name}
                       className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
