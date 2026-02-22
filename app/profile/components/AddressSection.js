@@ -1,21 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { getSessionToken, isAuthenticatedClient } from "@/utils/clientAuth";
 
 export default function AddressSection() {
+  const router = useRouter();
   const [addresses, setAddresses] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
-  const [zones, setZones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const emptyForm = {
     fullName: "",
     phone: "",
     provinceId: "",
     cityId: "",
-    zoneId: "",
+    zoneName: "",
     address: "",
     landmark: "",
     addressType: "home",
@@ -25,35 +30,72 @@ export default function AddressSection() {
 
   const [formData, setFormData] = useState(emptyForm);
 
+  const authHeaders = () => {
+    const token = getSessionToken();
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
+  const loadAddresses = async () => {
+    try {
+      const response = await fetch("/api/customers/addresses", {
+        headers: authHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to load addresses");
+      }
+      setAddresses(data?.data || []);
+    } catch (error) {
+      toast.error(error.message || "Failed to load addresses");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch("/api/admin/provinces")
-      .then((res) => res.json())
-      .then((data) => setProvinces(data));
+    let mounted = true;
+
+    const init = async () => {
+      const authed = await isAuthenticatedClient();
+      if (!authed) {
+        toast.error("Please login first");
+        router.replace("/account?next=/profile");
+        return;
+      }
+
+      const provincesRes = await fetch("/api/admin/provinces");
+      const provincesData = await provincesRes.json();
+      if (mounted) {
+        setProvinces(provincesData || []);
+      }
+
+      await loadAddresses();
+    };
+
+    init();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (!formData.provinceId) return;
+    if (!formData.provinceId) {
+      setCities([]);
+      setFormData((prev) => ({ ...prev, cityId: "" }));
+      return;
+    }
 
     fetch("/api/admin/cities")
       .then((res) => res.json())
       .then((data) => {
-        const filtered = data.filter(
-          (c) => c.provinceId == formData.provinceId,
-        );
+        const filtered = data.filter((c) => c.provinceId == formData.provinceId);
         setCities(filtered);
       });
   }, [formData.provinceId]);
-
-  useEffect(() => {
-    if (!formData.cityId) return;
-
-    fetch("/api/admin/zones")
-      .then((res) => res.json())
-      .then((data) => {
-        const filtered = data.filter((z) => z.cityId == formData.cityId);
-        setZones(filtered);
-      });
-  }, [formData.cityId]);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({
@@ -61,32 +103,106 @@ export default function AddressSection() {
       [field]: value,
     }));
   };
-  const handleSubmit = async () => {
-    const res = await fetch("/api/customers/addresses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ customerId: 1, ...formData }),
-    });
 
-    if (res.ok) {
-      const savedAddress = await res.json();
-      setAddresses((prev) => [...prev, savedAddress]); // update UI
+  const handleSubmit = async () => {
+    const required = {
+      fullName: formData.fullName?.trim(),
+      phone: formData.phone?.trim(),
+      provinceId: formData.provinceId,
+      cityId: formData.cityId,
+      zoneName: formData.zoneName?.trim(),
+      address: formData.address?.trim(),
+    };
+
+    if (
+      !required.fullName ||
+      !required.phone ||
+      !required.provinceId ||
+      !required.cityId ||
+      !required.zoneName ||
+      !required.address
+    ) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const endpoint = editingId
+        ? `/api/customers/addresses/${editingId}`
+        : "/api/customers/addresses";
+      const method = editingId ? "PUT" : "POST";
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: authHeaders(),
+        body: JSON.stringify({
+          ...formData,
+          fullName: required.fullName,
+          phone: required.phone,
+          zoneName: required.zoneName,
+          address: required.address,
+        }),
+      });
+
+      const payload = await res.json();
+      if (!res.ok) {
+        throw new Error(payload?.message || "Failed to save address");
+      }
+
+      if (editingId) {
+        setAddresses((prev) =>
+          prev.map((item) => (item.id === editingId ? payload.data : item))
+        );
+      } else {
+        setAddresses((prev) => [payload.data, ...prev]);
+      }
+
+      toast.success(editingId ? "Address updated" : "Address added");
       setShowForm(false);
       setFormData(emptyForm);
-    } else {
-      console.error("Failed to save address");
+      setEditingId(null);
+    } catch (error) {
+      toast.error(error.message || "Failed to save address");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleEdit = (index) => {
-    setFormData(addresses[index]);
-    setEditingIndex(index);
+  const handleEdit = (address) => {
+    setFormData({
+      fullName: address.fullName || "",
+      phone: address.phone || "",
+      provinceId: address.provinceId?.toString() || "",
+      cityId: address.cityId?.toString() || "",
+      zoneName: address.zone?.zoneName || "",
+      address: address.address || "",
+      landmark: address.landmark || "",
+      addressType: (address.addressType || "HOME").toLowerCase(),
+      defaultShipping: Boolean(address.defaultShipping),
+      defaultBilling: Boolean(address.defaultBilling),
+    });
+    setEditingId(address.id);
     setShowForm(true);
   };
 
-  const handleDelete = (index) => {
-    const updated = addresses.filter((_, i) => i !== index);
-    setAddresses(updated);
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`/api/customers/addresses/${id}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      const payload = await res.json();
+
+      if (!res.ok) {
+        throw new Error(payload?.message || "Failed to delete address");
+      }
+
+      setAddresses((prev) => prev.filter((item) => item.id !== id));
+      toast.success("Address deleted");
+    } catch (error) {
+      toast.error(error.message || "Failed to delete address");
+    }
   };
 
   return (
@@ -96,7 +212,7 @@ export default function AddressSection() {
         <button
           onClick={() => {
             setFormData(emptyForm);
-            setEditingIndex(null);
+            setEditingId(null);
             setShowForm(true);
           }}
           className="bg-orange-500 text-white px-4 py-2 rounded text-sm"
@@ -107,39 +223,50 @@ export default function AddressSection() {
 
       {/* Address List */}
       <div className="space-y-4">
-        {addresses.length === 0 && (
+        {loading && <p className="text-gray-500 text-sm">Loading addresses...</p>}
+
+        {!loading && addresses.length === 0 && (
           <p className="text-gray-500 text-sm">No addresses added yet.</p>
         )}
 
-        {addresses.map((address, index) => (
+        {addresses.map((address) => (
           <div
-            key={index}
+            key={address.id}
             className="border rounded-lg p-4 flex justify-between items-start"
           >
             <div>
               <p className="font-semibold">
                 {address.fullName}
-                {address.isDefault && (
+                {address.defaultShipping && (
                   <span className="ml-2 text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
-                    Default
+                    Default Shipping
+                  </span>
+                )}
+                {address.defaultBilling && (
+                  <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                    Default Billing
                   </span>
                 )}
               </p>
               <p className="text-sm text-gray-600">{address.phone}</p>
               <p className="text-sm text-gray-600">
-                {address.localAddress}, {address.city}, {address.province}
+                {address.address}, {address.zone?.zoneName}, {address.city?.city},{" "}
+                {address.province?.name}
               </p>
+              {address.landmark && (
+                <p className="text-sm text-gray-500">Landmark: {address.landmark}</p>
+              )}
             </div>
 
             <div className="flex gap-3 text-sm">
               <button
-                onClick={() => handleEdit(index)}
+                onClick={() => handleEdit(address)}
                 className="text-blue-600"
               >
                 Edit
               </button>
               <button
-                onClick={() => handleDelete(index)}
+                onClick={() => handleDelete(address.id)}
                 className="text-red-600"
               >
                 Delete
@@ -192,40 +319,58 @@ export default function AddressSection() {
             ))}
           </select>
 
-          <select
+          <textarea
+            className="w-full border rounded px-3 py-2 min-h-20"
+            value={formData.zoneName}
+            onChange={(e) => handleChange("zoneName", e.target.value)}
+            placeholder="Enter local zone / area"
+          />
+
+          <textarea
+            className="w-full border rounded px-3 py-2 min-h-24"
+            value={formData.address}
+            onChange={(e) => handleChange("address", e.target.value)}
+            placeholder="Enter full address"
+          />
+
+          <input
             className="w-full border rounded px-3 py-2"
-            value={formData.zoneId}
-            onChange={(e) => handleChange("zoneId", e.target.value)}
-          >
-            <option value="">Select Zone</option>
-            {zones.map((z) => (
-              <option key={z.id} value={z.id}>
-                {z.zoneName}
-              </option>
-            ))}
-          </select>
+            value={formData.landmark}
+            onChange={(e) => handleChange("landmark", e.target.value)}
+            placeholder="Landmark (optional)"
+          />
 
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
-              checked={formData.isDefault}
-              onChange={(e) => handleChange("isDefault", e.target.checked)}
+              checked={formData.defaultShipping}
+              onChange={(e) => handleChange("defaultShipping", e.target.checked)}
             />
             Set as default shipping address
+          </label>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={formData.defaultBilling}
+              onChange={(e) => handleChange("defaultBilling", e.target.checked)}
+            />
+            Set as default billing address
           </label>
 
           <div className="flex gap-3">
             <button
               onClick={handleSubmit}
+              disabled={saving}
               className="bg-orange-500 text-white px-4 py-2 rounded"
             >
-              Save Address
+              {saving ? "Saving..." : "Save Address"}
             </button>
 
             <button
               onClick={() => {
                 setShowForm(false);
-                setEditingIndex(null);
+                setEditingId(null);
               }}
               className="border px-4 py-2 rounded"
             >
