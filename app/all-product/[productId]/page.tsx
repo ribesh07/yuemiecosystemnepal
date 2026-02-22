@@ -53,6 +53,12 @@ interface Product {
   todayDeals: boolean;
 }
 
+function resolveImageUrl(imageUrl?: string | null) {
+  if (!imageUrl) return "/yumei_logo.png";
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+}
+
 export default function ProductDetailPage() {
   const { productId } = useParams();
   const router = useRouter();
@@ -198,7 +204,9 @@ export default function ProductDetailPage() {
             {/* Main Image */}
             <div className="relative bg-white rounded-2xl overflow-hidden aspect-square border border-gray-200 group">
               <img
-                src={`http://localhost:3000${product.images[selectedImage]?.mainImage || product.mainImage}`}
+                src={resolveImageUrl(
+                  product.images[selectedImage]?.mainImage || product.mainImage
+                )}
                 alt={product.name}
                 className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-110"
               />
@@ -250,7 +258,7 @@ export default function ProductDetailPage() {
                     }`}
                   >
                     <img
-                      src={`http://localhost:3000${image.mainImage}`}
+                      src={resolveImageUrl(image.mainImage)}
                       alt={`View ${index + 1}`}
                       className="w-full h-full object-contain p-3"
                     />

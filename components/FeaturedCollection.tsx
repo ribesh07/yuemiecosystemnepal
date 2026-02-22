@@ -37,6 +37,12 @@ interface Category {
   image: string;
 }
 
+function resolveImageUrl(imageUrl?: string | null) {
+  if (!imageUrl) return "/images/default-product.jpg";
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+}
+
 export default function FeaturedCollections() {
   const router = useRouter();
   
@@ -201,7 +207,7 @@ export default function FeaturedCollections() {
                   <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                     <div className="relative h-72">
                       <Image
-                        src={`http://localhost:3000${product.mainImage}`}
+                        src={resolveImageUrl(product.mainImage)}
                         alt={product.name}
                         fill
                         className="object-contain p-6 group-hover:scale-110 transition-transform duration-500"
