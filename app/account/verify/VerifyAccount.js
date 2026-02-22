@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { baseUrl } from "@/utils/config";
-import useInfoModalStore from "@/stores/infoModalStore";
-import useWarningModalStore from "@/stores/warningModalStore";
+import useInfoModalStore from "@/store/infoModalStore";
+import useWarningModalStore from "@/store/warningModalStore";
 import toast from "react-hot-toast";
 // import { baseUrl } from "@/utils/config";
 
