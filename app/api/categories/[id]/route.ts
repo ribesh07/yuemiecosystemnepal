@@ -43,7 +43,7 @@ export async function GET(
 import fs from "fs";
 import path from "path";
 import { serializeBigInt } from "@/lib/serializeBigInt";
-import { GET_UPLOAD_BASE_DIR, UPLOAD_BASE_DIR } from "@/utils/imageUpload";
+import { getCategoryImageDir, urlToFilePath } from "@/utils/imageUpload";
 
 export async function PUT(
   req: Request,
@@ -85,13 +85,13 @@ export async function PUT(
     // 🔄 Replace image if provided
     if (file) {
       if (existing.image) {
-        const oldPath = path.join(GET_UPLOAD_BASE_DIR, existing.image);
+        const oldPath = urlToFilePath(existing.image);
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
 
-      const uploadDir = path.join(UPLOAD_BASE_DIR, "categories");
+      const uploadDir = getCategoryImageDir();
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
@@ -157,10 +157,7 @@ export async function DELETE(
 
     /* ---------- DELETE IMAGE ---------- */
     if (category.image) {
-      const imagePath = path.join(
-       GET_UPLOAD_BASE_DIR,
-        category.image
-      );
+      const imagePath = urlToFilePath(category.image);
 
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
