@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import { baseUrl } from "@/utils/config";
 import useInfoModalStore from "@/store/infoModalStore";
 import useWarningModalStore from "@/store/warningModalStore";
 import toast from "react-hot-toast";
@@ -35,7 +34,7 @@ export default function VerifyAccountPage() {
       setIsLoading(false);
       // verification api
       try {
-        const response = await fetch(`${baseUrl}/verify-account`, {
+        const response = await fetch(`/api/auth/verify-account`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -57,7 +56,7 @@ export default function VerifyAccountPage() {
         } else {
           useWarningModalStore.getState().open({
             title: "Error",
-            message: data.errors[0].message + "  Verification failed !",
+            message: data.message || "Verification failed!",
           });
         }
       } catch (error) {
@@ -80,7 +79,7 @@ export default function VerifyAccountPage() {
       // alert("Verification code has been resent to your email");
       // resend code api here
       try {
-        const response = await fetch(`${baseUrl}/resend-code`, {
+        const response = await fetch(`/api/auth/resend-code`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -93,11 +92,9 @@ export default function VerifyAccountPage() {
         const data = await response.json();
         // console.log(data);
         if (response.ok) {
-          // alert(
-          //   `Verification code has been resent to your email ${data.code}!`
-          // );
+          toast.success(data.message || "Verification code resent");
         } else {
-          toast.error(data.errors[0].message || "Resend failed");
+          toast.error(data.message || "Resend failed");
         }
       } catch (error) {
         // console.error("Error:", error);

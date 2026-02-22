@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import useInfoModalStore from "@/store/infoModalStore";
 import useWarningModalStore from "@/store/warningModalStore";
-import { baseUrl } from "@/utils/config";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -68,7 +67,7 @@ export default function ResetPasswordForm() {
       });
     setIsLoading(true);
     try {
-      const response = await fetch(`${baseUrl}/auth/reset-password-verify`, {
+      const response = await fetch(`/api/auth/reset-password-verify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +91,7 @@ export default function ResetPasswordForm() {
       } else {
         useWarningModalStore.getState().open({
           title: "Error",
-          message: data.errors[0].message || "Verification failed",
+          message: data.message || "Verification failed",
         });
       }
     } catch (error) {

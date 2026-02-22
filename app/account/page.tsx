@@ -30,7 +30,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -44,6 +44,14 @@ export default function LoginPage() {
         toast.success("Login successful!");
         router.replace("/home"); // redirect after login
       } else {
+        if (data.code === "EMAIL_NOT_VERIFIED") {
+          return useWarningModalStore.getState().open({
+            title: "Verify Email",
+            message: data.message,
+            onOkay: () =>
+              router.push(`/account/verify?email=${encodeURIComponent(formData.email)}`),
+          });
+        }
         useWarningModalStore.getState().open({
           title: "Login Failed",
           message: data.message || "Invalid email or password",

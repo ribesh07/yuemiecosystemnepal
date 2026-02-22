@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import useInfoModalStore from "@/store/infoModalStore";
 import useWarningModalStore from "@/store/warningModalStore";
-import { baseUrl } from "@/utils/config";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
     setTimeout(async () => {
       setIsLoading(false);
       try {
-        const response = await fetch(`${baseUrl}/auth/forgot-password-code`, {
+        const response = await fetch(`/api/auth/forgot-password-code`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -55,8 +55,7 @@ export default function ForgotPasswordPage() {
         } else {
           useWarningModalStore.getState().open({
             title: "Error",
-            message:
-              data.errors[0].message || "Failed to send verification code",
+            message: data.message || "Failed to send verification code",
           });
         }
       } catch (error) {

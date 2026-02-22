@@ -92,7 +92,7 @@ export default function AuthPage() {
 
     // 2️⃣ API call
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -108,9 +108,16 @@ export default function AuthPage() {
       if (response.ok) {
         useInfoModalStore.getState().open({
           title: "Success",
-          message: `Account created! Please verify your email.`,
-          onOkay: () =>
-            router.push(`/account/verify?email=${encodeURIComponent(formData.email)}`),
+          message: data.message || "Account created successfully.",
+          onOkay: () => {
+            if (data.requiresVerification) {
+              router.push(
+                `/account/verify?email=${encodeURIComponent(formData.email)}`
+              );
+              return;
+            }
+            router.push("/account");
+          },
         });
       } else {
         useWarningModalStore.getState().open({
