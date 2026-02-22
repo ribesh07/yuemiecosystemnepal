@@ -6,6 +6,7 @@ import { serializeBigInt } from "@/lib/serializeBigInt";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import { getProductImageDir, urlToFilePath } from "@/utils/imageUpload";
 
 export async function PUT(
   req: Request,
@@ -52,12 +53,7 @@ export async function PUT(
     const newMainImage = formData.get("mainImage") as File | null;
     const newGalleryImages = formData.getAll("images") as File[];
 
-    const uploadDir = path.join(
-      process.cwd(),
-      "public/uploads/products",
-      existingProduct.productCode,
-      "images"
-    );
+    const uploadDir = getProductImageDir(existingProduct.productCode);
     fs.mkdirSync(uploadDir, { recursive: true });
 
     let mainImagePath = existingImages?.mainImage || null;
@@ -66,7 +62,7 @@ export async function PUT(
     // 🔄 Replace main image
     if (newMainImage) {
       if (mainImagePath) {
-        const oldPath = path.join(process.cwd(), "public", mainImagePath);
+        const oldPath = urlToFilePath(mainImagePath);
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
 

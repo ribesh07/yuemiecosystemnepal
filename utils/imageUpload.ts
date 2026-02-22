@@ -21,10 +21,15 @@ export function getProductImageDir(productCode: string) {
 }
 
 export function urlToFilePath(imageUrl: string) {
-  return path.join(
-    UPLOAD_BASE_DIR,
-    imageUrl.replace(/^\/uploads\//, "")
-  );
+  const relativePath = imageUrl
+    .replace(/^\/+/, "")
+    .replace(/^uploads\//, "");
+
+  return path.join(UPLOAD_BASE_DIR, relativePath);
+}
+
+export function getCategoryImageDir() {
+  return path.join(UPLOAD_BASE_DIR, "categories");
 }
 
 export function getPublicImageUrl(

@@ -2,12 +2,11 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
-// import { requireAdminRole } from "@/lib/auth"; // TEMP disabled for local
+// import { requireAdminRole } from "@/lib/auth"; 
 import fs from "fs";
 import path from "path";
 import { serializeBigInt } from "@/lib/serializeBigInt";
-
-const LOCAL_UPLOAD_BASE = path.join(process.cwd(), "public", "uploads");
+import { getCategoryImageDir, urlToFilePath } from "@/utils/imageUpload";
 
 export async function GET(req: Request) {
   try {
@@ -70,8 +69,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ LOCAL SAFE UPLOAD DIR
-    const uploadDir = path.join(LOCAL_UPLOAD_BASE, "categories");
+    const uploadDir = getCategoryImageDir();
     console.log("upload dir:", uploadDir);
 
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -110,7 +108,7 @@ export async function POST(req: Request) {
   } catch (error) {
     // 🧹 Cleanup uploaded file if DB failed
     if (imagePath) {
-      const filePath = path.join(process.cwd(), "public", imagePath);
+      const filePath = urlToFilePath(imagePath);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
