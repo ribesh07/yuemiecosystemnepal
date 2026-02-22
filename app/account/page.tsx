@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import useWarningModalStore from "@/store/warningModalStore";
 
@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,8 +42,10 @@ export default function LoginPage() {
       if (response.ok && data.token) {
         // Save token in sessionStorage
         sessionStorage.setItem("token", data.token);
+        window.dispatchEvent(new CustomEvent("auth-change"));
         toast.success("Login successful!");
-        router.replace("/home"); // redirect after login
+        const nextPath = searchParams.get("next");
+        router.replace(nextPath || "/home");
       } else {
         if (data.code === "EMAIL_NOT_VERIFIED") {
           return useWarningModalStore.getState().open({

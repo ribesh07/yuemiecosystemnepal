@@ -1,12 +1,37 @@
 "use client";
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { isAuthenticatedClient } from "@/utils/clientAuth";
 
 const CheckoutPage = () => {
+  const router = useRouter();
   const [selectedAddress, setSelectedAddress] = useState('');
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const validateAuth = async () => {
+      const authed = await isAuthenticatedClient();
+      if (!authed) {
+        toast.error("Please login first");
+        router.replace("/account?next=/Checkout");
+        return;
+      }
+
+      if (mounted) setAuthChecked(true);
+    };
+
+    validateAuth();
+
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
   
   // Sample saved addresses - replace with actual user data
   const savedAddresses = [
@@ -96,6 +121,14 @@ const CheckoutPage = () => {
   const subtotal = product.price * product.quantity;
   const shipping = 150;
   const total = subtotal + shipping;
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="h-10 w-10 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 py-8 px-4">

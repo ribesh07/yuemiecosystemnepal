@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { isAuthenticatedClient } from "@/utils/clientAuth";
 
 export default function Header() {
   const pathname = usePathname();
@@ -27,19 +28,30 @@ export default function Header() {
   ];
 
   useEffect(() => {
-    // Function to check login
-    const checkLogin = () => {
-      const token = sessionStorage.getItem("token");
-      setIsLoggedIn(!!token);
+    let mounted = true;
+
+    const checkLogin = async () => {
+      const authed = await isAuthenticatedClient();
+      if (mounted) {
+        setIsLoggedIn(authed);
+      }
     };
 
-    checkLogin(); // initial check
+    checkLogin();
 
-    // Listen to login/logout events
     window.addEventListener("auth-change", checkLogin);
+    window.addEventListener("storage", checkLogin);
+    window.addEventListener("focus", checkLogin);
+    document.addEventListener("visibilitychange", checkLogin);
 
-    return () => window.removeEventListener("auth-change", checkLogin);
-  }, []);
+    return () => {
+      mounted = false;
+      window.removeEventListener("auth-change", checkLogin);
+      window.removeEventListener("storage", checkLogin);
+      window.removeEventListener("focus", checkLogin);
+      document.removeEventListener("visibilitychange", checkLogin);
+    };
+  }, [pathname]);
 
   // Auto slide announcements
   useEffect(() => {

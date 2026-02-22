@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { X, Plus, Minus, ShoppingCart, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { isAuthenticatedClient } from "@/utils/clientAuth";
 
 export default function CartSidebar() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -69,6 +73,19 @@ export default function CartSidebar() {
     if (window?.storage) {
       await window.storage.delete("cart");
     }
+  };
+
+  const handleCheckout = async () => {
+    const authed = await isAuthenticatedClient();
+    if (!authed) {
+      toast.error("Please login first");
+      setIsOpen(false);
+      router.push("/account?next=/Checkout");
+      return;
+    }
+
+    setIsOpen(false);
+    router.push("/Checkout");
   };
 
   const subtotal = cartItems.reduce(
@@ -204,7 +221,10 @@ export default function CartSidebar() {
                 </div>
               </div>
 
-              <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold">
+              <button
+                onClick={handleCheckout}
+                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold"
+              >
                 Checkout
               </button>
             </div>
