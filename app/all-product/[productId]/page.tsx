@@ -105,6 +105,8 @@ export default function ProductDetailPage() {
   };
 
   const handleBuyNow = async () => {
+    if (!product) return;
+
     const authed = await isAuthenticatedClient();
     if (!authed) {
       toast.error("Please login to continue checkout");
@@ -112,7 +114,7 @@ export default function ProductDetailPage() {
       return;
     }
 
-    router.push("/Checkout");
+    router.push(`/Checkout?productId=${product.id}&qty=${quantity}`);
   };
 
   if (loading) {
