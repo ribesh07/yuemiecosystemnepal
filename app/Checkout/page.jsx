@@ -1,6 +1,6 @@
 "use client";
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { getSessionToken, isAuthenticatedClient } from "@/utils/clientAuth";
@@ -11,7 +11,7 @@ import {
   removeCartItemsByIds,
 } from "@/utils/cartClient";
 
-const CheckoutPage = () => {
+const CheckoutPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId");
@@ -452,4 +452,16 @@ const CheckoutPage = () => {
   );
 };
 
-export default CheckoutPage;
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="h-10 w-10 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <CheckoutPageContent />
+    </Suspense>
+  );
+}
