@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import RelatedProduct from "@/components/relatedProduct";
-import Link from "next/link";
 import { apiRequest } from "@/utils/ApisafeCalls";
+import { isAuthenticatedClient } from "@/utils/clientAuth";
+import { addCartItem } from "@/utils/cartClient";
+import toast from "react-hot-toast";
 
 interface ProductImage {
   id: string;
@@ -97,10 +99,41 @@ export default function ProductDetailPage() {
 
   const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    if (!product) return;
+    const authed = await isAuthenticatedClient();
+    if (!authed) {
+      toast.error("Please login to add items to cart");
+      router.push("/account?next=/all-product/" + product.id);
+      return;
+    }
+
+    addCartItem({
+      id: product.id,
+      productCode: product.productCode,
+      name: product.name,
+      image: resolveImageUrl(product.mainImage),
+      price: Number(product.sellPrice || 0),
+      quantity,
+      availableQuantity: Number(product.availableQuantity || 0),
+    });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
-    // Add your cart logic here
+    toast.success("Added to cart");
+    window.dispatchEvent(new CustomEvent("open-cart"));
+  };
+
+  const handleBuyNow = async () => {
+    if (!product) return;
+
+    const authed = await isAuthenticatedClient();
+    if (!authed) {
+      toast.error("Please login to continue checkout");
+      router.push("/account?next=/Checkout");
+      return;
+    }
+
+    router.push(`/Checkout?productId=${product.id}&qty=${quantity}`);
   };
 
   if (loading) {
@@ -411,17 +444,16 @@ export default function ProductDetailPage() {
                 )}
               </button>
               
-              <Link href="/Checkout">
-                <button
-                  disabled={!isInStock}
-                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl text-white font-semibold text-lg hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  BUY IT NOW
-                </button>
-              </Link>
+              <button
+                onClick={handleBuyNow}
+                disabled={!isInStock}
+                className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl text-white font-semibold text-lg hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                BUY IT NOW
+              </button>
             </div>
 
             {/* Trust Badges */}

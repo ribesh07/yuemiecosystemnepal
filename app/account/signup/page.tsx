@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import useInfoModalStore from "@/store/infoModalStore";
-import useWarningModalStore from "@/store/warningModalStore";
+import toast from "react-hot-toast";
+
 
 export default function AuthPage() {
   const nameRegex = /^[A-Za-z\s]+$/;
@@ -10,6 +10,7 @@ export default function AuthPage() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     firstname: "",
@@ -42,57 +43,44 @@ export default function AuthPage() {
       !formData.confirmPassword ||
       !formData.phone
     ) {
-      return useWarningModalStore.getState().open({
-        title: "Incomplete Form !",
-        message: "Please fill in all required fields.",
-      });
+      toast.error("Please fill in all required fields.");
+      return;
     }
 
     if (!nameRegex.test(formData.firstname)) {
-      return useWarningModalStore.getState().open({
-        title: "Invalid First Name !",
-        message: "First name should contain alphabets only.",
-      });
+      toast.error("First name should contain alphabets only.");
+      return;
     }
 
     if (!nameRegex.test(formData.lastname)) {
-      return useWarningModalStore.getState().open({
-        title: "Invalid Last Name !",
-        message: "Last name should contain alphabets only.",
-      });
+      toast.error("Last name should contain alphabets only.");
+      return;
     }
 
     if (!emailRegex.test(formData.email)) {
-      return useWarningModalStore.getState().open({
-        title: "Invalid E-mail !",
-        message: "Please enter a valid email address.",
-      });
+      toast.error("Please enter a valid email address.");
+      return;
     }
 
     if (formData.password.length < 6) {
-      return useWarningModalStore.getState().open({
-        title: "Weak Password !",
-        message: "Password should be at least 6 characters long.",
-      });
+      toast.error("Password should be at least 6 characters long.");
+      return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      return useWarningModalStore.getState().open({
-        title: "Password Mismatch !",
-        message: "Password and Confirm Password do not match.",
-      });
+      toast.error("Password and Confirm Password do not match.");
+      return;
     }
 
     if (formData.phone.length !== 10) {
-      return useWarningModalStore.getState().open({
-        title: "Invalid Mobile Number !",
-        message: "Mobile number should be exactly 10 digits.",
-      });
+      toast.error("Mobile number should be exactly 10 digits.");
+      return;
     }
 
     // 2️⃣ API call
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      setIsSubmitting(true);
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -106,23 +94,19 @@ export default function AuthPage() {
       const data = await response.json();
 
       if (response.ok) {
-        useInfoModalStore.getState().open({
-          title: "Success",
-          message: `Account created! Please verify your email.`,
-          onOkay: () =>
-            router.push(`/account/verify?email=${encodeURIComponent(formData.email)}`),
-        });
+        toast.success(data.message || "Account created successfully.");
+        if (data.requiresVerification) {
+          router.push(`/account/verify?email=${encodeURIComponent(formData.email)}`);
+        } else {
+          router.push("/account");
+        }
       } else {
-        useWarningModalStore.getState().open({
-          title: "Error",
-          message: data.message || "Registration failed",
-        });
+        toast.error(data.message || "Registration failed");
       }
     } catch (error) {
-      useWarningModalStore.getState().open({
-        title: "Error",
-        message: "Something went wrong. Please try again.",
-      });
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -231,9 +215,10 @@ export default function AuthPage() {
           {/* Submit */}
           <button
             onClick={handleCreateAccount}
+            disabled={isSubmitting}
             className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 mt-4"
           >
-            CREATE ACCOUNT
+            {isSubmitting ? "CREATING..." : "CREATE ACCOUNT"}
           </button>
 
           {/* Already have account */}

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,18 +18,37 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      if (email && password) {
-        console.log('Login attempt:', { email, password });
-        
-        // 🚀 Redirecting after successful login
-        router.push('/admin');
-
-      } else {
-        setError('Please fill in all fields');
-      }
+    if (!email || !password) {
+      setError('Please fill in all fields');
       setIsLoading(false);
-    }, 1000);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data?.token) {
+        throw new Error(data?.message || 'Invalid credentials');
+      }
+
+      localStorage.setItem('admin_auth', data.token);
+      localStorage.setItem('admin_token', data.token);
+      sessionStorage.setItem('admin_token', data.token);
+      toast.success('Admin login successful');
+      router.push('/admin');
+    } catch (err) {
+      const msg = err?.message || 'Login failed';
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
 
@@ -53,7 +73,7 @@ export default function LoginPage() {
           )}
 
           {/* Login Form */}
-          <div onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             {/* Email Field */}
             <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -130,13 +150,13 @@ export default function LoginPage() {
 
             {/* Submit Button */}
             <button
-              onClick={handleSubmit}
+              type="submit"
               disabled={isLoading}
               className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
-          </div>
+          </form>
 
           
 

@@ -8,7 +8,6 @@ export async function POST(req: Request) {
 
   const admin = await prisma.admin.findUnique({
     where: { email },
-    include: { role: true }
   });
 
   if (!admin) {
@@ -21,15 +20,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
   }
   const roleData = await prisma.adminRole.findUnique({
-    where : {
-        id : admin.roleId
-    }
-  })
+    where: {
+      id: admin.roleId,
+    },
+  });
+
+  if (!roleData) {
+    return NextResponse.json(
+      { message: "Admin role is not configured" },
+      { status: 400 }
+    );
+  }
 
   const token = signToken({
     sub: admin.id.toString(),
-    role: roleData?.name,
-    type: "ADMIN"
+    role: roleData.name,
+    type: "ADMIN",
   });
 
   return NextResponse.json({ token });

@@ -2,10 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { X, Plus, Minus, ShoppingCart, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { isAuthenticatedClient } from "@/utils/clientAuth";
+import {
+  clearCartItems,
+  getCartItems,
+  setCheckoutSelection,
+  setCartItems as persistCartItems,
+} from "@/utils/cartClient";
 
 export default function CartSidebar() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItemsState] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Load cart + listen for open event
@@ -15,22 +26,24 @@ export default function CartSidebar() {
     const handleOpenCart = () => {
       setIsOpen(true);
     };
+    const handleCartUpdated = () => {
+      loadCart();
+    };
 
     window.addEventListener("open-cart", handleOpenCart);
+    window.addEventListener("cart-updated", handleCartUpdated);
 
     return () => {
       window.removeEventListener("open-cart", handleOpenCart);
+      window.removeEventListener("cart-updated", handleCartUpdated);
     };
   }, []);
 
   const loadCart = async () => {
     try {
-      if (!window?.storage) return;
-
-      const result = await window.storage.get("cart");
-      if (result?.value) {
-        setCartItems(JSON.parse(result.value));
-      }
+      const items = getCartItems();
+      setCartItemsState(items);
+      setSelectedIds(items.map((item) => String(item.id)));
     } catch (err) {
       console.log("No cart found");
     } finally {
@@ -38,40 +51,82 @@ export default function CartSidebar() {
     }
   };
 
-  const saveCart = async (items) => {
-    try {
-      if (!window?.storage) return;
-      await window.storage.set("cart", JSON.stringify(items));
-    } catch (err) {
-      console.error("Save failed", err);
-    }
-  };
-
   const updateQuantity = (id, delta) => {
     const updated = cartItems.map((item) =>
       item.id === id
-        ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+        ? {
+            ...item,
+            quantity: Math.max(
+              1,
+              Math.min(
+                Number(item.availableQuantity || 9999),
+                Number(item.quantity || 1) + delta
+              )
+            ),
+          }
         : item
     );
 
-    setCartItems(updated);
-    saveCart(updated);
+    setCartItemsState(updated);
+    persistCartItems(updated);
   };
 
   const removeItem = (id) => {
     const updated = cartItems.filter((item) => item.id !== id);
-    setCartItems(updated);
-    saveCart(updated);
+    setCartItemsState(updated);
+    persistCartItems(updated);
+    setSelectedIds((prev) => prev.filter((x) => x !== String(id)));
   };
 
   const clearCart = async () => {
-    setCartItems([]);
-    if (window?.storage) {
-      await window.storage.delete("cart");
+    setCartItemsState([]);
+    clearCartItems();
+    setSelectedIds([]);
+  };
+
+  const toggleSelect = (id) => {
+    const key = String(id);
+    setSelectedIds((prev) =>
+      prev.includes(key) ? prev.filter((x) => x !== key) : [...prev, key]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === cartItems.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(cartItems.map((item) => String(item.id)));
     }
   };
 
-  const subtotal = cartItems.reduce(
+  const handleCheckout = async () => {
+    const authed = await isAuthenticatedClient();
+    if (!authed) {
+      toast.error("Please login first");
+      setIsOpen(false);
+      router.push("/account?next=/Checkout");
+      return;
+    }
+
+    const selectedItems = cartItems.filter((item) =>
+      selectedIds.includes(String(item.id))
+    );
+    if (!selectedItems.length) {
+      toast.error("Select at least one product to checkout.");
+      return;
+    }
+
+    setCheckoutSelection(selectedItems);
+
+    setIsOpen(false);
+    router.push("/Checkout?cart=1");
+  };
+
+  const selectedItems = cartItems.filter((item) =>
+    selectedIds.includes(String(item.id))
+  );
+
+  const subtotal = selectedItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
@@ -121,9 +176,30 @@ export default function CartSidebar() {
               </div>
             ) : (
               <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-3">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.length === cartItems.length}
+                      onChange={toggleSelectAll}
+                    />
+                    Select all
+                  </label>
+                  <span className="text-gray-600">
+                    Selected: {selectedItems.length}/{cartItems.length}
+                  </span>
+                </div>
+
                 {cartItems.map((item) => (
                   <div key={item.id} className="bg-gray-50 p-4 rounded-lg">
                     <div className="flex gap-4">
+                      <div className="pt-1">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(String(item.id))}
+                          onChange={() => toggleSelect(item.id)}
+                        />
+                      </div>
                       <div className="w-20 h-20 border rounded flex items-center justify-center overflow-hidden">
                         {item.image ? (
                           <img
@@ -168,7 +244,7 @@ export default function CartSidebar() {
                           </div>
 
                           <div className="font-bold">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            Rs. {(item.price * item.quantity).toFixed(2)}
                           </div>
                         </div>
                       </div>
@@ -192,20 +268,23 @@ export default function CartSidebar() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>Rs. {subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>Rs. {tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>Rs. {total.toFixed(2)}</span>
                 </div>
               </div>
 
-              <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold">
-                Checkout
+              <button
+                onClick={handleCheckout}
+                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold"
+              >
+                Checkout Selected ({selectedItems.length})
               </button>
             </div>
           )}

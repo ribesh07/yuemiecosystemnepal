@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "npx prisma migrate deploy && next dev ",
-    "build": "next build",
-    "radhe-radhe": "next build && pm2 restart yuemi && pm2 logs yuemi",
+    "build": "next build --webpack",
+    "radhe-radhe": "next build --webpack && pm2 restart yuemi && pm2 logs yuemi",
     "radhe": "npx prisma migrate dev && npx prisma generate && next dev",
     "setups": "npm i && npx prisma generate && npx prisma migrate deploy && node prisma/seed.js && npm run build",
     "start": "npx prisma generate && NODE_ENV=production node server.js",

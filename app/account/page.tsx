@@ -1,15 +1,22 @@
 "use client";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
-import useWarningModalStore from "@/store/warningModalStore";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const resolveNextPath = (nextPath: string | null) => {
+    if (!nextPath || !nextPath.startsWith("/")) return "/home";
+    if (nextPath.startsWith("/admin")) return "/home";
+    if (nextPath.startsWith("/login-admin")) return "/home";
+    return nextPath;
+  };
 
   // Input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,16 +28,14 @@ export default function LoginPage() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
-      return useWarningModalStore.getState().open({
-        title: "Incomplete Form",
-        message: "Please enter both email and password",
-      });
+      toast.error("Please enter both email and password");
+      return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -41,19 +46,24 @@ export default function LoginPage() {
       if (response.ok && data.token) {
         // Save token in sessionStorage
         sessionStorage.setItem("token", data.token);
+        // Ensure customer login never keeps admin session alive
+        localStorage.removeItem("admin_auth");
+        localStorage.removeItem("admin_token");
+        sessionStorage.removeItem("admin_token");
+        window.dispatchEvent(new CustomEvent("auth-change"));
         toast.success("Login successful!");
-        router.replace("/home"); // redirect after login
+        const nextPath = searchParams.get("next");
+        router.replace(resolveNextPath(nextPath));
       } else {
-        useWarningModalStore.getState().open({
-          title: "Login Failed",
-          message: data.message || "Invalid email or password",
-        });
+        if (data.code === "EMAIL_NOT_VERIFIED") {
+          toast.error(data.message || "Please verify your email.");
+          router.push(`/account/verify?email=${encodeURIComponent(formData.email)}`);
+          return;
+        }
+        toast.error(data.message || "Invalid email or password");
       }
     } catch (err) {
-      useWarningModalStore.getState().open({
-        title: "Error",
-        message: "Something went wrong. Please try again later.",
-      });
+      toast.error("Something went wrong. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -141,5 +151,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
