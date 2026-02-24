@@ -2,7 +2,6 @@
 import React, { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
-import useWarningModalStore from "@/store/warningModalStore";
 
 function LoginPageContent() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -22,10 +21,8 @@ function LoginPageContent() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
-      return useWarningModalStore.getState().open({
-        title: "Incomplete Form",
-        message: "Please enter both email and password",
-      });
+      toast.error("Please enter both email and password");
+      return;
     }
 
     setIsLoading(true);
@@ -48,23 +45,14 @@ function LoginPageContent() {
         router.replace(nextPath || "/home");
       } else {
         if (data.code === "EMAIL_NOT_VERIFIED") {
-          return useWarningModalStore.getState().open({
-            title: "Verify Email",
-            message: data.message,
-            onOkay: () =>
-              router.push(`/account/verify?email=${encodeURIComponent(formData.email)}`),
-          });
+          toast.error(data.message || "Please verify your email.");
+          router.push(`/account/verify?email=${encodeURIComponent(formData.email)}`);
+          return;
         }
-        useWarningModalStore.getState().open({
-          title: "Login Failed",
-          message: data.message || "Invalid email or password",
-        });
+        toast.error(data.message || "Invalid email or password");
       }
     } catch (err) {
-      useWarningModalStore.getState().open({
-        title: "Error",
-        message: "Something went wrong. Please try again later.",
-      });
+      toast.error("Something went wrong. Please try again later.");
     } finally {
       setIsLoading(false);
     }
