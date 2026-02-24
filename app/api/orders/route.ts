@@ -57,8 +57,9 @@ export async function POST(req: Request) {
     const addressId = body?.addressId ? BigInt(body.addressId) : null;
     const quantity = Number(body?.quantity || 0);
     const paymentMethod = String(body?.paymentMethod || "").toLowerCase();
+    const items = Array.isArray(body?.items) ? body.items : null;
 
-    if (!productId || !addressId || !quantity || quantity < 1) {
+    if (!addressId) {
       return NextResponse.json(
         { success: false, message: "Invalid order payload" },
         { status: 400 }
@@ -84,27 +85,51 @@ export async function POST(req: Request) {
       );
     }
 
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
-    });
+    const normalizedItems = items?.length
+      ? items
+          .map((item: any) => ({
+            productId: item?.productId ? BigInt(item.productId) : null,
+            quantity: Number(item?.quantity || 0),
+          }))
+          .filter((item: any) => item.productId && item.quantity > 0)
+      : productId && quantity > 0
+        ? [{ productId, quantity }]
+        : [];
 
-    if (!product) {
+    if (!normalizedItems.length) {
       return NextResponse.json(
-        { success: false, message: "Product not found" },
-        { status: 404 }
-      );
-    }
-
-    const available = Number(product.availableQuantity || 0);
-    if (quantity > available) {
-      return NextResponse.json(
-        { success: false, message: "Insufficient stock" },
+        { success: false, message: "No valid items found for order" },
         { status: 400 }
       );
     }
 
-    const unitPrice = Number(product.sellPrice || 0);
-    const subtotal = unitPrice * quantity;
+    const productIds = normalizedItems.map((item: any) => item.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+    });
+
+    const productMap = new Map(products.map((p: any) => [p.id.toString(), p]));
+    for (const item of normalizedItems) {
+      const product = productMap.get(item.productId.toString());
+      if (!product) {
+        return NextResponse.json(
+          { success: false, message: "Product not found" },
+          { status: 404 }
+        );
+      }
+      if (item.quantity > Number(product.availableQuantity || 0)) {
+        return NextResponse.json(
+          { success: false, message: `Insufficient stock for ${product.name}` },
+          { status: 400 }
+        );
+      }
+    }
+
+    const subtotal = normalizedItems.reduce((sum: number, item: any) => {
+      const product = productMap.get(item.productId.toString());
+      return sum + Number(product?.sellPrice || 0) * item.quantity;
+    }, 0);
+
     const shippingCost = Number(address.city?.shippingCost || 0);
     const discount = 0;
     const tax = 0;
@@ -128,15 +153,20 @@ export async function POST(req: Request) {
         },
       });
 
-      await tx.orderItem.create({
-        data: {
-          orderId: order.id,
-          productCode: product.productCode,
-          quantity: BigInt(quantity),
-          price: String(unitPrice),
-          subtotal: String(subtotal),
-        },
-      });
+      for (const item of normalizedItems) {
+        const product = productMap.get(item.productId.toString())!;
+        const lineSubtotal = Number(product.sellPrice || 0) * item.quantity;
+
+        await tx.orderItem.create({
+          data: {
+            orderId: order.id,
+            productCode: product.productCode,
+            quantity: BigInt(item.quantity),
+            price: String(Number(product.sellPrice || 0)),
+            subtotal: String(lineSubtotal),
+          },
+        });
+      }
 
       await tx.orderPayment.create({
         data: {
@@ -148,12 +178,17 @@ export async function POST(req: Request) {
         },
       });
 
-      await tx.product.update({
-        where: { id: product.id },
-        data: {
-          availableQuantity: BigInt(available - quantity),
-        },
-      });
+      for (const item of normalizedItems) {
+        const product = productMap.get(item.productId.toString())!;
+        const available = Number(product.availableQuantity || 0);
+
+        await tx.product.update({
+          where: { id: product.id },
+          data: {
+            availableQuantity: BigInt(available - item.quantity),
+          },
+        });
+      }
 
       await tx.user.update({
         where: { id: customerId },

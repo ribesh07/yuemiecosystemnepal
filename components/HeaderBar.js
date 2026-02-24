@@ -13,6 +13,7 @@ import {
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { isAuthenticatedClient } from "@/utils/clientAuth";
+import { getCartCount } from "@/utils/cartClient";
 
 export default function Header() {
   const pathname = usePathname();
@@ -20,6 +21,7 @@ export default function Header() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
   const announcements = [
     "Welcome to our Exclusive Online Store!",
@@ -34,12 +36,14 @@ export default function Header() {
       const authed = await isAuthenticatedClient();
       if (mounted) {
         setIsLoggedIn(authed);
+        setCartCount(authed ? getCartCount() : 0);
       }
     };
 
     checkLogin();
 
     window.addEventListener("auth-change", checkLogin);
+    window.addEventListener("cart-updated", checkLogin);
     window.addEventListener("storage", checkLogin);
     window.addEventListener("focus", checkLogin);
     document.addEventListener("visibilitychange", checkLogin);
@@ -47,6 +51,7 @@ export default function Header() {
     return () => {
       mounted = false;
       window.removeEventListener("auth-change", checkLogin);
+      window.removeEventListener("cart-updated", checkLogin);
       window.removeEventListener("storage", checkLogin);
       window.removeEventListener("focus", checkLogin);
       document.removeEventListener("visibilitychange", checkLogin);
@@ -150,7 +155,7 @@ export default function Header() {
                   >
                     <ShoppingCart size={22} />
                     <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      0
+                      {cartCount}
                     </span>
                   </button>
                 </>

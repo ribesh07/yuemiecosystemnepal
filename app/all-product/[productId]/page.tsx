@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import RelatedProduct from "@/components/relatedProduct";
 import { apiRequest } from "@/utils/ApisafeCalls";
 import { isAuthenticatedClient } from "@/utils/clientAuth";
+import { addCartItem } from "@/utils/cartClient";
 import toast from "react-hot-toast";
 
 interface ProductImage {
@@ -98,10 +99,28 @@ export default function ProductDetailPage() {
 
   const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    if (!product) return;
+    const authed = await isAuthenticatedClient();
+    if (!authed) {
+      toast.error("Please login to add items to cart");
+      router.push("/account?next=/all-product/" + product.id);
+      return;
+    }
+
+    addCartItem({
+      id: product.id,
+      productCode: product.productCode,
+      name: product.name,
+      image: resolveImageUrl(product.mainImage),
+      price: Number(product.sellPrice || 0),
+      quantity,
+      availableQuantity: Number(product.availableQuantity || 0),
+    });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
-    // Add your cart logic here
+    toast.success("Added to cart");
+    window.dispatchEvent(new CustomEvent("open-cart"));
   };
 
   const handleBuyNow = async () => {

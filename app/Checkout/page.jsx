@@ -4,11 +4,18 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { getSessionToken, isAuthenticatedClient } from "@/utils/clientAuth";
+import {
+  clearCheckoutSelection,
+  getCartItems,
+  getCheckoutSelection,
+  removeCartItemsByIds,
+} from "@/utils/cartClient";
 
 const CheckoutPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId");
+  const isCartCheckout = searchParams.get("cart") === "1";
   const qtyParam = Number(searchParams.get("qty") || "1");
   const quantity = Number.isNaN(qtyParam) || qtyParam < 1 ? 1 : qtyParam;
   const [selectedAddressId, setSelectedAddressId] = useState('');
@@ -19,6 +26,7 @@ const CheckoutPage = () => {
   const [placingOrder, setPlacingOrder] = useState(false);
   const [product, setProduct] = useState(null);
   const [productLoading, setProductLoading] = useState(true);
+  const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -31,8 +39,8 @@ const CheckoutPage = () => {
         return;
       }
 
-      if (!productId) {
-        toast.error("No product selected for checkout");
+      if (!productId && !isCartCheckout) {
+        toast.error("No product selected for checkout.");
         router.replace("/all-product");
         return;
       }
@@ -56,17 +64,30 @@ const CheckoutPage = () => {
         }
       }
 
-      const productsRes = await fetch("/api/products");
-      const productsData = await productsRes.json();
-      const list = productsData?.products || [];
-      const selected = list.find((p) => String(p.id) === String(productId));
-      if (!selected) {
-        toast.error("Product not found");
-        router.replace("/all-product");
-        return;
-      }
-      if (mounted) {
-        setProduct(selected);
+      if (isCartCheckout) {
+        const selected = getCheckoutSelection();
+        const items = selected.length ? selected : getCartItems();
+        if (!items.length) {
+          toast.error("Your cart is empty.");
+          router.replace("/all-product");
+          return;
+        }
+        if (mounted) {
+          setCartItems(items);
+        }
+      } else {
+        const productsRes = await fetch("/api/products");
+        const productsData = await productsRes.json();
+        const list = productsData?.products || [];
+        const selected = list.find((p) => String(p.id) === String(productId));
+        if (!selected) {
+          toast.error("Product not found");
+          router.replace("/all-product");
+          return;
+        }
+        if (mounted) {
+          setProduct(selected);
+        }
       }
 
       if (mounted) {
@@ -82,13 +103,33 @@ const CheckoutPage = () => {
     return () => {
       mounted = false;
     };
-  }, [router, productId]);
+  }, [router, productId, isCartCheckout]);
+
+  const summaryItems = isCartCheckout
+    ? cartItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        image: item.image,
+        categoryName: item.categoryName || "",
+        sellPrice: Number(item.price || 0),
+        quantity: Number(item.quantity || 1),
+      }))
+    : product
+      ? [{
+          id: product.id,
+          name: product.name,
+          image: product.mainImage,
+          categoryName: product.categoryName || "",
+          sellPrice: Number(product.sellPrice || 0),
+          quantity,
+        }]
+      : [];
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!product) {
-      toast.error("Product not loaded");
+    if (!summaryItems.length) {
+      toast.error("No items found for checkout.");
       return;
     }
     
@@ -111,8 +152,17 @@ const CheckoutPage = () => {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
-        productId: product.id,
-        quantity,
+        ...(isCartCheckout
+          ? {
+              items: summaryItems.map((item) => ({
+                productId: item.id,
+                quantity: item.quantity,
+              })),
+            }
+          : {
+              productId: summaryItems[0].id,
+              quantity: summaryItems[0].quantity,
+            }),
         addressId: selectedAddressId,
         paymentMethod: "cod",
       }),
@@ -123,6 +173,10 @@ const CheckoutPage = () => {
           throw new Error(data?.message || "Failed to place order");
         }
         toast.success("Order placed successfully!");
+        if (isCartCheckout) {
+          removeCartItemsByIds(summaryItems.map((item) => item.id));
+          clearCheckoutSelection();
+        }
         router.push("/profile");
       })
       .catch((err) => {
@@ -135,7 +189,10 @@ const CheckoutPage = () => {
 
   const selectedAddress = savedAddresses.find((a) => String(a.id) === String(selectedAddressId));
   const shipping = Number(selectedAddress?.city?.shippingCost || 0);
-  const subtotal = Number(product?.sellPrice || 0) * quantity;
+  const subtotal = summaryItems.reduce(
+    (sum, item) => sum + Number(item.sellPrice || 0) * Number(item.quantity || 0),
+    0
+  );
   const total = subtotal + shipping;
 
   if (!authChecked || productLoading) {
@@ -300,28 +357,45 @@ const CheckoutPage = () => {
 
                 {/* Product Details */}
                 <div className="mb-6 pb-6 border-b border-gray-200">
-                  <div className="flex gap-4">
-                    <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-gray-200">
-                      <Image
-                        src={product?.mainImage || "/yumei_logo.png"}
-                        alt={product?.name || "Product"}
-                        fill
-                        className="object-cover"
-                        sizes="96px"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-800 text-sm mb-1 line-clamp-2">
-                        {product?.name}
-                      </h4>
-                      <p className="text-xs text-gray-600 mb-2">{product?.categoryName || "-"}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Qty: {quantity}</span>
-                        <span className="font-bold text-orange-500">Rs. {Number(product?.sellPrice || 0)}</span>
+                  <div className="space-y-4">
+                    {summaryItems.map((item) => (
+                      <div key={item.id} className="flex gap-4">
+                        <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-gray-200">
+                          <Image
+                            src={item?.image || "/yumei_logo.png"}
+                            alt={item?.name || "Product"}
+                            fill
+                            className="object-cover"
+                            sizes="96px"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-800 text-sm mb-1 line-clamp-2">
+                            {item?.name}
+                          </h4>
+                          <p className="text-xs text-gray-600 mb-2">
+                            {item?.categoryName || "-"}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">
+                              Qty: {item.quantity}
+                            </span>
+                            <span className="font-bold text-orange-500">
+                              Rs. {Number(item.sellPrice || 0)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
+
+                {isCartCheckout && (
+                  <div className="mb-4 text-xs text-gray-500">
+                    Total Items:{" "}
+                    {summaryItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}
+                  </div>
+                )}
 
                 {/* Price Breakdown */}
                 <div className="space-y-3 mb-6">
