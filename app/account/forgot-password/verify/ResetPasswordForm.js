@@ -108,10 +108,10 @@ export default function ResetPasswordForm() {
   const handleCancel = () => router.push("/account");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-2xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600 mb-2">
+          <h1 className="text-3xl font-bold text-orange-600 mb-2">
             RESET YOUR PASSWORD
           </h1>
         </div>
@@ -135,7 +135,7 @@ export default function ResetPasswordForm() {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Enter E-mail"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50"
               />
             </div>
 
@@ -152,7 +152,7 @@ export default function ResetPasswordForm() {
                 value={formData.resetCode}
                 onChange={handleInputChange}
                 placeholder="Enter Reset Code"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50"
               />
             </div>
 
@@ -170,7 +170,7 @@ export default function ResetPasswordForm() {
                   value={formData.newPassword}
                   onChange={handleInputChange}
                   placeholder="New Password"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50"
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50"
                 />
                 <button
                   type="button"
@@ -230,7 +230,7 @@ export default function ResetPasswordForm() {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   placeholder="Re-Enter New Password"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50"
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none bg-gray-50"
                 />
                 <button
                   type="button"
@@ -280,7 +280,7 @@ export default function ResetPasswordForm() {
               <button
                 onClick={handleResetPassword}
                 disabled={isLoading}
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                className="bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-700 disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? "RESETTING..." : "RESET PASSWORD"}
               </button>
@@ -291,7 +291,7 @@ export default function ResetPasswordForm() {
         <div className="text-center">
           <button
             onClick={handleCancel}
-            className="w-full bg-gray-50 text-blue-600 border-2 border-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 cursor-pointer"
+            className="w-full bg-gray-50 text-orange-600 border-2 border-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-orange-50 cursor-pointer"
           >
             CANCEL
           </button>
@@ -300,7 +300,7 @@ export default function ResetPasswordForm() {
         <div className="mt-6 text-center text-sm text-gray-600">
           Didn't receive the reset code?{" "}
           <button
-            className="text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+            className="text-orange-600 hover:text-orange-800 font-medium cursor-pointer"
             onClick={handleResendCode}
           >
             Request a new code

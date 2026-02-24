@@ -71,12 +71,12 @@ function LoginPageContent() {
 
   return isLoading ? (
     <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
     </div>
   ) : (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-md p-8">
-        <h1 className="text-2xl font-bold text-blue-600 text-center mb-4">
+        <h1 className="text-2xl font-bold text-orange-600 text-center mb-4">
           LOGIN
         </h1>
         <form className="space-y-4" onSubmit={handleSignIn}>
@@ -91,7 +91,7 @@ function LoginPageContent() {
               value={formData.email}
               onChange={handleInputChange}
               placeholder="Enter your email"
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
               required
             />
           </div>
@@ -108,7 +108,7 @@ function LoginPageContent() {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
                 required
               />
               <button
@@ -124,7 +124,7 @@ function LoginPageContent() {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
           >
             LOGIN
           </button>
@@ -133,7 +133,7 @@ function LoginPageContent() {
             <button
               type="button"
               onClick={() => router.push("/account/forgot-password")}
-              className="text-blue-600 hover:text-blue-800 font-medium"
+              className="text-orange-600 hover:text-orange-800 font-medium"
             >
               Forgot Password?
             </button>
@@ -144,7 +144,7 @@ function LoginPageContent() {
           <p className="text-gray-600 mb-2">New here?</p>
           <button
             onClick={() => router.push("/account/signup")}
-            className="w-full bg-gray-50 text-blue-600 border-2 border-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+            className="w-full bg-gray-50 text-orange-600 border-2 border-orange-600 px-6 py-3 rounded-lg font-medium hover:bg-orange-50 transition-colors"
           >
             Create an Account
           </button>

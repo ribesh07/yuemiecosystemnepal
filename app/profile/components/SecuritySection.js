@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { clearSessionAuth, getSessionToken } from "@/utils/clientAuth";
+import useConfirmModalStore from "@/store/confirmModalStore";
 
 function Modal({ title, isOpen, onClose, children }) {
   if (!isOpen) return null;
@@ -36,20 +37,13 @@ export default function SecuritySection() {
     confirmPassword: "",
   });
 
-  const handleLogout = async () => {
-    if (!confirm("Are you sure you want to logout?")) return;
-
-    try {
-      const res = await fetch("/api/auth/logout", { method: "POST" });
-      if (!res.ok) throw new Error("Logout failed");
-      toast.success("Logged out successfully!");
-    } catch {
-      toast.error("Logout failed. Try again.");
-    } finally {
-      clearSessionAuth();
-      router.replace("/home");
-    }
-  };
+  const handleLogout = () => {
+    clearSessionAuth();
+    toast.success("Logged out successfully");
+    setTimeout(() => {
+      router.push("/account");
+    }, 1000);
+  };  
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -106,7 +100,7 @@ export default function SecuritySection() {
 
         <button
           onClick={handleLogout}
-          className="border px-4 py-2 rounded text-sm"
+          className="bg-red-500 text-white px-4 py-2 rounded text-sm"
         >
           Logout
         </button>
