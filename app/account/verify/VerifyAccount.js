@@ -109,11 +109,11 @@ export default function VerifyAccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-2xl p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600 mb-2">
+          <h1 className="text-3xl font-bold text-orange-600 mb-2">
             VERIFY YOUR ACCOUNT
           </h1>
         </div>
@@ -156,7 +156,7 @@ export default function VerifyAccountPage() {
                 value={verificationCode}
                 onChange={handleVerificationCodeChange}
                 placeholder="Enter Verification Code"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors bg-gray-50"
               />
             </div>
 
@@ -165,7 +165,7 @@ export default function VerifyAccountPage() {
               <button
                 onClick={handleVerify}
                 disabled={isLoading}
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-orange-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "VERIFYING..." : "VERIFY"}
               </button>
@@ -173,7 +173,7 @@ export default function VerifyAccountPage() {
               <button
                 onClick={handleResendCode}
                 disabled={isLoading}
-                className="text-blue-600 hover:text-blue-800 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="text-orange-600 hover:text-orange-800 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Resend Code?
               </button>
@@ -189,7 +189,7 @@ export default function VerifyAccountPage() {
 
           <button
             onClick={handleLoginNow}
-            className="w-full bg-gray-50 text-blue-600 border-2 border-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+            className="w-full bg-gray-50 text-orange-600 border-2 border-orange-600 px-6 py-3 rounded-lg font-medium hover:bg-orange-50 transition-colors focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 cursor-pointer"
           >
             LOGIN NOW
           </button>

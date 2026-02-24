@@ -74,11 +74,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-2xl p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600 mb-2">
+          <h1 className="text-3xl font-bold text-orange-600 mb-2">
             FORGOT PASSWORD?
           </h1>
         </div>
@@ -104,7 +104,7 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={handleEmailChange}
                 placeholder="Enter E-mail"
-                className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-gray-50 text-lg"
+                className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors bg-gray-50 text-lg"
               />
             </div>
 
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
               <button
                 onClick={handleSendVerificationCode}
                 disabled={isLoading}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold text-lg hover:bg-orange-700 transition-colors focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isLoading ? "SENDING..." : "SEND VERIFICATION CODE"}
               </button>
@@ -152,7 +152,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center">
           <button
             onClick={handleCancel}
-            className="w-full bg-gray-50 text-blue-600 border-2 border-blue-600 px-6 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+            className="w-full bg-gray-50 text-orange-600 border-2 border-orange-600 px-6 py-4 rounded-lg font-semibold text-lg hover:bg-orange-50 transition-colors focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 cursor-pointer"
           >
             CANCEL
           </button>
@@ -164,7 +164,7 @@ export default function ForgotPasswordPage() {
             Remember your password?
             <button
               onClick={handleCancel}
-              className="text-blue-600 hover:text-blue-800 font-medium ml-1 transition-colors cursor-pointer"
+              className="text-orange-600 hover:text-orange-800 font-medium ml-1 transition-colors cursor-pointer"
             >
               Back to Login
             </button>

@@ -111,10 +111,10 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-blue-600 mb-2">CREATE ACCOUNT</h1>
+          <h1 className="text-2xl font-bold text-orange-600 mb-2">CREATE ACCOUNT</h1>
         </div>
         <div className="space-y-4">
           {/* First Name */}
@@ -125,7 +125,7 @@ export default function AuthPage() {
               value={formData.firstname}
               onChange={handleInputChange}
               placeholder="Enter First Name"
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -137,7 +137,7 @@ export default function AuthPage() {
               value={formData.lastname}
               onChange={handleInputChange}
               placeholder="Enter Last Name"
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -150,7 +150,7 @@ export default function AuthPage() {
               value={formData.email}
               onChange={handleInputChange}
               placeholder="Enter Email"
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -164,7 +164,7 @@ export default function AuthPage() {
               onChange={handleInputChange}
               placeholder="Enter Mobile Number"
               maxLength={10}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -178,7 +178,7 @@ export default function AuthPage() {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Enter Password"
-                className="w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-orange-500"
               />
               <button
                 type="button"
@@ -200,7 +200,7 @@ export default function AuthPage() {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 placeholder="Confirm Password"
-                className="w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-orange-500"
               />
               <button
                 type="button"
@@ -216,7 +216,7 @@ export default function AuthPage() {
           <button
             onClick={handleCreateAccount}
             disabled={isSubmitting}
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 mt-4"
+            className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 mt-4"
           >
             {isSubmitting ? "CREATING..." : "CREATE ACCOUNT"}
           </button>
