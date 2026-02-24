@@ -78,13 +78,13 @@ export default function HeroSlider() {
       </div>
 
       {/* Navigation Arrows */}
-      <button
+      {/* <button
         onClick={() =>
           setCurrentSlide(
             currentSlide === 0 ? totalSlides - 1 : currentSlide - 1
           )
         }
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-2 rounded-full"
+        className="absolute left-4 top-1/2 -translate-y-1/2  text-white px-3 py-2 rounded-full"
       >
         ‹
       </button>
@@ -98,7 +98,7 @@ export default function HeroSlider() {
         className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-2 rounded-full"
       >
         ›
-      </button>
+      </button> */}
 
       {/* Dots */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
