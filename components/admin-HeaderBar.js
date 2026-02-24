@@ -18,7 +18,7 @@ export default function AdminHeaderBar() {
   }, []);
     const pathname = usePathname();
 
-  if (pathname === "/admin/login") return null;
+  if (pathname === "/login-admin") return null;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm">
@@ -67,7 +67,9 @@ export default function AdminHeaderBar() {
           <button
             onClick={() => {
               localStorage.removeItem("admin_auth");
-              router.push("/admin/login");
+              localStorage.removeItem("admin_token");
+              sessionStorage.removeItem("admin_token");
+              router.push("/login-admin");
             }}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-red-500 text-white hover:bg-red-600 transition"
           >
