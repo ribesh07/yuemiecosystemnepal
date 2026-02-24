@@ -11,6 +11,13 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const resolveNextPath = (nextPath: string | null) => {
+    if (!nextPath || !nextPath.startsWith("/")) return "/home";
+    if (nextPath.startsWith("/admin")) return "/home";
+    if (nextPath.startsWith("/login-admin")) return "/home";
+    return nextPath;
+  };
+
   // Input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,10 +46,14 @@ function LoginPageContent() {
       if (response.ok && data.token) {
         // Save token in sessionStorage
         sessionStorage.setItem("token", data.token);
+        // Ensure customer login never keeps admin session alive
+        localStorage.removeItem("admin_auth");
+        localStorage.removeItem("admin_token");
+        sessionStorage.removeItem("admin_token");
         window.dispatchEvent(new CustomEvent("auth-change"));
         toast.success("Login successful!");
         const nextPath = searchParams.get("next");
-        router.replace(nextPath || "/home");
+        router.replace(resolveNextPath(nextPath));
       } else {
         if (data.code === "EMAIL_NOT_VERIFIED") {
           toast.error(data.message || "Please verify your email.");
