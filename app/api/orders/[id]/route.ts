@@ -137,7 +137,7 @@ export async function PATCH(
       }
 
       await (tx as any).returnRequest.createMany({
-        data: order.items.map((item) => ({
+        data: order.items.map((item: { productCode: string; quantity: bigint }) => ({
           orderId,
           customerId,
           productCode: item.productCode,
