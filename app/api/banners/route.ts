@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import fs from "fs";
 import path from "path";
-import { GET_UPLOAD_BASE_DIR, UPLOAD_BASE_DIR } from "@/utils/imageUpload";
-// import { requireAdminRole } from "@/lib/auth"; // enable later
+import { UPLOAD_BASE_DIR, urlToFilePath } from "@/utils/imageUpload";
+import { requireAdminRole } from "@/lib/auth";
 
 /**
  * GET /api/banners
@@ -39,7 +39,9 @@ export async function POST(req: Request) {
   let banner: any | null = null;
 
   try {
-    // requireAdminRole("ADMIN"); // enable later
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole("ADMIN");
+    }
 
     const formData = await req.formData();
 
@@ -99,7 +101,7 @@ export async function POST(req: Request) {
   } catch (error) {
     /* ---------- CLEANUP ---------- */
     if (imagePath) {
-      const filePath = path.join(GET_UPLOAD_BASE_DIR, imagePath);
+      const filePath = urlToFilePath(imagePath);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }

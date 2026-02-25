@@ -99,7 +99,7 @@ const SideHeaderBar = () => {
       ],
      },
 
-    { icon: Star, label: "Reviews & Ratings", path: "/admin/reviews" },
+    // { icon: Star, label: "Reviews & Ratings", path: "/admin/reviews" },
     
     { icon: FileText, label: "Grievances", path: "/admin/grievances" },
     
@@ -107,9 +107,9 @@ const SideHeaderBar = () => {
     
 
     { icon: BarChart3, label: "Warranty Report", path: "/admin/report" },
-    { icon: Truck, label: "Shipping Carriers", path: "/admin/shipping" },
+    // { icon: Truck, label: "Shipping Carriers", path: "/admin/shipping" },
     
-    { icon: XCircle, label: "Return & Cancel Reasons", path: "/admin/returns" },
+    { icon: XCircle, label: "Return list", path: "/admin/returns" },
 
     {
       icon: Shield,

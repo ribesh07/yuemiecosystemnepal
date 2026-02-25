@@ -1,15 +1,17 @@
 import { prisma } from "@/prisma/prisma-client";
 import { NextRequest, NextResponse } from "next/server";
-
-(BigInt.prototype as any).toJSON = function () {
-  return this.toString();
-};
+import { requireAdminRole } from "@/lib/auth";
+import { serializeBigInt } from "@/lib/serializeBigInt";
 
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole();
+    }
+
     const { id } = await context.params;
     const { zoneName, cityId } = await req.json();
 
@@ -22,7 +24,7 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(updatedZone);
+    return NextResponse.json(serializeBigInt(updatedZone));
   } catch {
     return NextResponse.json(
       { error: "Failed to update zone" },
@@ -36,6 +38,10 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole();
+    }
+
     const { id } = await context.params;
 
     await prisma.addressZone.delete({

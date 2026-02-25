@@ -8,7 +8,7 @@ const ORDER_STATUS_FLOW: Record<string, string[]> = {
   shipped: ["delivered", "cancelled"],
   delivered: ["returns"],
   cancelled: [],
-  returns: [],
+  returns: ["shipped", "cancelled"],
 };
 
 const PAYMENT_STATUSES = new Set(["unpaid", "paid", "partial", "refunded"]);

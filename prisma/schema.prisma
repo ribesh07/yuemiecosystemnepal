@@ -35,6 +35,7 @@ model User {
 
   addresses         CustomerAddress[]
   orders            Order[]
+  returnRequests    ReturnRequest[]
   cart              Cart?
   wishlist          Wishlist[]
   reviews           ProductReview[]
@@ -211,6 +212,7 @@ model Product {
   cartItems         CartItem[]
   wishlists Wishlist[]
   orderItems        OrderItem[]
+  returnRequests    ReturnRequest[]
 
   @@index([categoryId])
   @@index([brandId])
@@ -312,6 +314,7 @@ model Order {
   user          User      @relation(fields: [customerId], references: [id])
   items         OrderItem[]
   payments      OrderPayment[]
+  returnRequests ReturnRequest[]
 
   @@map("orders")
 }
@@ -396,4 +399,35 @@ model PopupAds {
 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model Inquiry {
+  id          BigInt    @id @default(autoincrement())
+  name        String
+  email       String
+  inquiryType String    @map("inquiry_type")
+  message     String
+  status      String    @default("new")
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime?
+
+  @@map("inquiries")
+}
+
+model ReturnRequest {
+  id          BigInt    @id @default(autoincrement())
+  orderId     BigInt    @map("order_id")
+  customerId  BigInt    @map("customer_id")
+  productCode String    @map("product_code")
+  quantity    BigInt    @default(1)
+  reason      String
+  status      String    @default("new")
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime?
+
+  order       Order     @relation(fields: [orderId], references: [id])
+  user        User      @relation(fields: [customerId], references: [id])
+  product     Product   @relation(fields: [productCode], references: [productCode])
+
+  @@map("return_requests")
 }

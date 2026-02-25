@@ -1,9 +1,7 @@
 import { prisma } from "@/prisma/prisma-client";
 import { NextResponse } from "next/server";
-
-(BigInt.prototype as any).toJSON = function () {
-  return this.toString();
-};
+import { requireAdminRole } from "@/lib/auth";
+import { serializeBigInt } from "@/lib/serializeBigInt";
 
 
 export async function GET() {
@@ -12,10 +10,14 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(cities);
+  return NextResponse.json(serializeBigInt(cities));
 }
 
 export async function POST(req: Request) {
+  if (process.env.NODE_ENV === "production") {
+    await requireAdminRole();
+  }
+
   const { city, shippingCost, provinceId } = await req.json();
 
   const newCity = await prisma.shippingCity.create({
@@ -26,5 +28,5 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json(newCity);
+  return NextResponse.json(serializeBigInt(newCity));
 }

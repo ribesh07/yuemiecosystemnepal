@@ -2,6 +2,11 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
+import { requireAdminRole } from "@/lib/auth";
+import { serializeBigInt } from "@/lib/serializeBigInt";
+import fs from "fs";
+import path from "path";
+import { getCategoryImageDir, urlToFilePath } from "@/utils/imageUpload";
 
 export async function GET(
   req: Request,
@@ -38,18 +43,15 @@ export async function GET(
     );
   }
 }
-
-
-import fs from "fs";
-import path from "path";
-import { serializeBigInt } from "@/lib/serializeBigInt";
-import { getCategoryImageDir, urlToFilePath } from "@/utils/imageUpload";
-
 export async function PUT(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole("ADMIN");
+    }
+
     const { id } = await context.params;
 
     if (!id) {
@@ -133,6 +135,10 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole("ADMIN");
+    }
+
     const { id } = await context.params;
 
     if (!id) {
