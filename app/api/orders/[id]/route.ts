@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
+import { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
@@ -109,7 +110,8 @@ export async function PATCH(
       );
     }
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
       const existingActiveReturns = await (tx as any).returnRequest?.count({
         where: {
           orderId,
@@ -146,7 +148,8 @@ export async function PATCH(
       });
 
       return changed;
-    });
+      }
+    );
 
     return NextResponse.json({
       success: true,

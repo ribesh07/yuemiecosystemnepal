@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
+import { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
@@ -33,7 +34,8 @@ export async function PUT(
       );
     }
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
       if (body.defaultShipping) {
         await tx.customerAddress.updateMany({
           where: { customerId, id: { not: addressId } },
@@ -104,7 +106,8 @@ export async function PUT(
           zone: true,
         },
       });
-    });
+      }
+    );
 
     return NextResponse.json({ success: true, data: serializeBigInt(updated) });
   } catch (error) {
