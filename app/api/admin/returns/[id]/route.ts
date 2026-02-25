@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
+import { Prisma } from "@prisma/client";
 import { requireAdminRole } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
@@ -71,7 +72,8 @@ export async function PATCH(
       );
     }
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
       const changed = await (tx as any).returnRequest.update({
         where: { id: returnId },
         data: { status: nextStatus, updatedAt: new Date() },
@@ -88,7 +90,8 @@ export async function PATCH(
       }
 
       return changed;
-    });
+      }
+    );
 
     return NextResponse.json({
       success: true,

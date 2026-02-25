@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
+import { Prisma } from "@prisma/client";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 import { getProductImageDir } from "@/utils/imageUpload";
 import fs from "fs";
@@ -105,7 +106,7 @@ const categoryIdNum = categoryId ? Number(categoryId) : null; // convert to Int 
 
 // --- Create product inside a transaction ---
 // --- Create product inside a transaction ---
-const product = await prisma.$transaction(async (tx) => {
+const product = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
   const createdProduct = await tx.product.create({
     data: {
       productCode,

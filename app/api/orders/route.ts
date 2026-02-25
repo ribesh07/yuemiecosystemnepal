@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
+import { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
@@ -138,7 +139,8 @@ export async function POST(req: Request) {
       `${Date.now()}${Math.floor(100 + Math.random() * 900)}`
     );
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
       const order = await tx.order.create({
         data: {
           orderNumber,
@@ -198,7 +200,8 @@ export async function POST(req: Request) {
       });
 
       return order;
-    });
+      }
+    );
 
     return NextResponse.json({
       success: true,

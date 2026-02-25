@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
+import { Prisma } from "@prisma/client";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 import { requireAdminRole } from "@/lib/auth";
 import fs from "fs";
@@ -146,7 +147,7 @@ export async function PUT(
     }
 
     // 🧱 Transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const product = await tx.product.update({
         where: { id: productId },
         data: {
