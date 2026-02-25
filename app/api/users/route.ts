@@ -10,13 +10,13 @@ export async function GET() {
     orderBy: { id: "desc" },
   });
 
-  const safeUsers = users.map((user: any) => ({
+  const safeUsers: any[] = users.map((user: any) => ({
     ...user,
     id: user.id.toString(),
     createdAt: user.createdAt?.toISOString()
   }));
 
-  const Users = safeUsers.map((safeUser) => {
+  const Users = safeUsers.map((safeUser: any) => {
     const { password, ...u } = safeUser;
     return u;
   });
