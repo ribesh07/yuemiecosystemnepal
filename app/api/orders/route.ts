@@ -4,6 +4,21 @@ import { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
+type OrderInputItem = {
+  productId: bigint;
+  quantity: number;
+};
+
+type ProductForOrder = Prisma.ProductGetPayload<{
+  select: {
+    id: true;
+    name: true;
+    productCode: true;
+    sellPrice: true;
+    availableQuantity: true;
+  };
+}>;
+
 export async function GET() {
   try {
     const user = await requireAuth();
@@ -86,7 +101,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const normalizedItems = items?.length
+    const normalizedItems: OrderInputItem[] = items?.length
       ? items
           .map((item: any) => ({
             productId: item?.productId ? BigInt(item.productId) : null,
@@ -104,12 +119,21 @@ export async function POST(req: Request) {
       );
     }
 
-    const productIds = normalizedItems.map((item: any) => item.productId);
+    const productIds = normalizedItems.map((item) => item.productId);
     const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        productCode: true,
+        sellPrice: true,
+        availableQuantity: true,
+      },
       where: { id: { in: productIds } },
     });
 
-    const productMap = new Map(products.map((p: any) => [p.id.toString(), p]));
+    const productMap = new Map<string, ProductForOrder>(
+      products.map((p) => [p.id.toString(), p])
+    );
     for (const item of normalizedItems) {
       const product = productMap.get(item.productId.toString());
       if (!product) {
@@ -126,7 +150,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const subtotal = normalizedItems.reduce((sum: number, item: any) => {
+    const subtotal = normalizedItems.reduce((sum: number, item) => {
       const product = productMap.get(item.productId.toString());
       return sum + Number(product?.sellPrice || 0) * item.quantity;
     }, 0);
