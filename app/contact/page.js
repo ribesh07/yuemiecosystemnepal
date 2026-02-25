@@ -12,6 +12,7 @@ const ContactPage = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [submitError, setSubmitError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,13 +22,25 @@ const ContactPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError("");
 
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.message || "Failed to submit inquiry");
+      }
+
       setSubmitStatus("success");
       setFormData({
         name: "",
@@ -35,10 +48,13 @@ const ContactPage = () => {
         inquiryType: "",
         message: "",
       });
-
-      // Clear success message after 3 seconds
+    } catch (error) {
+      setSubmitStatus("error");
+      setSubmitError(error?.message || "Failed to send inquiry. Please try again.");
+    } finally {
+      setIsSubmitting(false);
       setTimeout(() => setSubmitStatus(null), 3000);
-    }, 1000);
+    }
   };
 
   return (
@@ -91,6 +107,11 @@ const ContactPage = () => {
           {submitStatus === "success" && (
             <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
               Thank you! Your message has been sent successfully.
+            </div>
+          )}
+          {submitStatus === "error" && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              {submitError || "Failed to send inquiry. Please try again."}
             </div>
           )}
 
