@@ -52,7 +52,7 @@ export async function DELETE(req: Request) {
     if (type === "gallery") {
       const images = (productImages.imagePath as string[]) || [];
 
-      const updatedImages = images.filter((img) => img !== imagePath);
+      const updatedImages = images.filter((img: string) => img !== imagePath);
 
       await prisma.productImage.update({
         where: { productCode },
