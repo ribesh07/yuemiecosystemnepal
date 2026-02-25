@@ -1,10 +1,7 @@
 import { prisma } from "@/prisma/prisma-client";
 import { NextRequest, NextResponse } from "next/server";
-
-// BigInt JSON fix
-(BigInt.prototype as any).toJSON = function () {
-  return this.toString();
-};
+import { requireAdminRole } from "@/lib/auth";
+import { serializeBigInt } from "@/lib/serializeBigInt";
 
 
 
@@ -13,6 +10,10 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole();
+    }
+
     const { id } = await context.params;
     const { city, shippingCost, applyShipping, provinceId } =
       await req.json();
@@ -28,7 +29,7 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(updatedCity);
+    return NextResponse.json(serializeBigInt(updatedCity));
   } catch (error) {
     console.error("Error updating city:", error);
     return NextResponse.json(
@@ -43,6 +44,10 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole();
+    }
+
     const { id } = await context.params;
 
     await prisma.shippingCity.delete({

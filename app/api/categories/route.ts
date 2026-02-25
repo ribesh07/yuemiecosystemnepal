@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
-// import { requireAdminRole } from "@/lib/auth"; 
+import { requireAdminRole } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
 import { serializeBigInt } from "@/lib/serializeBigInt";
@@ -47,16 +47,15 @@ export async function POST(req: Request) {
   let createdCategory: any | null = null;
 
   try {
-    // if (process.env.NODE_ENV === "production") {
-    //   await requireAdminRole("ADMIN");
-    // }
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole("ADMIN");
+    }
 
     const formData = await req.formData();
 
     const name = formData.get("name") as string;
     const status = formData.get("status") as string;
     const description = formData.get("description") as string | null;
-    const slug = formData.get("slug") as string | null;
     const parentId = formData.get("parentId") as string | null;
     const top = formData.get("top") as string | null;
     const file = formData.get("image") as File | null;

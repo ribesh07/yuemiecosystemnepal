@@ -3,14 +3,18 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import fs from "fs";
-import path from "path";
-import { UPLOAD_BASE_DIR } from "@/utils/imageUpload";
+import { requireAdminRole } from "@/lib/auth";
+import { urlToFilePath } from "@/utils/imageUpload";
 
 export async function DELETE(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole("ADMIN");
+    }
+
     const { id } = await context.params;
 
     if (!id) {
@@ -42,10 +46,7 @@ export async function DELETE(
 
     /* ---------- DELETE IMAGE ---------- */
     if (popupAd.imageUrl) {
-      const imagePath = path.join(
-        UPLOAD_BASE_DIR,
-        popupAd.imageUrl
-      );
+      const imagePath = urlToFilePath(popupAd.imageUrl);
 
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);

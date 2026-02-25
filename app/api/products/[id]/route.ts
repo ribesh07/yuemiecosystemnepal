@@ -3,16 +3,65 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { serializeBigInt } from "@/lib/serializeBigInt";
+import { requireAdminRole } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { getProductImageDir, urlToFilePath } from "@/utils/imageUpload";
+
+export async function GET(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Product id is required" },
+        { status: 400 }
+      );
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id: BigInt(id) },
+      include: {
+        images: true,
+        category: true,
+        brand: true,
+        variations: true,
+        reviews: true,
+      },
+    });
+
+    if (!product) {
+      return NextResponse.json(
+        { success: false, message: "Product not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: serializeBigInt(product),
+    });
+  } catch (error) {
+    console.error("PRODUCT_GET_BY_ID_ERROR", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch product" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PUT(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole("ADMIN");
+    }
+
     const { id } = await context.params;
     const productId = BigInt(id);
 

@@ -93,6 +93,7 @@ function renderStars(ratingValue: number) {
 export default function ProductDetailPage() {
   const { productId } = useParams();
   const router = useRouter();
+  const normalizedProductId = Array.isArray(productId) ? productId[0] : productId;
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -102,13 +103,14 @@ export default function ProductDetailPage() {
   const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => {
+    if (!normalizedProductId) return;
+
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const result = await apiRequest("/products", false);
-        const allProducts = result?.products || [];
-        const found = allProducts.find((p: Product) => p.id == productId);
-        setProduct(found || null);
+        const result = await apiRequest(`/products/${normalizedProductId}`, false);
+        const found = result?.data || result?.product || null;
+        setProduct(found);
       } catch (err) {
         console.error(err);
         setProduct(null);
@@ -118,7 +120,7 @@ export default function ProductDetailPage() {
     };
 
     fetchProduct();
-  }, [productId]);
+  }, [normalizedProductId]);
 
   const incrementQuantity = () => {
     if (product && quantity < Number(product.availableQuantity)) {
