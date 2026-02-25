@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
-import { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
@@ -9,15 +8,15 @@ type OrderInputItem = {
   quantity: number;
 };
 
-type ProductForOrder = Prisma.ProductGetPayload<{
-  select: {
-    id: true;
-    name: true;
-    productCode: true;
-    sellPrice: true;
-    availableQuantity: true;
-  };
-}>;
+type ProductForOrder = {
+  id: bigint;
+  name: string | null;
+  productCode: string;
+  sellPrice: unknown;
+  availableQuantity: bigint;
+};
+
+const toNumber = (value: unknown) => Number(value ?? 0);
 
 export async function GET() {
   try {
@@ -142,7 +141,7 @@ export async function POST(req: Request) {
           { status: 404 }
         );
       }
-      if (item.quantity > Number(product.availableQuantity || 0)) {
+      if (item.quantity > toNumber(product.availableQuantity)) {
         return NextResponse.json(
           { success: false, message: `Insufficient stock for ${product.name}` },
           { status: 400 }
@@ -152,7 +151,7 @@ export async function POST(req: Request) {
 
     const subtotal = normalizedItems.reduce((sum: number, item) => {
       const product = productMap.get(item.productId.toString());
-      return sum + Number(product?.sellPrice || 0) * item.quantity;
+      return sum + toNumber(product?.sellPrice) * item.quantity;
     }, 0);
 
     const shippingCost = Number(address.city?.shippingCost || 0);
@@ -164,7 +163,7 @@ export async function POST(req: Request) {
     );
 
     const result = await prisma.$transaction(
-      async (tx: Prisma.TransactionClient) => {
+      async (tx: any) => {
       const order = await tx.order.create({
         data: {
           orderNumber,
@@ -181,14 +180,14 @@ export async function POST(req: Request) {
 
       for (const item of normalizedItems) {
         const product = productMap.get(item.productId.toString())!;
-        const lineSubtotal = Number(product.sellPrice || 0) * item.quantity;
+        const lineSubtotal = toNumber(product.sellPrice) * item.quantity;
 
         await tx.orderItem.create({
           data: {
             orderId: order.id,
             productCode: product.productCode,
             quantity: BigInt(item.quantity),
-            price: String(Number(product.sellPrice || 0)),
+            price: String(toNumber(product.sellPrice)),
             subtotal: String(lineSubtotal),
           },
         });
@@ -206,7 +205,7 @@ export async function POST(req: Request) {
 
       for (const item of normalizedItems) {
         const product = productMap.get(item.productId.toString())!;
-        const available = Number(product.availableQuantity || 0);
+        const available = toNumber(product.availableQuantity);
 
         await tx.product.update({
           where: { id: product.id },
