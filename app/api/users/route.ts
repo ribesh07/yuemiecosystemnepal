@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
-import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { randomCode } from "@/lib/randomCode";
 
@@ -11,7 +10,7 @@ export async function GET() {
     orderBy: { id: "desc" },
   });
 
-  const safeUsers = users.map((user: User) => ({
+  const safeUsers = users.map((user: any) => ({
     ...user,
     id: user.id.toString(),
     createdAt: user.createdAt?.toISOString()
