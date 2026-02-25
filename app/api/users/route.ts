@@ -11,13 +11,16 @@ export async function GET() {
     orderBy: { id: "desc" },
   });
 
-  const safeUsers = users.map(user => ({
+  const safeUsers = users.map((user: User) => ({
     ...user,
     id: user.id.toString(),
     createdAt: user.createdAt?.toISOString()
   }));
 
-  const Users = safeUsers.map(({ password, ...u }) => u);
+  const Users = safeUsers.map((safeUser) => {
+    const { password, ...u } = safeUser;
+    return u;
+  });
 
 
   return NextResponse.json(Users, { status: 200 });

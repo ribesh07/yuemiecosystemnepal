@@ -118,7 +118,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const productIds = normalizedItems.map((item) => item.productId);
+    const productIds = normalizedItems.map((item: OrderInputItem) => item.productId);
     const products = await prisma.product.findMany({
       select: {
         id: true,
@@ -131,7 +131,7 @@ export async function POST(req: Request) {
     });
 
     const productMap = new Map<string, ProductForOrder>(
-      products.map((p) => [p.id.toString(), p])
+      products.map((p: ProductForOrder) => [p.id.toString(), p])
     );
     for (const item of normalizedItems) {
       const product = productMap.get(item.productId.toString());
@@ -149,7 +149,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const subtotal = normalizedItems.reduce((sum: number, item) => {
+    const subtotal = normalizedItems.reduce((sum: number, item: OrderInputItem) => {
       const product = productMap.get(item.productId.toString());
       return sum + toNumber(product?.sellPrice) * item.quantity;
     }, 0);
