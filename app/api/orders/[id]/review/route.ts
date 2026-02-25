@@ -70,7 +70,7 @@ export async function POST(
     }
 
     const hasProduct = order.items.some(
-      (item) => String(item.productCode) === productCode
+      (item: { productCode: string }) => String(item.productCode) === productCode
     );
 
     if (!hasProduct) {
