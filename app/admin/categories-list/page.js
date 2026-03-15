@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import useConfirmModalStore from "@/store/confirmModalStore";
 import toast from "react-hot-toast";
 
@@ -111,12 +112,12 @@ export default function CategoriesListPage() {
                     >
                       Info
                     </button>
-                    <button
-                      onClick={() => alert("Edit functionality coming soon!")}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+                    <Link
+                      href={`/admin/edit-categories/${cat.id}`}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition inline-block"
                     >
                       Edit
-                    </button>
+                    </Link>
                     <button
                       onClick={() => handleDelete(cat.id)}
                       className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"

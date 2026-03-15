@@ -180,10 +180,10 @@ model Product {
   productCode       String   @unique @map("product_code")
   name              String   @map("product_name")
   slug              String?  @unique
-  description       String?  @map("product_description")
-  specifications    String?  @map("key_specifications")
-  packaging         String?
-  warranty          String?
+  description       String?  @map("product_description") @db.LongText
+  specifications    String?  @map("key_specifications") @db.LongText
+  packaging         String?  @db.LongText
+  warranty          String?  @db.LongText
   categoryId        BigInt?
   categoryName      String?
   brandId           Int?

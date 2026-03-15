@@ -86,8 +86,10 @@ export async function PUT(
     // 🧾 Product fields
     const name = formData.get("name") as string | null;
     const slug = formData.get("slug") as string | null;
-    const description = formData.get("description") as string | null;
-    const specifications = formData.get("specifications") as string | null;
+    const description = (formData.get("productDescription") ||
+      formData.get("description")) as string | null;
+    const specifications = (formData.get("keySpecifications") ||
+      formData.get("specifications")) as string | null;
     const packaging = formData.get("packaging") as string | null;
     const warranty = formData.get("warranty") as string | null;
     const categoryId = formData.get("categoryId") as string | null;
@@ -100,14 +102,30 @@ export async function PUT(
     const status = formData.get("status") as string | null;
 
     // 🖼 Images
-    const newMainImage = formData.get("mainImage") as File | null;
-    const newGalleryImages = formData.getAll("images") as File[];
+    const mainImageRaw = formData.get("mainImage");
+    const newMainImage =
+      mainImageRaw instanceof File && mainImageRaw.size > 0 ? mainImageRaw : null;
+    const productCatalogRaw = formData.get("productCatalog");
+    const newProductCatalog =
+      productCatalogRaw instanceof File && productCatalogRaw.size > 0
+        ? productCatalogRaw
+        : null;
+    const galleryInputs = [
+      ...formData.getAll("images"),
+      ...formData.getAll("productImages"),
+    ];
+    const newGalleryImages = galleryInputs.filter(
+      (file): file is File =>
+        file instanceof File && file.size > 0 && file.type.startsWith("image/")
+    );
 
     const uploadDir = getProductImageDir(existingProduct.productCode);
     fs.mkdirSync(uploadDir, { recursive: true });
 
-    let mainImagePath = existingImages?.mainImage || null;
+    let mainImagePath =
+      existingImages?.mainImage || existingProduct.mainImage || null;
     let galleryImages: string[] = (existingImages?.imagePath as string[]) || [];
+    let productCatalogPath = existingProduct.productCatalog || null;
 
     // 🔄 Replace main image
     if (newMainImage) {
@@ -128,10 +146,27 @@ export async function PUT(
       mainImagePath = `/uploads/products/${existingProduct.productCode}/images/${fileName}`;
     }
 
+    // 🔄 Replace product catalog
+    if (newProductCatalog) {
+      if (productCatalogPath) {
+        const oldCatalogPath = urlToFilePath(productCatalogPath);
+        if (fs.existsSync(oldCatalogPath)) fs.unlinkSync(oldCatalogPath);
+      }
+
+      const ext = newProductCatalog.name.split(".").pop();
+      const fileName = `catalog-${crypto.randomUUID()}.${ext}`;
+      const filePath = path.join(uploadDir, fileName);
+
+      fs.writeFileSync(
+        filePath,
+        Buffer.from(await newProductCatalog.arrayBuffer())
+      );
+
+      productCatalogPath = `/uploads/products/${existingProduct.productCode}/images/${fileName}`;
+    }
+
     // ➕ Add new gallery images
     for (const file of newGalleryImages) {
-      if (!file.type.startsWith("image/")) continue;
-
       const ext = file.name.split(".").pop();
       const fileName = `${crypto.randomUUID()}.${ext}`;
       const filePath = path.join(uploadDir, fileName);
@@ -173,6 +208,8 @@ export async function PUT(
             availableQuantity: BigInt(availableQuantity),
           }),
           ...(status !== null && { status: Number(status) }),
+          mainImage: mainImagePath,
+          productCatalog: productCatalogPath,
         },
       });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import RelatedProduct from "@/components/relatedProduct";
 import { apiRequest } from "@/utils/ApisafeCalls";
@@ -12,7 +12,7 @@ interface ProductImage {
   id: string;
   mainImage: string;
   productCode: string;
-  imagePath: any[];
+  imagePath: string[] | null;
 }
 
 interface Brand {
@@ -121,6 +121,19 @@ export default function ProductDetailPage() {
 
     fetchProduct();
   }, [normalizedProductId]);
+
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [product?.id]);
+
+  const imageList = useMemo(() => {
+    if (!product) return [];
+    const gallery = product.images?.[0]?.imagePath || [];
+    const normalizedGallery = Array.isArray(gallery) ? gallery : [];
+    const all = [product.mainImage, ...normalizedGallery].filter(Boolean);
+    const unique = Array.from(new Set(all));
+    return unique;
+  }, [product]);
 
   const incrementQuantity = () => {
     if (product && quantity < Number(product.availableQuantity)) {
@@ -268,9 +281,7 @@ export default function ProductDetailPage() {
             {/* Main Image */}
             <div className="relative bg-white rounded-2xl overflow-hidden aspect-square border border-gray-200 group">
               <img
-                src={resolveImageUrl(
-                  product.images[selectedImage]?.mainImage || product.mainImage
-                )}
+                src={resolveImageUrl(imageList[selectedImage] || product.mainImage)}
                 alt={product.name}
                 className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-110"
               />
@@ -309,11 +320,11 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Thumbnail Images */}
-            {product.images.length > 1 && (
+            {imageList.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
-                {product.images.map((image, index) => (
+                {imageList.map((image, index) => (
                   <button
-                    key={image.id}
+                    key={`${image}-${index}`}
                     onClick={() => setSelectedImage(index)}
                     className={`relative bg-white rounded-xl overflow-hidden aspect-square transition-all duration-300 border-2 ${
                       selectedImage === index
@@ -322,7 +333,7 @@ export default function ProductDetailPage() {
                     }`}
                   >
                     <img
-                      src={resolveImageUrl(image.mainImage)}
+                      src={resolveImageUrl(image)}
                       alt={`View ${index + 1}`}
                       className="w-full h-full object-contain p-3"
                     />
