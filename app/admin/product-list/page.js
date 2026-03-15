@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Edit2, Trash2, Info, Plus, Search } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import useConfirmModalStore from "@/store/confirmModalStore";
 
@@ -22,6 +21,11 @@ export default function ProductListPage() {
   // const [deleteId, setDeleteId] = useState(null);
   const openConfirm = useConfirmModalStore((state) => state.open);
 
+  const resolveImageUrl = (imageUrl) => {
+    if (!imageUrl) return "/no-image.png";
+    if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+    return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+  };
 
   // Fetch Products
   useEffect(() => {
@@ -44,7 +48,7 @@ export default function ProductListPage() {
       try {
         const res = await fetch(CATEGORY_API);
         const data = await res.json();
-        setCategories(data.categories || []);
+        setCategories(data.data?.categories || []);
       } catch (err) {
         console.error("Categories fetch error:", err);
       }
@@ -58,7 +62,8 @@ export default function ProductListPage() {
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       (p.productCode || "").toLowerCase().includes(search.toLowerCase());
     const matchesCategory =
-      selectedCategory === "" || p.categories === selectedCategory;
+      selectedCategory === "" ||
+      String(p.categoryId || p.category?.id || "") === String(selectedCategory);
     return matchesSearch && matchesCategory;
   });
 
@@ -135,7 +140,7 @@ const handleDelete = (id) => {
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.catrgory}>
+              <option key={cat.id} value={cat.id}>
                 {cat.category}
               </option>
             ))}
@@ -184,9 +189,10 @@ const handleDelete = (id) => {
                 <td className="px-6 py-4">
                   <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-100">
                     <img
-                      src={product.mainImage || "/no-image.png"}
+                      src={resolveImageUrl(
+                        product.mainImage || product.images?.[0]?.mainImage
+                      )}
                       alt={product.name}
-                      fill
                       className="object-cover"
                     />
                   </div>
@@ -270,9 +276,12 @@ const handleDelete = (id) => {
                     <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition">
                       <Info size={18} />
                     </button>
-                    <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition">
+                    <Link
+                      href={`/admin/edit-product/${product.id}`}
+                      className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                    >
                       <Edit2 size={18} />
-                    </button>
+                    </Link>
                     <button
                       onClick={() => handleDelete(product.id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
@@ -315,4 +324,3 @@ const handleDelete = (id) => {
     </div>
   );
 }
-
