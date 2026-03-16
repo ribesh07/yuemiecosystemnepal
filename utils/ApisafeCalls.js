@@ -6,15 +6,20 @@ export const getToken = () => {
 export const apiRequest = async (url, tokenReq = true, options = {}) => {
   url = `${baseUrl}${url}`;
   const token = localStorage.getItem("token");
+  const method = options.method || "GET";
   const headers = {
     ...(tokenReq && token && { Authorization: `Bearer ${token}` }),
-    ...(options.method !== "GET" && { "Content-Type": "application/json" }),
+    ...(method !== "GET" && { "Content-Type": "application/json" }),
     ...options.headers,
   };
 
   let response;
   try {
-    response = await fetch(url, { ...options, headers });
+    const fetchOptions = { ...options, headers };
+    if (method === "GET") {
+      fetchOptions.cache = "no-store";
+    }
+    response = await fetch(url, fetchOptions);
   } catch (err) {
     console.log("Network error:", err);
     console.warn(err);
