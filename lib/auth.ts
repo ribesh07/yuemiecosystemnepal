@@ -1,15 +1,26 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { verifyToken } from "./jwt";
 
 export const requireAuth = async () => {
   const headersList = await headers();
   const authHeader = headersList.get("authorization");
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  let token: string | undefined;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else {
+    const cookieStore = await cookies();
+    token =
+      cookieStore.get("token")?.value ||
+      cookieStore.get("admin_token")?.value ||
+      undefined;
+  }
+
+  if (!token) {
     throw new Error("UNAUTHORIZED");
   }
 
-  const token = authHeader.split(" ")[1];
   return verifyToken(token);
 };
 
