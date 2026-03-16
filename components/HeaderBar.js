@@ -24,11 +24,11 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
-  const fallbackAnnouncements = [
-    { title: "Welcome to our Exclusive Online Store!", colorCode: "#f97316" },
-    { title: "Free Shipping on Orders Over 500!", colorCode: "#f97316" },
-    { title: "New Products Added Weekly!", colorCode: "#f97316" },
-  ];
+  // const fallbackAnnouncements = [
+  //   { title: "Welcome to our Exclusive Online Store!", colorCode: "#f97316" },
+  //   { title: "Free Shipping on Orders Over 500!", colorCode: "#f97316" },
+  //   { title: "New Products Added Weekly!", colorCode: "#f97316" },
+  // ];
 
   useEffect(() => {
     let mounted = true;
@@ -64,7 +64,9 @@ export default function Header() {
       try {
         const res = await fetch("/api/popup-ads");
         const data = await res.json();
+        
         const ads = data?.data?.popupAds || [];
+        alert (ads.length);
         const now = new Date();
         const activeAds = ads
           .filter((ad) => ad.isActive)
@@ -119,7 +121,7 @@ export default function Header() {
           </button>
 
           <p className="text-center flex-1 text-sm md:text-base">
-            {announcements[currentSlide]?.title || ""}
+            {announcements[currentSlide]?.title || "Our Exclusive Online Store!"}
           </p>
 
           <button
