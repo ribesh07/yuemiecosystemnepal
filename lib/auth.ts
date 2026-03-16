@@ -31,8 +31,14 @@ export const requireAdminRole = async (...roles: string[]) => {
     throw new Error("FORBIDDEN");
   }
 
-  if (roles.length && !roles.includes(user.role!)) {
-    throw new Error("FORBIDDEN");
+  if (roles.length) {
+    const normalizedRoles = roles.map((role) => role.toUpperCase());
+    const userRole = (user.role || "").toUpperCase();
+
+    const isSuper = userRole === "SUPER_ADMIN" || userRole.includes("SUPER");
+    if (!normalizedRoles.includes(userRole) && !isSuper) {
+      throw new Error("FORBIDDEN");
+    }
   }
 
   return user;
