@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Support = () => {
   const supportFeatures = [
@@ -13,7 +14,7 @@ const Support = () => {
       id: 2,
       icon: '/Free_Shipping.webp',
       title: "Free Shipping",
-      description: "Get Free Shipping PAN India"
+      description: "Get Free Shipping On Orders Over 20K"
     },
     {
       id: 3,
@@ -62,9 +63,12 @@ const Support = () => {
         </div>
 
         <div className="flex justify-center">
-          <button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-8 py-3 rounded border-2 border-orange-600 transition-all duration-300 hover:shadow-lg">
-            follow Us
-          </button>
+          <Link
+                  href="https://www.facebook.com/share/1EHtfCYK72/"
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-8 py-3 rounded border-2 border-orange-600 transition-all duration-300 hover:shadow-lg"
+                >
+                  Follow Us
+                </Link>
         </div>
         <div className="mt-4 mb-4 h-1 bg-orange-500 w-full"></div>
 

@@ -19,14 +19,15 @@ export default function Header() {
   const pathname = usePathname();
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [announcements, setAnnouncements] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
-  const announcements = [
-    "Welcome to our Exclusive Online Store!",
-    "Free Shipping on Orders Over 500!",
-    "New Products Added Weekly!",
+  const fallbackAnnouncements = [
+    { title: "Welcome to our Exclusive Online Store!", colorCode: "#f97316" },
+    { title: "Free Shipping on Orders Over 500!", colorCode: "#f97316" },
+    { title: "New Products Added Weekly!", colorCode: "#f97316" },
   ];
 
   useEffect(() => {
@@ -58,6 +59,36 @@ export default function Header() {
     };
   }, [pathname]);
 
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const res = await fetch("/api/popup-ads");
+        const data = await res.json();
+        const ads = data?.data?.popupAds || [];
+        const now = new Date();
+        const activeAds = ads
+          .filter((ad) => ad.isActive)
+          .filter((ad) => {
+            if (ad.startAt && new Date(ad.startAt) > now) return false;
+            if (ad.endAt && new Date(ad.endAt) < now) return false;
+            return true;
+          })
+          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+          .map((ad) => ({
+            title: ad.title || "Announcement",
+            colorCode: ad.colorCode || "#f97316",
+          }));
+
+        setAnnouncements(activeAds.length ? activeAds : fallbackAnnouncements);
+      } catch (err) {
+        console.error("Failed to fetch announcements", err);
+        setAnnouncements(fallbackAnnouncements);
+      }
+    };
+
+    fetchAnnouncements();
+  }, []);
+
   // Auto slide announcements
   useEffect(() => {
     if (!announcements.length) return;
@@ -65,14 +96,17 @@ export default function Header() {
       setCurrentSlide((prev) => (prev + 1) % announcements.length);
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [announcements.length]);
 
   if (pathname === "/login-admin") return null;
 
   return (
     <header className="w-full">
       {/* Announcement Bar */}
-      <div className="bg-orange-500 text-white relative">
+      <div
+        className="text-white relative"
+        style={{ backgroundColor: announcements[currentSlide]?.colorCode || "#f97316" }}
+      >
         <div className="flex items-center justify-between px-4 py-2">
           <button
             onClick={() =>
@@ -85,7 +119,7 @@ export default function Header() {
           </button>
 
           <p className="text-center flex-1 text-sm md:text-base">
-            {announcements[currentSlide]}
+            {announcements[currentSlide]?.title || ""}
           </p>
 
           <button
@@ -111,13 +145,17 @@ export default function Header() {
             </button>
 
             {/* Logo */}
-            <Link href="/" className="relative">
-              <img
-                src="/yuemi_logo_black.png"
-                alt="Yuemi Ecosystem Nepal"
-                className="h-5 md:h-6"
-              />
-            </Link>
+          <Link href="/" className="flex items-end gap-3 mb-4">
+  <img
+    src="/yuemi_logo_black.png"
+    alt="Yuemi Ecosystem Nepal"
+    className="h-5 md:h-6"
+  />
+
+  <span className="text-[10px] md:text-xs text-orange-500 tracking-widest -ml-2 mt-3">
+    NEPAL
+  </span>
+</Link>
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-8 text-sm font-bold">

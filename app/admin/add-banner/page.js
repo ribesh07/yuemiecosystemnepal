@@ -18,11 +18,11 @@ export default function AddBannerPage() {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append("bannerName", bannerName);
-    formData.append("bannerImage", file);
+    formData.append("title", bannerName);
+    formData.append("image", file);
 
     // send to API (upload image + save to DB)
-    const res = await fetch("/api/banner", {
+    const res = await fetch("/api/banners", {
       method: "POST",
       body: formData,
     });

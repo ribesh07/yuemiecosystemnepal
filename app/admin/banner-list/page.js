@@ -7,27 +7,29 @@ import useConfirmModalStore from "@/store/confirmModalStore";
 export default function BannerList() {
   const [banners, setBanners] = useState([]);
   const openConfirm = useConfirmModalStore((state) => state.open);
+  const resolveImageUrl = (imageUrl) => {
+    if (!imageUrl) return "/no-image.png";
+    if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+    return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+  };
 
   const fetchBanners = async () => {
-    const res = await fetch("/api/banner");
+    const res = await fetch("/api/banners");
     const data = await res.json();
     if (data.success) {
-      setBanners(data.banners);
+      setBanners(data.data?.banners || data.banners || []);
     }
   };
 
   const deleteBanner = async (id) => {
-    if (!confirm("Are you sure you want to delete this banner?")) return;
-
-    const res = await fetch(`/api/banner/${id}`, {
-      method: "DELETE",
-    });
-
-    const data = await res.json();
     openConfirm({
       title: "Delete Banner",
       message: "Are you sure you want to delete this banner? This action cannot be undone.",
       onConfirm: async () => {
+        const res = await fetch(`/api/banners/${id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
         if (data.success) {
           toast.success("Banner removed successfully");
           fetchBanners();
@@ -47,8 +49,7 @@ export default function BannerList() {
   };
 
   const handleEdit = (id) => {
-    // Add your edit logic here
-    console.log("Edit banner:", id);
+    window.location.href = `/admin/edit-banner/${id}`;
   };
 
   const handleInfo = (id) => {
@@ -83,8 +84,8 @@ export default function BannerList() {
                 {/* Banner Image */}
                 <div className="shrink-0 w-32 h-20 mr-4">
                   <Image
-                    src={banner.image_path}
-                    alt={banner.banner_name}
+                    src={resolveImageUrl(banner.imageUrl)}
+                    alt={banner.title || "Banner"}
                     width={128}
                     height={80}
                     className="w-full h-full object-cover rounded-md border border-gray-200"
@@ -94,7 +95,7 @@ export default function BannerList() {
                 {/* Banner Info */}
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {banner.banner_name}
+                    {banner.title || "Untitled banner"}
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
                     ID: {banner.id}
