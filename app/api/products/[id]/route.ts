@@ -1,4 +1,5 @@
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
@@ -93,9 +94,16 @@ export async function PUT(
     const packaging = formData.get("packaging") as string | null;
     const warranty = formData.get("warranty") as string | null;
     const categoryId = formData.get("categoryId") as string | null;
+    const categoryName = formData.get("categoryName") as string | null;
     const brandId = formData.get("brandId") as string | null;
+    const deliveryTargetDays = formData.get("deliveryTargetDays") as string | null;
+    const weeklyProduct = formData.get("weeklyProduct") as string | null;
+    const flashSaleProduct = formData.get("flashSaleProduct") as string | null;
+    const todayDeals = formData.get("todayDeals") as string | null;
+    const specialProduct = formData.get("specialProduct") as string | null;
     const actualPrice = formData.get("actualPrice") as string | null;
-    const sellPrice = formData.get("sellPrice") as string | null;
+    const sellPrice = (formData.get("sellPrice") ||
+      formData.get("sellingPrice")) as string | null;
     const discount = formData.get("discount") as string | null;
     const stockQuantity = formData.get("stockQuantity") as string | null;
     const availableQuantity = formData.get("availableQuantity") as string | null;
@@ -195,9 +203,17 @@ export async function PUT(
           ...(categoryId !== null && {
             categoryId: categoryId ? BigInt(categoryId) : null,
           }),
+          ...(categoryName !== null && { categoryName }),
           ...(brandId !== null && {
             brandId: brandId ? Number(brandId) : null,
           }),
+          ...(deliveryTargetDays !== null && {
+            deliveryTargetDays: deliveryTargetDays ? Number(deliveryTargetDays) : null,
+          }),
+          ...(weeklyProduct !== null && { weeklyProduct: weeklyProduct === "true" }),
+          ...(flashSaleProduct !== null && { flashSaleProduct: flashSaleProduct === "true" }),
+          ...(todayDeals !== null && { todayDeals: todayDeals === "true" }),
+          ...(specialProduct !== null && { specialProduct: specialProduct === "true" }),
           ...(actualPrice !== null && { actualPrice }),
           ...(sellPrice !== null && { sellPrice }),
           ...(discount !== null && { discount }),
