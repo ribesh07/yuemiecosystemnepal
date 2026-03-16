@@ -5,8 +5,8 @@ import {
   Phone,
   Mail,
   Facebook,
-  Twitter,
-  Youtube,
+  // Twitter,
+  // Youtube,
   Instagram,
   ArrowUp,
 } from "lucide-react";
@@ -158,12 +158,12 @@ export default function FooterBar() {
               {/* Social Media Icons */}
               <div className="flex space-x-4 pt-4">
                 <Link
-                  href="https://www.facebook.com/gargdentalnpl/"
+                  href="https://www.facebook.com/share/1EHtfCYK72/"
                   className="w-8 h-8 bg-orange-500 hover:bg-orange-400 rounded-full flex items-center justify-center transition-colors"
                 >
                   <Facebook className="w-4 h-4" />
                 </Link>
-                <Link
+                {/* <Link
                   href="#"
                   className="w-8 h-8 bg-orange-500 hover:bg-orange-400 rounded-full flex items-center justify-center transition-colors"
                 >
@@ -174,12 +174,25 @@ export default function FooterBar() {
                   className="w-8 h-8 bg-orange-500 hover:bg-orange-400 rounded-full flex items-center justify-center transition-colors"
                 >
                   <Youtube className="w-4 h-4" />
-                </Link>
+                </Link> */}
                 <Link
-                  href="https://www.instagram.com/gargdentalpvt.ltd/"
+                  href="https://www.instagram.com/yueminepal?igsh=MjVwZDR3NGk1d2Y1"
                   className="w-8 h-8 bg-orange-500 hover:bg-orange-400 rounded-full flex items-center justify-center transition-colors"
                 >
                   <Instagram className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="https://www.tiktok.com/@yueminepal"
+                  className="w-8 h-8 bg-orange-500 hover:bg-orange-400 rounded-full flex items-center justify-center transition-colors"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M19 7.5a7.5 7.5 0 01-4-1.2v7.4a5.3 5.3 0 11-5.3-5.3c.3 0 .6 0 .9.1v2.7a2.6 2.6 0 102.6 2.6V2h2.8c.3 2.2 2 4.1 4 4.7v2.8z" />
+                  </svg>
                 </Link>
               </div>
             </div>

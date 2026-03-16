@@ -9,14 +9,14 @@ import Support from "@/components/Support";
 //import YuemiCategories from "@/components/YuemiCategories";
 import CategoriesPage from "./categories/page";
 
-import HeroSlider from "@/components/HeroSlider";
+// import HeroSlider from "@/components/HeroSlider";
 
 
 export default function Home() {
   return (
     <main>
-       
-       <HeroSlider />
+       <ImageSlider />
+       {/* <HeroSlider /> */}
        {/* <CarAccessoriesGallery /> */}
       <CategoriesPage />
        <FeaturedCollections />

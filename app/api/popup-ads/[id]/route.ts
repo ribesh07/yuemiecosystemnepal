@@ -2,9 +2,93 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
-import fs from "fs";
 import { requireAdminRole } from "@/lib/auth";
-import { urlToFilePath } from "@/utils/imageUpload";
+import fs from "fs";
+import path from "path";
+import { UPLOAD_BASE_DIR, urlToFilePath } from "@/utils/imageUpload";
+
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    if (process.env.NODE_ENV === "production") {
+      await requireAdminRole("ADMIN");
+    }
+
+    const { id } = await context.params;
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Popup ad id is required" },
+        { status: 400 }
+      );
+    }
+
+    const adId = Number(id);
+    const existing = await prisma.popupAds.findUnique({ where: { id: adId } });
+
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, message: "Popup ad not found" },
+        { status: 404 }
+      );
+    }
+
+    const formData = await req.formData();
+
+    const title = formData.get("title") as string | null;
+    const colorCode = formData.get("colorCode") as string | null;
+    const position = formData.get("position") as string | null;
+    const isActive = formData.get("isActive") as string | null;
+    const startAt = formData.get("startAt") as string | null;
+    const endAt = formData.get("endAt") as string | null;
+    const file = formData.get("image") as File | null;
+
+    let imagePath = existing.imageUrl || null;
+
+    if (file && file.size > 0) {
+      if (existing.imageUrl) {
+        const oldPath = urlToFilePath(existing.imageUrl);
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+
+      const uploadDir = path.join(UPLOAD_BASE_DIR, "popup-ads");
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "")}`;
+      const fullPath = path.join(uploadDir, fileName);
+      fs.writeFileSync(fullPath, Buffer.from(await file.arrayBuffer()));
+      imagePath = `/uploads/popup-ads/${fileName}`;
+    }
+
+    const updated = await prisma.popupAds.update({
+      where: { id: adId },
+      data: {
+        title: title ?? existing.title,
+        colorCode: colorCode ?? existing.colorCode,
+        imageUrl: imagePath,
+        position: position ? Number(position) : existing.position,
+        isActive: isActive ? Boolean(Number(isActive)) : existing.isActive,
+        startAt: startAt ? new Date(startAt) : existing.startAt,
+        endAt: endAt ? new Date(endAt) : existing.endAt,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Popup ad updated successfully",
+      data: updated,
+    });
+  } catch (error) {
+    console.error("POPUPADS_UPDATE_ERROR", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to update popup ad" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function DELETE(
   req: Request,
@@ -16,47 +100,31 @@ export async function DELETE(
     }
 
     const { id } = await context.params;
-
     if (!id) {
       return NextResponse.json(
-        { success: false, message: "Invalid popup ad id" },
+        { success: false, message: "Popup ad id is required" },
         { status: 400 }
       );
     }
 
-    const popupAdId = Number(id);
+    const adId = Number(id);
+    const existing = await prisma.popupAds.findUnique({ where: { id: adId } });
 
-    if (isNaN(popupAdId)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid popup ad id" },
-        { status: 400 }
-      );
-    }
-
-    const popupAd = await prisma.popupAds.findUnique({
-      where: { id: popupAdId },
-    });
-
-    if (!popupAd) {
+    if (!existing) {
       return NextResponse.json(
         { success: false, message: "Popup ad not found" },
         { status: 404 }
       );
     }
 
-    /* ---------- DELETE IMAGE ---------- */
-    if (popupAd.imageUrl) {
-      const imagePath = urlToFilePath(popupAd.imageUrl);
-
+    if (existing.imageUrl) {
+      const imagePath = urlToFilePath(existing.imageUrl);
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }
     }
 
-    /* ---------- DELETE DB ---------- */
-    await prisma.popupAds.delete({
-      where: { id: popupAdId },
-    });
+    await prisma.popupAds.delete({ where: { id: adId } });
 
     return NextResponse.json({
       success: true,
