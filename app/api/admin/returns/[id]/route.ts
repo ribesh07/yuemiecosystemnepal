@@ -3,6 +3,8 @@ import { prisma } from "@/prisma/prisma-client";
 import { Prisma } from "@prisma/client";
 import { requireAdminRole } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
+import { sendMail } from "@/lib/mailer";
+import { buildReturnStatusEmail } from "@/lib/orderEmail";
 
 function parseId(value: string) {
   try {
@@ -51,6 +53,11 @@ export async function PATCH(
 
     const current = await (prisma as any).returnRequest.findUnique({
       where: { id: returnId },
+      include: {
+        user: true,
+        order: true,
+        product: true,
+      },
     });
 
     if (!current) {
@@ -92,6 +99,29 @@ export async function PATCH(
       return changed;
       }
     );
+
+    if (
+      current?.user?.email &&
+      String(currentStatus) !== String(nextStatus)
+    ) {
+      try {
+        const mail = buildReturnStatusEmail({
+          orderNumber: current.order?.orderNumber || current.orderId.toString(),
+          customerName: current.user?.fullName,
+          status: nextStatus,
+          reason: current.reason,
+          productName: current.product?.name || current.productCode,
+        });
+        await sendMail({
+          to: current.user.email,
+          subject: mail.subject,
+          html: mail.html,
+          text: mail.text,
+        });
+      } catch (mailError) {
+        console.error("RETURN_EMAIL_ERROR", mailError);
+      }
+    }
 
     return NextResponse.json({
       success: true,

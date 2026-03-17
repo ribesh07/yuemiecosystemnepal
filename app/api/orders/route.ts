@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { requireAuth } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
+import { sendMail } from "@/lib/mailer";
+import { buildOrderPlacedEmail } from "@/lib/orderEmail";
+import { generateInvoicePdf } from "@/lib/invoicePdf";
 
 type OrderInputItem = {
   productId: bigint;
@@ -225,6 +228,57 @@ export async function POST(req: Request) {
       return order;
       }
     );
+
+    try {
+      const fullOrder = await prisma.order.findUnique({
+        where: { id: result.id },
+        include: {
+          user: true,
+          items: {
+            include: {
+              product: {
+                select: { name: true, productCode: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (fullOrder?.user?.email) {
+        const addressSnapshot = await prisma.customerAddress.findFirst({
+          where: { id: addressId, customerId },
+          include: {
+            province: true,
+            city: true,
+            zone: true,
+          },
+        });
+        const mail = buildOrderPlacedEmail(fullOrder, addressSnapshot);
+        let invoicePdf: Buffer | null = null;
+        try {
+          invoicePdf = await generateInvoicePdf(fullOrder, addressSnapshot);
+        } catch (pdfError) {
+          console.error("ORDER_INVOICE_PDF_ERROR", pdfError);
+        }
+        await sendMail({
+          to: fullOrder.user.email,
+          subject: mail.subject,
+          html: mail.html,
+          text: mail.text,
+          attachments: invoicePdf
+            ? [
+                {
+                  filename: `invoice-${fullOrder.orderNumber}.pdf`,
+                  content: invoicePdf,
+                  contentType: "application/pdf",
+                },
+              ]
+            : undefined,
+        });
+      }
+    } catch (mailError) {
+      console.error("ORDER_EMAIL_ERROR", mailError);
+    }
 
     return NextResponse.json({
       success: true,

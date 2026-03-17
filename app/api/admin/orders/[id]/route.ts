@@ -3,6 +3,8 @@ import { prisma } from "@/prisma/prisma-client";
 import { Prisma } from "@prisma/client";
 import { requireAdminRole } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
+import { sendMail } from "@/lib/mailer";
+import { buildOrderPaymentEmail, buildOrderStatusEmail } from "@/lib/orderEmail";
 
 const ORDER_STATUS_FLOW: Record<string, string[]> = {
   processing: ["shipped", "cancelled"],
@@ -58,6 +60,7 @@ export async function PATCH(
       where: { id: orderId },
       include: {
         payments: true,
+        user: true,
       },
     });
 
@@ -139,6 +142,42 @@ export async function PATCH(
       return order;
       }
     );
+
+    if (
+      nextOrderStatus &&
+      String(existingOrder.orderStatus || "").toLowerCase() !== nextOrderStatus &&
+      updated.user?.email
+    ) {
+      try {
+        const mail = buildOrderStatusEmail(updated);
+        await sendMail({
+          to: updated.user.email,
+          subject: mail.subject,
+          html: mail.html,
+          text: mail.text,
+        });
+      } catch (mailError) {
+        console.error("ORDER_STATUS_EMAIL_ERROR", mailError);
+      }
+    }
+
+    if (
+      nextPaymentStatus &&
+      String(existingOrder.paymentStatus || "").toLowerCase() !== nextPaymentStatus &&
+      updated.user?.email
+    ) {
+      try {
+        const mail = buildOrderPaymentEmail(updated);
+        await sendMail({
+          to: updated.user.email,
+          subject: mail.subject,
+          html: mail.html,
+          text: mail.text,
+        });
+      } catch (mailError) {
+        console.error("ORDER_PAYMENT_EMAIL_ERROR", mailError);
+      }
+    }
 
     return NextResponse.json({
       success: true,
