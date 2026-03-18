@@ -22,6 +22,7 @@ export async function POST(req: Request) {
     const specifications = formData.get("keySpecifications")?.toString() || null;
     const packaging = formData.get("packaging")?.toString() || null;
     const warranty = formData.get("warranty")?.toString() || null;
+    const warrantyDaysRaw = formData.get("warrantyDays")?.toString();
     const categoryId = formData.get("categoryId")?.toString() || null;
     const categoryName = formData.get("categoryName")?.toString() || null;
     const actualPrice = formData.get("actualPrice")?.toString();
@@ -152,7 +153,16 @@ const product = await prisma.$transaction(async (tx: Prisma.TransactionClient) =
 
 
 
-    return NextResponse.json({
+  // Compatibility fallback: DB has `warranty_days` even if Prisma client is older.
+  if (warrantyDaysRaw !== undefined && warrantyDaysRaw !== null) {
+    await prisma.$executeRawUnsafe(
+      "UPDATE products SET warranty_days = ? WHERE id = ?",
+      Number(warrantyDaysRaw || 365),
+      product.id.toString()
+    );
+  }
+
+  return NextResponse.json({
       success: true,
       message: "Product created successfully",
       data: serializeBigInt(product),

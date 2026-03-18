@@ -22,7 +22,7 @@ const mailSecure =
 const fromAddress = process.env.MAIL_FROM_ADDRESS || "no-reply@example.com";
 const fromName = process.env.MAIL_FROM_NAME || "YuemiNepal";
 
-let transporter: nodemailer.Transporter | null = null;
+let transporter: any = null;
 
 function getTransporter() {
   if (transporter) return transporter;

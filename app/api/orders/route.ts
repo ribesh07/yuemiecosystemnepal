@@ -167,65 +167,129 @@ export async function POST(req: Request) {
 
     const result = await prisma.$transaction(
       async (tx: any) => {
-      const order = await tx.order.create({
-        data: {
-          orderNumber,
-          customerId,
-          subtotal: String(subtotal),
-          tax: String(tax),
-          shippingCost: String(shippingCost),
-          discount: String(discount),
-          totalAmount: String(totalAmount),
-          orderStatus: "processing",
-          paymentStatus: "unpaid",
-        },
-      });
+        const txAny = tx as any;
+        const order = await tx.order.create({
+          data: {
+            orderNumber,
+            customerId,
+            subtotal: String(subtotal),
+            tax: String(tax),
+            shippingCost: String(shippingCost),
+            discount: String(discount),
+            totalAmount: String(totalAmount),
+            orderStatus: "processing",
+            paymentStatus: "unpaid",
+          },
+        });
 
-      for (const item of normalizedItems) {
-        const product = productMap.get(item.productId.toString())!;
-        const lineSubtotal = toNumber(product.sellPrice) * item.quantity;
+        for (const item of normalizedItems) {
+          const product = productMap.get(item.productId.toString())!;
+          const unitPrice = toNumber(product.sellPrice);
 
-        await tx.orderItem.create({
+          const availableUnits = txAny.productUnit?.findMany
+            ? await txAny.productUnit.findMany({
+                where: {
+                  productCode: product.productCode,
+                  status: "in_stock",
+                },
+                orderBy: { serialNumber: "asc" },
+                take: item.quantity,
+              })
+            : await tx.$queryRawUnsafe(
+                `
+                  SELECT id, product_code as productCode
+                  FROM product_units
+                  WHERE product_code = ? AND status = 'in_stock'
+                  ORDER BY serial_number ASC
+                  LIMIT ?
+                `,
+                product.productCode,
+                item.quantity
+              );
+
+          if (availableUnits.length < item.quantity) {
+            throw new Error(
+              `INSUFFICIENT_UNITS:${product.productCode}:${availableUnits.length}:${item.quantity}`
+            );
+          }
+
+          for (const unit of availableUnits) {
+            try {
+              await tx.orderItem.create({
+                data: {
+                  orderId: order.id,
+                  productCode: product.productCode,
+                  productUnitId: unit.id,
+                  quantity: BigInt(1),
+                  price: String(unitPrice),
+                  subtotal: String(unitPrice),
+                } as any,
+              });
+            } catch (itemError) {
+              // Prisma client can lag behind DB schema after manual SQL.
+              // Fallback insert keeps product_unit_id persisted for warranty flow.
+              await tx.$executeRawUnsafe(
+                `
+                  INSERT INTO order_items
+                  (orderId, productCode, product_unit_id, quantity, price, subtotal, createdAt)
+                  VALUES (?, ?, ?, ?, ?, ?, NOW())
+                `,
+                order.id.toString(),
+                product.productCode,
+                unit.id.toString(),
+                "1",
+                String(unitPrice),
+                String(unitPrice)
+              );
+            }
+
+          }
+
+          if (txAny.productUnit?.updateMany) {
+            await txAny.productUnit.updateMany({
+              where: { id: { in: availableUnits.map((u: any) => u.id) } },
+              data: { status: "sold" },
+            });
+          } else {
+            for (const u of availableUnits) {
+              await tx.$executeRawUnsafe(
+                "UPDATE product_units SET status = 'sold' WHERE id = ?",
+                u.id.toString()
+              );
+            }
+          }
+        }
+
+        await tx.orderPayment.create({
           data: {
             orderId: order.id,
-            productCode: product.productCode,
-            quantity: BigInt(item.quantity),
-            price: String(toNumber(product.sellPrice)),
-            subtotal: String(lineSubtotal),
+            paymentMode: "COD",
+            paidAmount: "0",
+            dueAmount: String(totalAmount),
+            status: "unpaid",
           },
         });
-      }
 
-      await tx.orderPayment.create({
-        data: {
-          orderId: order.id,
-          paymentMode: "COD",
-          paidAmount: "0",
-          dueAmount: String(totalAmount),
-          status: "unpaid",
-        },
-      });
+        for (const item of normalizedItems) {
+          const product = productMap.get(item.productId.toString())!;
+          const available = toNumber(product.availableQuantity);
 
-      for (const item of normalizedItems) {
-        const product = productMap.get(item.productId.toString())!;
-        const available = toNumber(product.availableQuantity);
+          await tx.product.update({
+            where: { id: product.id },
+            data: {
+              availableQuantity: BigInt(available - item.quantity),
+            },
+          });
+        }
 
-        await tx.product.update({
-          where: { id: product.id },
+        await tx.user.update({
+          where: { id: customerId },
           data: {
-            availableQuantity: BigInt(available - item.quantity),
+            orderCount: { increment: 1 },
           },
         });
-      }
 
-      await tx.user.update({
-        where: { id: customerId },
-        data: {
-          orderCount: { increment: 1 },
-        },
-      });
-
-      return order;
+        return order;
       }
     );
 
@@ -286,6 +350,19 @@ export async function POST(req: Request) {
       data: serializeBigInt(result),
     });
   } catch (error) {
+    if (error instanceof Error && error.message.startsWith("INSUFFICIENT_UNITS")) {
+      const [, code, available, requested] = error.message.split(":");
+      const availableCount = Number(available || 0);
+      const requestedCount = Number(requested || 0);
+      const message =
+        availableCount <= 0
+          ? `All serial numbers are sold out for ${code}`
+          : `Only ${availableCount} serial number(s) available for ${code}, requested ${requestedCount}`;
+      return NextResponse.json(
+        { success: false, message },
+        { status: 400 }
+      );
+    }
     if (error instanceof Error && error.message === "UNAUTHORIZED") {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },

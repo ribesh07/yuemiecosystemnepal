@@ -10,6 +10,8 @@ export default function WarrantyPage() {
   
   const [registerSerial, setRegisterSerial] = useState('');
   const [checkSerial, setCheckSerial] = useState('');
+  const [checkOrderId, setCheckOrderId] = useState('');
+  const [checkEmail, setCheckEmail] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -24,9 +26,21 @@ export default function WarrantyPage() {
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast.success('Warranty registered successfully!');
+      const res = await fetch("/api/warranties/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          serialNumber: registerSerial.trim(),
+          purchaseSource: "store",
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Registration failed");
+      }
+
+      toast.success(data?.message || "Warranty registered successfully!");
       setRegisterSerial('');
     } catch (error) {
       console.error('Error submitting:', error);
@@ -39,30 +53,78 @@ export default function WarrantyPage() {
   const handleCheckWarranty = async (e) => {
     e.preventDefault();
     
-    if (!checkSerial.trim()) {
-      toast.error('Please enter a serial number');
+    if (!checkSerial.trim() && !checkOrderId.trim()) {
+      toast.error('Please enter serial number or order ID');
       return;
     }
 
     setIsChecking(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const isValid = Math.random() > 0.2;
-      const expiryDate = new Date();
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-      expiryDate.setMonth(expiryDate.getMonth() + Math.floor(Math.random() * 12));
-      
-      setWarrantyResult({
-        isValid,
-        serialNumber: checkSerial,
-        productName: isValid ? 'Premium Warranty Product X-2000' : 'Unknown Product',
-        purchaseDate: isValid ? '2024-01-15' : null,
-        expiryDate: isValid ? expiryDate.toISOString().split('T')[0] : null,
-        warrantyPeriod: isValid ? '2 Years' : null,
-        status: isValid ? 'Active' : 'Not Found'
+      const res = await fetch("/api/warranties/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          serialNumber: checkSerial.trim() || undefined,
+          orderId: checkOrderId.trim() || undefined,
+          email: checkEmail.trim() || undefined,
+        }),
       });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Lookup failed");
+      }
+
+      if (data?.data?.items && Array.isArray(data.data.items)) {
+        const item = data.data.items[0];
+        if (!item) {
+          throw new Error("No warranty found for this order");
+        }
+        setWarrantyResult({
+          isValid: item.status === "active",
+          serialNumber: item.serialNumber || checkSerial,
+          productName: item.productName || "Unknown Product",
+          purchaseDate: item.purchaseDate
+            ? new Date(item.purchaseDate).toISOString().split('T')[0]
+            : null,
+          expiryDate: item.expiryDate
+            ? new Date(item.expiryDate).toISOString().split('T')[0]
+            : null,
+          warrantyPeriod: `${item.warrantyDays || 365} Days`,
+          status: item.status === "active" ? "Active" : "Expired",
+        });
+      } else if (data?.data?.status === "not_registered") {
+        setWarrantyResult({
+          isValid: false,
+          serialNumber: checkSerial,
+          productName: data?.data?.productName || "Unknown Product",
+          purchaseDate: null,
+          expiryDate: null,
+          warrantyPeriod: null,
+          status: "Not Found",
+        });
+      } else {
+        const purchaseDate = data?.data?.purchaseDate
+          ? new Date(data.data.purchaseDate).toISOString().split('T')[0]
+          : null;
+        const expiryDate = data?.data?.expiryDate
+          ? new Date(data.data.expiryDate).toISOString().split('T')[0]
+          : null;
+        const days = Number(data?.data?.warrantyDays || 365);
+        const years = Math.floor(days / 365);
+        const warrantyPeriod = years >= 1 ? `${years} Year${years > 1 ? "s" : ""}` : `${days} Days`;
+
+        setWarrantyResult({
+          isValid: data?.data?.status === "active",
+          serialNumber: checkSerial || data?.data?.serialNumber || "",
+          productName: data?.data?.productName || "Unknown Product",
+          purchaseDate,
+          expiryDate,
+          warrantyPeriod,
+          status: data?.data?.status === "active" ? "Active" : "Expired",
+        });
+      }
       
       setShowWarrantyResult(true);
     } catch (error) {
@@ -404,29 +466,57 @@ export default function WarrantyPage() {
               <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-8"></div>
 
               <form onSubmit={handleCheckWarranty} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-3">
-                    Product Serial Number *
-                  </label>
-                  <input
-                    type="text"
-                    value={checkSerial}
-                    onChange={(e) => setCheckSerial(e.target.value)}
-                    placeholder="Enter serial number to check warranty"
-                    className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-lg"
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
-                    <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Find your serial number on the product label, manual, or original packaging</span>
-                  </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-3">
+                      Product Serial Number
+                    </label>
+                    <input
+                      type="text"
+                      value={checkSerial}
+                      onChange={(e) => setCheckSerial(e.target.value)}
+                      placeholder="Enter serial number"
+                      className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-lg"
+                    />
+                    <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
+                      <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>Find your serial number on the product label or box</span>
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-3">
+                      Order ID
+                    </label>
+                    <input
+                      type="text"
+                      value={checkOrderId}
+                      onChange={(e) => setCheckOrderId(e.target.value)}
+                      placeholder="Enter order ID"
+                      className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-lg"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Provide your email below to verify the order.
+                    </p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3">
+                      Email (for order lookup)
+                    </label>
+                    <input
+                      type="email"
+                      value={checkEmail}
+                      onChange={(e) => setCheckEmail(e.target.value)}
+                      placeholder="Enter email used in order"
+                      className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-lg"
+                    />
+                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isChecking || !checkSerial.trim()}
+                  disabled={isChecking || (!checkSerial.trim() && !checkOrderId.trim())}
                   className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-bold text-lg disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
                 >
                   {isChecking ? (

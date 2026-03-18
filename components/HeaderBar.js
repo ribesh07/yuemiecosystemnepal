@@ -66,7 +66,7 @@ export default function Header() {
         const data = await res.json();
         
         const ads = data?.data?.popupAds || [];
-        alert (ads.length);
+       
         const now = new Date();
         const activeAds = ads
           .filter((ad) => ad.isActive)

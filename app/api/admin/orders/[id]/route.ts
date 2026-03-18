@@ -96,8 +96,9 @@ export async function PATCH(
       );
     }
 
-    const updated = await prisma.$transaction(
+    const updated: any = await prisma.$transaction(
       async (tx: Prisma.TransactionClient) => {
+      const txAny = tx as any;
       const order = await tx.order.update({
         where: { id: orderId },
         data: {
@@ -123,10 +124,16 @@ export async function PATCH(
                   mainImage: true,
                 },
               },
+              productUnit: {
+                select: {
+                  id: true,
+                  serialNumber: true,
+                },
+              },
             },
           },
           payments: true,
-        },
+        } as any,
       });
 
       if (nextPaymentStatus && existingOrder.payments.length) {
@@ -137,6 +144,108 @@ export async function PATCH(
             updatedAt: new Date(),
           },
         });
+      }
+
+      const currentStatus = String(existingOrder.orderStatus || "").toLowerCase();
+
+      if (nextOrderStatus && nextOrderStatus === "cancelled" && currentStatus !== "cancelled") {
+        let unitIds = (order.items as any[])
+          .map((item: any) => item.productUnit?.id)
+          .filter((id: any) => id);
+        if (!unitIds.length) {
+          const unitRows = (await tx.$queryRawUnsafe(
+            "SELECT product_unit_id as productUnitId FROM order_items WHERE orderId = ? AND product_unit_id IS NOT NULL",
+            orderId.toString()
+          )) as any[];
+          unitIds = (unitRows || []).map((r: any) => r.productUnitId).filter(Boolean);
+        }
+        if (unitIds.length) {
+          if (txAny.productUnit?.updateMany) {
+            await txAny.productUnit.updateMany({
+              where: { id: { in: unitIds } },
+              data: { status: "in_stock" },
+            });
+          } else {
+            for (const id of unitIds) {
+              await tx.$executeRawUnsafe(
+                "UPDATE product_units SET status = 'in_stock' WHERE id = ?",
+                id.toString()
+              );
+            }
+          }
+        }
+      }
+
+      if (nextOrderStatus && nextOrderStatus === "delivered" && currentStatus !== "delivered") {
+        let warrantyItems = (order.items as any[])
+          .map((item: any) => ({
+            productCode: item.productCode,
+            productUnitId: item.productUnit?.id,
+            customerId: order.customerId,
+          }))
+          .filter((item: any) => item.productUnitId);
+
+        if (!warrantyItems.length) {
+          const unitRows = (await tx.$queryRawUnsafe(
+            "SELECT productCode, product_unit_id as productUnitId FROM order_items WHERE orderId = ? AND product_unit_id IS NOT NULL",
+            orderId.toString()
+          )) as any[];
+          warrantyItems = (unitRows || []).map((row: any) => ({
+            productCode: row.productCode,
+            productUnitId: row.productUnitId,
+            customerId: order.customerId,
+          }));
+        }
+
+        for (const item of warrantyItems) {
+          if (!item.productUnitId) continue;
+          const existingWarranty = txAny.warranty?.findUnique
+            ? await txAny.warranty.findUnique({
+                where: { productUnitId: item.productUnitId },
+              })
+            : (
+                (await tx.$queryRawUnsafe(
+                  "SELECT id FROM warranties WHERE product_unit_id = ? LIMIT 1",
+                  item.productUnitId.toString()
+                )) as any[]
+              )?.[0] || null;
+          if (existingWarranty) continue;
+
+          const wdRows = (await tx.$queryRawUnsafe(
+            "SELECT warranty_days as warrantyDays FROM products WHERE product_code = ? LIMIT 1",
+            item.productCode
+          )) as any[];
+          const days = Number(wdRows?.[0]?.warrantyDays || 365);
+          const purchaseDate = new Date();
+          const expiryDate = new Date(purchaseDate);
+          expiryDate.setDate(expiryDate.getDate() + days);
+
+          if (txAny.warranty?.create) {
+            await txAny.warranty.create({
+              data: {
+                productUnitId: item.productUnitId,
+                orderId,
+                customerId: order.customerId,
+                purchaseDate,
+                expiryDate,
+                purchaseSource: "online",
+              },
+            });
+          } else {
+            await tx.$executeRawUnsafe(
+              `
+                INSERT INTO warranties
+                (product_unit_id, order_id, customer_id, purchase_date, expiry_date, purchase_source)
+                VALUES (?, ?, ?, ?, ?, 'online')
+              `,
+              item.productUnitId.toString(),
+              orderId.toString(),
+              order.customerId.toString(),
+              purchaseDate,
+              expiryDate
+            );
+          }
+        }
       }
 
       return order;
