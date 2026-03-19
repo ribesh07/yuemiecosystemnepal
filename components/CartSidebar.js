@@ -18,6 +18,7 @@ export default function CartSidebar() {
   const [cartItems, setCartItemsState] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // Load cart + listen for open event
   useEffect(() => {
@@ -100,11 +101,15 @@ export default function CartSidebar() {
   };
 
   const handleCheckout = async () => {
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
+
     const authed = await isAuthenticatedClient();
     if (!authed) {
       toast.error("Please login first");
       setIsOpen(false);
       router.push("/account?next=/Checkout");
+      setCheckoutLoading(false);
       return;
     }
 
@@ -113,6 +118,7 @@ export default function CartSidebar() {
     );
     if (!selectedItems.length) {
       toast.error("Select at least one product to checkout.");
+      setCheckoutLoading(false);
       return;
     }
 
@@ -120,6 +126,7 @@ export default function CartSidebar() {
 
     setIsOpen(false);
     router.push("/Checkout?cart=1");
+    setCheckoutLoading(false);
   };
 
   const selectedItems = cartItems.filter((item) =>
@@ -282,9 +289,15 @@ export default function CartSidebar() {
 
               <button
                 onClick={handleCheckout}
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold"
+                disabled={checkoutLoading}
+                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Checkout Selected ({selectedItems.length})
+                {checkoutLoading && (
+                  <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
+                {checkoutLoading
+                  ? "Preparing Checkout..."
+                  : `Checkout Selected (${selectedItems.length})`}
               </button>
             </div>
           )}

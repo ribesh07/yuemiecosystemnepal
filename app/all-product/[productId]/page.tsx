@@ -103,6 +103,8 @@ export default function ProductDetailPage() {
   const [addedToCart, setAddedToCart] = useState(false);
   const [zoomActive, setZoomActive] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const [addToCartLoading, setAddToCartLoading] = useState(false);
+  const [buyNowLoading, setBuyNowLoading] = useState(false);
 
   useEffect(() => {
     if (!normalizedProductId) return;
@@ -147,33 +149,44 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     if (!product) return;
+    if (addToCartLoading || buyNowLoading) return;
+    setAddToCartLoading(true);
+
     const authed = await isAuthenticatedClient();
     if (!authed) {
+      setAddToCartLoading(false);
       toast.error("Please login to add items to cart");
       router.push("/account?next=/all-product/" + product.id);
       return;
     }
 
-    addCartItem({
-      id: product.id,
-      productCode: product.productCode,
-      name: product.name,
-      image: resolveImageUrl(product.mainImage),
-      price: Number(product.sellPrice || 0),
-      quantity,
-      availableQuantity: Number(product.availableQuantity || 0),
-    });
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
-    toast.success("Added to cart");
-    window.dispatchEvent(new CustomEvent("open-cart"));
+    try {
+      addCartItem({
+        id: product.id,
+        productCode: product.productCode,
+        name: product.name,
+        image: resolveImageUrl(product.mainImage),
+        price: Number(product.sellPrice || 0),
+        quantity,
+        availableQuantity: Number(product.availableQuantity || 0),
+      });
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 2000);
+      toast.success("Added to cart");
+      window.dispatchEvent(new CustomEvent("open-cart"));
+    } finally {
+      setAddToCartLoading(false);
+    }
   };
 
   const handleBuyNow = async () => {
     if (!product) return;
+    if (buyNowLoading || addToCartLoading) return;
+    setBuyNowLoading(true);
 
     const authed = await isAuthenticatedClient();
     if (!authed) {
+      setBuyNowLoading(false);
       toast.error("Please login to continue checkout");
       router.push("/account?next=/Checkout");
       return;
@@ -506,10 +519,15 @@ export default function ProductDetailPage() {
             <div className="space-y-3 pt-4">
               <button
                 onClick={handleAddToCart}
-                disabled={!isInStock}
+                disabled={!isInStock || addToCartLoading || buyNowLoading}
                 className="w-full py-4 bg-white border-2 border-gray-900 rounded-xl text-gray-900 font-semibold text-lg hover:bg-gray-50 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 relative overflow-hidden"
               >
-                {addedToCart ? (
+                {addToCartLoading ? (
+                  <>
+                    <span className="w-6 h-6 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
+                    Adding to Cart...
+                  </>
+                ) : addedToCart ? (
                   <>
                     <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -528,13 +546,22 @@ export default function ProductDetailPage() {
               
               <button
                 onClick={handleBuyNow}
-                disabled={!isInStock}
+                disabled={!isInStock || buyNowLoading || addToCartLoading}
                 className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl text-white font-semibold text-lg hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                BUY IT NOW
+                {buyNowLoading ? (
+                  <>
+                    <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Redirecting to Checkout...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    BUY IT NOW
+                  </>
+                )}
               </button>
             </div>
 
