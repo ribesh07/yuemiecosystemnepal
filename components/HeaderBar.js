@@ -15,20 +15,20 @@ import Link from "next/link";
 import { isAuthenticatedClient } from "@/utils/clientAuth";
 import { getCartCount } from "@/utils/cartClient";
 
+const fallbackAnnouncements = [
+  { title: "Welcome to our Exclusive Online Store!", colorCode: "#f97316" },
+  { title: "Free Shipping on Orders Over 500!", colorCode: "#f97316" },
+  { title: "New Products Added Weekly!", colorCode: "#f97316" },
+];
+
 export default function Header() {
   const pathname = usePathname();
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [announcements, setAnnouncements] = useState([]);
+  const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-
-  // const fallbackAnnouncements = [
-  //   { title: "Welcome to our Exclusive Online Store!", colorCode: "#f97316" },
-  //   { title: "Free Shipping on Orders Over 500!", colorCode: "#f97316" },
-  //   { title: "New Products Added Weekly!", colorCode: "#f97316" },
-  // ];
 
   useEffect(() => {
     let mounted = true;
