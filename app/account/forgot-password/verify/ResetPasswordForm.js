@@ -1,8 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import useInfoModalStore from "@/store/infoModalStore";
-import useWarningModalStore from "@/store/warningModalStore";
+import toast from "react-hot-toast";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -36,35 +35,22 @@ export default function ResetPasswordForm() {
 
   const handleResetPassword = async () => {
     if (!formData.email.trim())
-      return useInfoModalStore
-        .getState()
-        .open({ title: "Info", message: "Please enter your email address" });
+      return toast.error("Please enter your email address");
     if (!formData.resetCode.trim())
-      return useInfoModalStore
-        .getState()
-        .open({ title: "Info", message: "Please enter the reset code" });
+      return toast.error("Please enter the reset code");
     if (!formData.newPassword.trim())
-      return useInfoModalStore
-        .getState()
-        .open({ title: "Info", message: "Please enter a new password" });
+      return toast.error("Please enter a new password");
     if (!formData.confirmPassword.trim())
-      return useInfoModalStore
-        .getState()
-        .open({ title: "Info", message: "Please confirm your new password" });
+      return toast.error("Please confirm your new password");
     if (formData.newPassword !== formData.confirmPassword)
-      return useWarningModalStore
-        .getState()
-        .open({ title: "Warning", message: "Passwords do not match" });
+      return toast.error("Passwords do not match");
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email))
-      return useInfoModalStore
-        .getState()
-        .open({ title: "Info", message: "Please enter a valid email address" });
+      return toast.error("Please enter a valid email address");
     if (formData.newPassword.length < 6)
-      return useWarningModalStore.getState().open({
-        title: "Warning",
-        message: "Password must be at least 6 characters long",
-      });
+      return toast.error("Password must be at least 6 characters long");
+    if (isLoading) return;
+
     setIsLoading(true);
     try {
       const response = await fetch(`/api/auth/reset-password-verify`, {
@@ -81,26 +67,18 @@ export default function ResetPasswordForm() {
         }),
       });
       const data = await response.json();
-      setIsLoading(false);
       if (response.ok) {
-        useInfoModalStore.getState().open({
-          title: "Success",
-          message: "Password has been reset successfully. You can now log in.",
-          onOkay: () => router.push("/account"),
-        });
+        toast.success(
+          data?.message || "Password reset successfully. Please login."
+        );
+        router.push("/account");
       } else {
-        useWarningModalStore.getState().open({
-          title: "Error",
-          message: data.message || "Verification failed",
-        });
+        toast.error(data?.message || "Verification failed");
       }
     } catch (error) {
-      // console.error(error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
       setIsLoading(false);
-      useWarningModalStore.getState().open({
-        title: "Error",
-        message: "Something went wrong. Please try again.",
-      });
     }
   };
 

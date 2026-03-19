@@ -2,8 +2,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import useInfoModalStore from "@/store/infoModalStore";
-import useWarningModalStore from "@/store/warningModalStore";
 import toast from "react-hot-toast";
 // import { baseUrl } from "@/utils/config";
 
@@ -21,86 +19,74 @@ export default function VerifyAccountPage() {
 
   const handleVerify = () => {
     if (!verificationCode.trim()) {
-      useInfoModalStore
-        .getState()
-        .open({ title: "Info", message: "Please enter the verification code" });
+      toast.error("Please enter the verification code");
       return;
     }
-    setIsLoading(true);
-    // console.log("Verification attempt:", { email, code: verificationCode });
+    if (!email?.trim()) {
+      toast.error("Email is missing. Please signup again.");
+      return;
+    }
+    if (isLoading) return;
 
-    // Simulate API call
-    setTimeout(async () => {
-      setIsLoading(false);
-      // verification api
-      try {
-        const response = await fetch(`/api/auth/verify-account`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            email: email,
-            user_verification_code: verificationCode,
-          }),
-        });
+    setIsLoading(true);
+    fetch(`/api/auth/verify-account`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+        user_verification_code: verificationCode,
+      }),
+    })
+      .then(async (response) => {
         const data = await response.json();
-        // console.log(data);
-        if (response.ok) {
-          useInfoModalStore.getState().open({
-            title: "Success",
-            message: "Account verified successfully!",
-            onOkay: () => router.push("/account"),
-          });
-        } else {
-          useWarningModalStore.getState().open({
-            title: "Error",
-            message: data.message || "Verification failed!",
-          });
+        if (!response.ok) {
+          throw new Error(data?.message || "Verification failed");
         }
-      } catch (error) {
-        // console.error("Error:", error);
-        useWarningModalStore.getState().open({
-          title: "Error",
-          message: "Something went wrong. Please try again.",
-        });
-      }
-    }, 1500);
+        toast.success(data?.message || "Account verified successfully");
+        router.push("/account");
+      })
+      .catch((error) => {
+        toast.error(error?.message || "Something went wrong. Please try again.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleResendCode = () => {
-    setIsLoading(true);
-    // console.log("Resending verification code to:", email);
+    if (!email?.trim()) {
+      toast.error("Email is missing. Please signup again.");
+      return;
+    }
+    if (isLoading) return;
 
-    // Simulate API call
-    setTimeout(async () => {
-      setIsLoading(false);
-      // alert("Verification code has been resent to your email");
-      // resend code api here
-      try {
-        const response = await fetch(`/api/auth/resend-code`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            email: email,
-          }),
-        });
+    setIsLoading(true);
+    fetch(`/api/auth/resend-code`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+      }),
+    })
+      .then(async (response) => {
         const data = await response.json();
-        // console.log(data);
-        if (response.ok) {
-          toast.success(data.message || "Verification code resent");
-        } else {
-          toast.error(data.message || "Resend failed");
+        if (!response.ok) {
+          throw new Error(data?.message || "Resend failed");
         }
-      } catch (error) {
-        // console.error("Error:", error);
-        alert("Something went wrong. Please try again.");
-      }
-    }, 1000);
+        toast.success(data?.message || "Verification code resent");
+      })
+      .catch((error) => {
+        toast.error(error?.message || "Something went wrong. Please try again.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleLoginNow = () => {
