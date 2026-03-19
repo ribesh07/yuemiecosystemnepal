@@ -112,26 +112,26 @@ const SideHeaderBar = () => {
     
     { icon: XCircle, label: "Return list", path: "/admin/returns" },
 
-    {
-      icon: Shield,
-      label: "Compliance & Legitimacy",
-      path: "#",
-      expandable: true,
-      children: [
-        { name: "About Us", path: "/admin/compliance/policies" },
-        { name: "Company Information", path: "/admin//comp-info" },
+    // {
+    //   icon: Shield,
+    //   label: "Compliance & Legitimacy",
+    //   path: "#",
+    //   expandable: true,
+    //   children: [
+    //     // { name: "About Us", path: "/admin/compliance/policies" },
+    //     { name: "Company Information", path: "/admin//comp-info" },
       
-        { name: "Shipping Information", path: "/admin/compliance/shipping" },
-        { name: "Contact Us", path: "/admin/contact" },
+    //     // { name: "Shipping Information", path: "/admin/compliance/shipping" },
+    //     // { name: "Contact Us", path: "/admin/contact" },
 
-      ],
-    },
-    {
-      icon: MessageSquare,
-      label: "Testimonials",
-      path: "admin/testimonials",
+    //   ],
+    // },
+    // {
+    //   icon: MessageSquare,
+    //   label: "Testimonials",
+    //   path: "admin/testimonials",
       
-    },
+    // },
 
   ];
      const pathname = usePathname();

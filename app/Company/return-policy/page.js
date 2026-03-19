@@ -1,217 +1,144 @@
-export default function ReturnPolicy() {
+import React from 'react';
+
+export default function ReturnPolicyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      
-      
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-orange-600 to-red-600 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-          <div className="relative z-10">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4">Return Policy</h1>
-            <p className="text-xl text-blue-100 max-w-2xl">
-              Your satisfaction is our priority. Easy returns within 7 days.
-            </p>
-          </div>
-        </div>
-        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-96 h-96 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <div className="bg-white shadow-sm rounded-lg p-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Return Policy</h1>
+          <p className="text-sm text-gray-600 mb-8">Last updated: December 21, 2025</p>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-2">7 Days</h3>
-            <p className="text-gray-600">Return Window</p>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-2">Free</h3>
-            <p className="text-gray-600">Defective Returns</p>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-2">5-7 Days</h3>
-            <p className="text-gray-600">Refund Processing</p>
-          </div>
-        </div>
+          <div className="prose prose-gray max-w-none">
 
-        {/* How It Works */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">How Returns Work</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="relative">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-600 text-white font-bold text-lg">
-                    1
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Request Return</h3>
-                  <p className="text-gray-600">Log into your account and select the item you'd like to return from your order history.</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="relative">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-600 text-white font-bold text-lg">
-                    2
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Ship It Back</h3>
-                  <p className="text-gray-600">Print your prepaid label, pack the item securely, and drop it off at any shipping location.</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="relative">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-600 text-white font-bold text-lg">
-                    3
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Get Refunded</h3>
-                  <p className="text-gray-600">Once we receive your return, we'll process your refund within 5-7 business days.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                We want you to be completely satisfied with your purchase. If you are not satisfied for any reason, you may return most items within 30 days of delivery for a full refund or exchange. Please read the following policy carefully before initiating a return.
+              </p>
+            </section>
 
-        {/* Policy Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Eligible Returns */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 border border-green-200">
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 ml-4">Eligible for Return</h3>
-            </div>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <svg className="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">Items in original condition with tags</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">Unused products in original packaging</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">Defective or damaged items</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">Wrong items received</span>
-              </li>
-            </ul>
-          </div>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Eligibility for Returns</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                To be eligible for a return, the following conditions must be met:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                <li>Item must be returned within 30 days of the delivery date</li>
+                <li>Item must be unused and in the same condition as received</li>
+                <li>Item must be in its original packaging with all tags attached</li>
+                <li>Proof of purchase (order number or receipt) must be provided</li>
+                <li>Item must not be listed under non-returnable categories below</li>
+              </ul>
+            </section>
 
-          {/* Non-Returnable */}
-          <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-3xl p-8 border border-red-200">
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 ml-4">Non-Returnable</h3>
-            </div>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">Personal care items & cosmetics</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">Intimate apparel & swimwear</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">Food & perishable goods</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">Custom or personalized items</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-700">Digital products & gift cards</span>
-              </li>
-            </ul>
-          </div>
-        </div>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Non-Returnable Items</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                The following items cannot be returned or exchanged:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                <li>Final sale or clearance items marked as non-returnable</li>
+                <li>Custom-made, personalized, or engraved products</li>
+                <li>Perishable goods such as food or flowers</li>
+                <li>Downloadable software or digital products</li>
+                <li>Intimate or sanitary goods for hygiene reasons</li>
+                <li>Gift cards or store credit vouchers</li>
+              </ul>
+            </section>
 
-        {/* Contact CTA */}
-        <div className="bg-gradient-to-r from-orange-600 to-red-600 rounded-3xl shadow-2xl p-12 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Need Help?</h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Our customer service team is here to assist you with any questions about returns or refunds.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="mailto:yuemiecosystemnepal@gmail.com" className="inline-flex items-center px-8 py-4 bg-white text-orange-600 rounded-full font-semibold hover:bg-blue-50 transition-colors">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Email Support
-            </a>
-            <a href="tel:9802341806" className="inline-flex items-center px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-colors">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-              9802341806
-            </a>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">How to Initiate a Return</h2>
+              <h3 className="text-xl font-medium text-gray-800 mb-3">Step 1 — Request a Return</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Log in to your account, navigate to your order history, and select the item you wish to return. Click "Start a Return" and follow the on-screen instructions. You will receive a confirmation email with further steps within 2 business hours.
+              </p>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">Step 2 — Pack Your Item</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Securely repack the item in its original packaging. Include the printed return slip provided in your confirmation email inside the package. Items that arrive damaged due to improper packing may not qualify for a full refund.
+              </p>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">Step 3 — Ship It Back</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Use the prepaid return shipping label attached to your confirmation email and drop the package at any authorized carrier location. We cover return shipping costs for all domestic orders. International customers are responsible for return shipping fees.
+              </p>
+
+              <h3 className="text-xl font-medium text-gray-800 mb-3">Step 4 — Receive Your Refund</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Once we receive and inspect your returned item (typically 2–3 business days), we will notify you by email. If approved, your refund will be processed to your original payment method within 5–7 business days.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Exchanges</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                We gladly accept exchanges for a different size, color, or variant of the same item. To request an exchange, select "Exchange" instead of "Return" when initiating your request. Replacement items are shipped as soon as your original return is received and inspected. Exchanges are subject to product availability.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Damaged or Defective Items</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                If your item arrived damaged, defective, or incorrect, please contact us within 48 hours of delivery. Email us at returns@example.com with your order number and clear photos of the damage or defect. We will arrange a replacement or issue a full refund at no cost to you — no return shipment required in most cases.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Refund Details</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                All approved refunds are issued to the original payment method used at checkout. Please note the following:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                <li>Credit / debit card refunds may take 5–7 business days to appear on your statement</li>
+                <li>Original shipping fees are non-refundable unless the return is due to our error</li>
+                <li>Refunds are processed in your original payment currency</li>
+                <li>Store credit is available as an alternative and is issued instantly upon approval</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Late or Missing Refunds</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                If you have not received your refund within the expected timeframe, please take the following steps before contacting us:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                <li>Check your bank account or payment app once more</li>
+                <li>Contact your credit card provider — it may take additional processing time</li>
+                <li>Contact your bank, as there is often some processing time before a refund is posted</li>
+              </ul>
+              <p className="text-gray-700 leading-relaxed mt-4">
+                If you have completed all of the above steps and still have not received your refund, please reach out to us using the contact details below.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Changes to This Policy</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                We reserve the right to update or modify this Return Policy at any time. Changes will be posted on this page with an updated effective date. We encourage you to review this policy periodically. Continued use of our services after changes are posted constitutes your acceptance of the revised policy.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                If you have any questions about our Return Policy or need assistance with a return, please contact our support team:
+              </p>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-700 mb-2">
+                  <span className="font-medium">Email:</span> returns@example.com
+                </p>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-medium">Phone:</span> +1 (555) 123-4567
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Address:</span> 123 Commerce Street, Suite 100, City, State 12345
+                </p>
+              </div>
+            </section>
+
           </div>
-          <p className="text-blue-100 mt-6 text-sm">Sunday-Friday, 9AM-6PM </p>
         </div>
       </div>
-
-      
-      
     </div>
   );
 }

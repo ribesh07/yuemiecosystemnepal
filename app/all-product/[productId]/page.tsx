@@ -101,6 +101,8 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState("description");
   const [addedToCart, setAddedToCart] = useState(false);
+  const [zoomActive, setZoomActive] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
 
   useEffect(() => {
     if (!normalizedProductId) return;
@@ -237,6 +239,7 @@ export default function ProductDetailPage() {
 
   const isInStock = Number(product.availableQuantity) > 0;
   const isLowStock = Number(product.availableQuantity) <= 10 && Number(product.availableQuantity) > 0;
+  const selectedImageUrl = resolveImageUrl(imageList[selectedImage] || product.mainImage);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -279,12 +282,35 @@ export default function ProductDetailPage() {
           {/* Left Column - Product Images */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative bg-white rounded-2xl overflow-hidden aspect-square border border-gray-200 group">
+            <div
+              className="relative bg-white rounded-2xl overflow-hidden aspect-square border border-gray-200 group"
+              onMouseEnter={() => setZoomActive(true)}
+              onMouseLeave={() => setZoomActive(false)}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                setZoomPosition({
+                  x: Math.max(0, Math.min(100, x)),
+                  y: Math.max(0, Math.min(100, y)),
+                });
+              }}
+            >
               <img
-                src={resolveImageUrl(imageList[selectedImage] || product.mainImage)}
+                src={selectedImageUrl}
                 alt={product.name}
                 className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-110"
               />
+
+              {zoomActive && (
+                <div
+                  className="hidden lg:block absolute w-28 h-28 border-2 border-orange-500/70 bg-white/20 pointer-events-none"
+                  style={{
+                    left: `calc(${zoomPosition.x}% - 56px)`,
+                    top: `calc(${zoomPosition.y}% - 56px)`,
+                  }}
+                />
+              )}
               
               {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -344,7 +370,21 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Right Column - Product Info */}
-          <div className="space-y-6">
+          <div>
+            {zoomActive && (
+              <div className="hidden lg:block bg-white rounded-2xl border border-gray-200 aspect-square overflow-hidden">
+                <div
+                  className="w-full h-full"
+                  style={{
+                    backgroundImage: `url('${selectedImageUrl}')`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                    backgroundSize: "260%",
+                  }}
+                />
+              </div>
+            )}
+            <div className={zoomActive ? "space-y-6 lg:hidden" : "space-y-6"}>
             {/* Brand */}
             {product.brand && (
               <div className="flex items-center gap-3">
@@ -518,6 +558,7 @@ export default function ProductDetailPage() {
                 </svg>
                 <p className="text-xs font-medium text-gray-700">Gift Wrap Available</p>
               </div>
+            </div>
             </div>
           </div>
         </div>
