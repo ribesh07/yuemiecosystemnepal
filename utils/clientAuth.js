@@ -6,6 +6,7 @@ export const getSessionToken = () => {
 export const clearSessionAuth = () => {
   if (typeof window === "undefined") return;
   sessionStorage.removeItem("token");
+  sessionStorage.removeItem("cart_user_scope");
   window.dispatchEvent(new CustomEvent("auth-change"));
 };
 
@@ -37,4 +38,3 @@ export const isAuthenticatedClient = async () => {
     return false;
   }
 };
-
