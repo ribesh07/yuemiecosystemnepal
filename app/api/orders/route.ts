@@ -243,6 +243,37 @@ export async function POST(req: Request) {
               );
             }
 
+            const existingWarranty = (
+              (await tx.$queryRawUnsafe(
+                "SELECT id FROM warranties WHERE product_unit_id = ? LIMIT 1",
+                unit.id.toString()
+              )) as any[]
+            )?.[0];
+
+            if (!existingWarranty) {
+              const wdRows = (await tx.$queryRawUnsafe(
+                "SELECT warranty_days as warrantyDays FROM products WHERE product_code = ? LIMIT 1",
+                product.productCode
+              )) as any[];
+              const days = Number(wdRows?.[0]?.warrantyDays || 365);
+              const purchaseDate = new Date();
+              const expiryDate = new Date(purchaseDate);
+              expiryDate.setDate(expiryDate.getDate() + days);
+
+              await tx.$executeRawUnsafe(
+                `
+                  INSERT INTO warranties
+                  (product_unit_id, order_id, customer_id, purchase_date, expiry_date, purchase_source)
+                  VALUES (?, ?, ?, ?, ?, 'online')
+                `,
+                unit.id.toString(),
+                order.id.toString(),
+                customerId.toString(),
+                purchaseDate,
+                expiryDate
+              );
+            }
+
           }
 
           if (txAny.productUnit?.updateMany) {
