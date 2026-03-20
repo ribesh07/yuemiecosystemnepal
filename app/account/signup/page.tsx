@@ -34,6 +34,8 @@ export default function AuthPage() {
   };
 
   const handleCreateAccount = async () => {
+    if (isSubmitting) return;
+
     // 1️⃣ Validation
     if (
       !formData.firstname ||
@@ -216,7 +218,7 @@ export default function AuthPage() {
           <button
             onClick={handleCreateAccount}
             disabled={isSubmitting}
-            className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 mt-4"
+            className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 mt-4 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "CREATING..." : "CREATE ACCOUNT"}
           </button>

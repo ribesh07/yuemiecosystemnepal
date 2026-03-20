@@ -27,6 +27,8 @@ function LoginPageContent() {
   // Login handler
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+
     if (!formData.email || !formData.password) {
       toast.error("Please enter both email and password");
       return;
@@ -124,9 +126,10 @@ function LoginPageContent() {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
+            disabled={isLoading}
+            className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            LOGIN
+            {isLoading ? "LOGGING IN..." : "LOGIN"}
           </button>
 
           <div className="mt-4 text-center">

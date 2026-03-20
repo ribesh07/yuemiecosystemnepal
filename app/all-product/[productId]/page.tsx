@@ -101,6 +101,10 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState("description");
   const [addedToCart, setAddedToCart] = useState(false);
+  const [zoomActive, setZoomActive] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const [addToCartLoading, setAddToCartLoading] = useState(false);
+  const [buyNowLoading, setBuyNowLoading] = useState(false);
 
   useEffect(() => {
     if (!normalizedProductId) return;
@@ -145,33 +149,44 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     if (!product) return;
+    if (addToCartLoading || buyNowLoading) return;
+    setAddToCartLoading(true);
+
     const authed = await isAuthenticatedClient();
     if (!authed) {
+      setAddToCartLoading(false);
       toast.error("Please login to add items to cart");
       router.push("/account?next=/all-product/" + product.id);
       return;
     }
 
-    addCartItem({
-      id: product.id,
-      productCode: product.productCode,
-      name: product.name,
-      image: resolveImageUrl(product.mainImage),
-      price: Number(product.sellPrice || 0),
-      quantity,
-      availableQuantity: Number(product.availableQuantity || 0),
-    });
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
-    toast.success("Added to cart");
-    window.dispatchEvent(new CustomEvent("open-cart"));
+    try {
+      addCartItem({
+        id: product.id,
+        productCode: product.productCode,
+        name: product.name,
+        image: resolveImageUrl(product.mainImage),
+        price: Number(product.sellPrice || 0),
+        quantity,
+        availableQuantity: Number(product.availableQuantity || 0),
+      });
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 2000);
+      toast.success("Added to cart");
+      window.dispatchEvent(new CustomEvent("open-cart"));
+    } finally {
+      setAddToCartLoading(false);
+    }
   };
 
   const handleBuyNow = async () => {
     if (!product) return;
+    if (buyNowLoading || addToCartLoading) return;
+    setBuyNowLoading(true);
 
     const authed = await isAuthenticatedClient();
     if (!authed) {
+      setBuyNowLoading(false);
       toast.error("Please login to continue checkout");
       router.push("/account?next=/Checkout");
       return;
@@ -237,6 +252,7 @@ export default function ProductDetailPage() {
 
   const isInStock = Number(product.availableQuantity) > 0;
   const isLowStock = Number(product.availableQuantity) <= 10 && Number(product.availableQuantity) > 0;
+  const selectedImageUrl = resolveImageUrl(imageList[selectedImage] || product.mainImage);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -279,12 +295,35 @@ export default function ProductDetailPage() {
           {/* Left Column - Product Images */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative bg-white rounded-2xl overflow-hidden aspect-square border border-gray-200 group">
+            <div
+              className="relative bg-white rounded-2xl overflow-hidden aspect-square border border-gray-200 group"
+              onMouseEnter={() => setZoomActive(true)}
+              onMouseLeave={() => setZoomActive(false)}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                setZoomPosition({
+                  x: Math.max(0, Math.min(100, x)),
+                  y: Math.max(0, Math.min(100, y)),
+                });
+              }}
+            >
               <img
-                src={resolveImageUrl(imageList[selectedImage] || product.mainImage)}
+                src={selectedImageUrl}
                 alt={product.name}
                 className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-110"
               />
+
+              {zoomActive && (
+                <div
+                  className="hidden lg:block absolute w-28 h-28 border-2 border-orange-500/70 bg-white/20 pointer-events-none"
+                  style={{
+                    left: `calc(${zoomPosition.x}% - 56px)`,
+                    top: `calc(${zoomPosition.y}% - 56px)`,
+                  }}
+                />
+              )}
               
               {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -344,7 +383,21 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Right Column - Product Info */}
-          <div className="space-y-6">
+          <div>
+            {zoomActive && (
+              <div className="hidden lg:block bg-white rounded-2xl border border-gray-200 aspect-square overflow-hidden">
+                <div
+                  className="w-full h-full"
+                  style={{
+                    backgroundImage: `url('${selectedImageUrl}')`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                    backgroundSize: "260%",
+                  }}
+                />
+              </div>
+            )}
+            <div className={zoomActive ? "space-y-6 lg:hidden" : "space-y-6"}>
             {/* Brand */}
             {product.brand && (
               <div className="flex items-center gap-3">
@@ -466,10 +519,15 @@ export default function ProductDetailPage() {
             <div className="space-y-3 pt-4">
               <button
                 onClick={handleAddToCart}
-                disabled={!isInStock}
+                disabled={!isInStock || addToCartLoading || buyNowLoading}
                 className="w-full py-4 bg-white border-2 border-gray-900 rounded-xl text-gray-900 font-semibold text-lg hover:bg-gray-50 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 relative overflow-hidden"
               >
-                {addedToCart ? (
+                {addToCartLoading ? (
+                  <>
+                    <span className="w-6 h-6 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
+                    Adding to Cart...
+                  </>
+                ) : addedToCart ? (
                   <>
                     <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -488,13 +546,22 @@ export default function ProductDetailPage() {
               
               <button
                 onClick={handleBuyNow}
-                disabled={!isInStock}
+                disabled={!isInStock || buyNowLoading || addToCartLoading}
                 className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl text-white font-semibold text-lg hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                BUY IT NOW
+                {buyNowLoading ? (
+                  <>
+                    <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Redirecting to Checkout...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    BUY IT NOW
+                  </>
+                )}
               </button>
             </div>
 
@@ -518,6 +585,7 @@ export default function ProductDetailPage() {
                 </svg>
                 <p className="text-xs font-medium text-gray-700">Gift Wrap Available</p>
               </div>
+            </div>
             </div>
           </div>
         </div>

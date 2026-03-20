@@ -93,6 +93,7 @@ export async function PUT(
       formData.get("specifications")) as string | null;
     const packaging = formData.get("packaging") as string | null;
     const warranty = formData.get("warranty") as string | null;
+    const warrantyDays = formData.get("warrantyDays") as string | null;
     const categoryId = formData.get("categoryId") as string | null;
     const categoryName = formData.get("categoryName") as string | null;
     const brandId = formData.get("brandId") as string | null;
@@ -249,6 +250,14 @@ export async function PUT(
 
       return product;
     });
+
+    if (warrantyDays !== null) {
+      await prisma.$executeRawUnsafe(
+        "UPDATE products SET warranty_days = ? WHERE id = ?",
+        Number(warrantyDays || 365),
+        productId.toString()
+      );
+    }
 
     return NextResponse.json({
       success: true,

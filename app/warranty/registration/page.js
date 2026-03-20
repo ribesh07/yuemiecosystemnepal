@@ -28,14 +28,31 @@ export default function WarrantyRegisterPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.serialNumber) {
       toast.error("Serial number is required");
       return;
     }
 
-    console.log("Warranty Registration Data:", formData);
-    toast.success("Warranty registered successfully!");
+    try {
+      const res = await fetch("/api/warranties/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          serialNumber: formData.serialNumber,
+          purchaseDate: formData.purchaseDate || undefined,
+          purchaseSource: "store",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || "Registration failed");
+      }
+      toast.success(data?.message || "Warranty registered successfully!");
+    } catch (error) {
+      console.error("Warranty register error:", error);
+      toast.error("Warranty registration failed");
+    }
   };
 
   return (

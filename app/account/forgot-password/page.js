@@ -1,9 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-
-import useInfoModalStore from "@/store/infoModalStore";
-import useWarningModalStore from "@/store/warningModalStore";
+import toast from "react-hot-toast";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -18,54 +16,45 @@ export default function ForgotPasswordPage() {
 
   const handleSendVerificationCode = () => {
     if (!email.trim()) {
-      useInfoModalStore
-        .getState()
-        .open({ title: "Info", message: "Please enter your email address" });
+      toast.error("Please enter your email address");
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      useInfoModalStore
-        .getState()
-        .open({ title: "Info", message: "Please enter a valid email address" });
+      toast.error("Please enter a valid email address");
       return;
     }
+
+    if (isLoading) return;
     setIsLoading(true);
-    setTimeout(async () => {
-      setIsLoading(false);
-      try {
-        const response = await fetch(`/api/auth/forgot-password-code`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            email: email,
-          }),
-        });
+    fetch(`/api/auth/forgot-password-code`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+      }),
+    })
+      .then(async (response) => {
         const data = await response.json();
-        if (data.success) {
-          setIsCodeSent(true);
-          // console.log("Verification code sent successfully");
-          // console.log(data.code);
-          router.push(
-            `/account/forgot-password/verify?email=${encodeURIComponent(email)}`
-          );
-        } else {
-          useWarningModalStore.getState().open({
-            title: "Error",
-            message: data.message || "Failed to send verification code",
-          });
+        if (!response.ok || !data?.success) {
+          throw new Error(data?.message || "Failed to send verification code");
         }
-      } catch (error) {
-        // console.error("Error:", error);
-        useWarningModalStore.getState().open({
-          title: "Error",
-          message: "Something went wrong. Please try again.",
-        });
-      }
-    }, 1500);
+
+        setIsCodeSent(true);
+        toast.success(data.message || "Verification code sent");
+        router.push(
+          `/account/forgot-password/verify?email=${encodeURIComponent(email)}`
+        );
+      })
+      .catch((error) => {
+        toast.error(error?.message || "Something went wrong. Please try again.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleCancel = () => {

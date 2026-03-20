@@ -99,9 +99,38 @@ export async function GET(req: Request) {
       }),
     ]);
 
+    const orderIds = (orders || []).map((o: any) => o.id?.toString()).filter(Boolean);
+    let serialRows: any[] = [];
+    if (orderIds.length) {
+      const placeholders = orderIds.map(() => "?").join(",");
+      serialRows = (await prisma.$queryRawUnsafe(
+        `
+          SELECT oi.id as orderItemId, oi.orderId as orderId, oi.productCode as productCode,
+                 pu.serial_number as serialNumber
+          FROM order_items oi
+          LEFT JOIN product_units pu ON pu.id = oi.product_unit_id
+          WHERE oi.orderId IN (${placeholders})
+        `,
+        ...orderIds
+      )) as any[];
+    }
+
+    const serialMap = new Map<string, string>();
+    for (const row of serialRows) {
+      serialMap.set(String(row.orderItemId), row.serialNumber || "");
+    }
+
+    const enrichedOrders = (orders as any[]).map((order) => ({
+      ...order,
+      items: (order.items || []).map((item: any) => ({
+        ...item,
+        serialNumber: serialMap.get(String(item.id)) || null,
+      })),
+    }));
+
     return NextResponse.json({
       success: true,
-      data: serializeBigInt(orders),
+      data: serializeBigInt(enrichedOrders),
       meta: {
         page,
         limit,

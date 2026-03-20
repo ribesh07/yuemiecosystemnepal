@@ -34,16 +34,23 @@ export default function ProfileInfo() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ fullName: "", profilePhotoPath: "" });
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
 
   const avatarSrc = useMemo(() => {
-    if (form.profilePhotoPath) return form.profilePhotoPath;
+    if (user?.profilePhotoPath) return user.profilePhotoPath;
     return "/employee.jpeg";
-  }, [form.profilePhotoPath]);
+  }, [user?.profilePhotoPath]);
 
-  const authHeaders = () => {
+  const previewAvatarSrc = useMemo(() => {
+    if (form.profilePhotoPath) return form.profilePhotoPath;
+    if (user?.profilePhotoPath) return user.profilePhotoPath;
+    return "/employee.jpeg";
+  }, [form.profilePhotoPath, user?.profilePhotoPath]);
+
+  const authHeaders = (json = true) => {
     const token = getSessionToken();
     return {
-      "Content-Type": "application/json",
+      ...(json ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
   };
@@ -58,7 +65,7 @@ export default function ProfileInfo() {
       }
 
       const res = await fetch("/api/users/me", {
-        headers: authHeaders(),
+        headers: authHeaders(false),
       });
       const payload = await res.json();
       if (!res.ok) {
@@ -85,6 +92,17 @@ export default function ProfileInfo() {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
+      return;
+    }
+    const maxSizeMb = 5;
+    if (file.size > maxSizeMb * 1024 * 1024) {
+      toast.error(`Image must be smaller than ${maxSizeMb}MB`);
+      return;
+    }
+
+    setSelectedImageFile(file);
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -105,23 +123,27 @@ export default function ProfileInfo() {
 
     try {
       setSaving(true);
+      const body = new FormData();
+      body.append("fullName", form.fullName.trim());
+      if (selectedImageFile) {
+        body.append("profilePhoto", selectedImageFile);
+      }
+
       const res = await fetch("/api/users/me", {
         method: "PUT",
-        headers: authHeaders(),
-        body: JSON.stringify({
-          fullName: form.fullName.trim(),
-          profilePhotoPath: form.profilePhotoPath || null,
-        }),
+        headers: authHeaders(false),
+        body,
       });
       const payload = await res.json();
       if (!res.ok) {
         throw new Error(payload?.message || "Failed to update profile");
       }
       setUser(payload?.data);
-      setForm((prev) => ({
-        ...prev,
-        fullName: payload?.data?.fullName || prev.fullName,
-      }));
+      setForm({
+        fullName: payload?.data?.fullName || form.fullName,
+        profilePhotoPath: payload?.data?.profilePhotoPath || "",
+      });
+      setSelectedImageFile(null);
       toast.success(payload?.message || "Profile updated");
       setEditProfile(false);
     } catch (error) {
@@ -129,6 +151,24 @@ export default function ProfileInfo() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const openEditModal = () => {
+    setForm({
+      fullName: user?.fullName || "",
+      profilePhotoPath: user?.profilePhotoPath || "",
+    });
+    setSelectedImageFile(null);
+    setEditProfile(true);
+  };
+
+  const closeEditModal = () => {
+    setForm({
+      fullName: user?.fullName || "",
+      profilePhotoPath: user?.profilePhotoPath || "",
+    });
+    setSelectedImageFile(null);
+    setEditProfile(false);
   };
 
   if (loading) {
@@ -145,6 +185,7 @@ export default function ProfileInfo() {
         width={120}
         height={120}
         className="mx-auto rounded-full object-cover"
+        unoptimized={avatarSrc.startsWith("data:")}
       />
 
       <h2 className="mt-4 text-xl font-semibold">{user.fullName}</h2>
@@ -152,7 +193,7 @@ export default function ProfileInfo() {
       <p className="text-gray-500 text-sm">{user.phone || "-"}</p>
 
       <button
-        onClick={() => setEditProfile(true)}
+        onClick={openEditModal}
         className="mt-3 text-sm text-blue-600 hover:underline"
       >
         Edit Profile
@@ -161,9 +202,20 @@ export default function ProfileInfo() {
       <Modal
         title="Edit Profile"
         isOpen={editProfile}
-        onClose={() => setEditProfile(false)}
+        onClose={closeEditModal}
       >
         <form className="space-y-4" onSubmit={handleSaveProfile}>
+          <div className="flex justify-center">
+            <Image
+              src={previewAvatarSrc}
+              alt="Avatar Preview"
+              width={96}
+              height={96}
+              className="rounded-full object-cover border"
+              unoptimized={previewAvatarSrc.startsWith("data:")}
+            />
+          </div>
+
           <input
             className="w-full border rounded px-3 py-2"
             value={form.fullName}
@@ -204,4 +256,3 @@ export default function ProfileInfo() {
     </div>
   );
 }
-

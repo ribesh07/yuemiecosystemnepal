@@ -45,6 +45,7 @@ const SideHeaderBar = () => {
       children: [
         { name: "View All", path: "/admin/product-list" },
         { name: "Add New", path: "/admin/add-product" },
+        { name: "Product Units", path: "/admin/product-units" },
       ],
     },
     {
@@ -106,31 +107,31 @@ const SideHeaderBar = () => {
 
     
 
-    { icon: BarChart3, label: "Warranty Report", path: "/admin/report" },
+    { icon: BarChart3, label: "Warranties", path: "/admin/warranties" },
     // { icon: Truck, label: "Shipping Carriers", path: "/admin/shipping" },
     
     { icon: XCircle, label: "Return list", path: "/admin/returns" },
 
-    {
-      icon: Shield,
-      label: "Compliance & Legitimacy",
-      path: "#",
-      expandable: true,
-      children: [
-        { name: "About Us", path: "/admin/compliance/policies" },
-        { name: "Company Information", path: "/admin//comp-info" },
+    // {
+    //   icon: Shield,
+    //   label: "Compliance & Legitimacy",
+    //   path: "#",
+    //   expandable: true,
+    //   children: [
+    //     // { name: "About Us", path: "/admin/compliance/policies" },
+    //     { name: "Company Information", path: "/admin//comp-info" },
       
-        { name: "Shipping Information", path: "/admin/compliance/shipping" },
-        { name: "Contact Us", path: "/admin/contact" },
+    //     // { name: "Shipping Information", path: "/admin/compliance/shipping" },
+    //     // { name: "Contact Us", path: "/admin/contact" },
 
-      ],
-    },
-    {
-      icon: MessageSquare,
-      label: "Testimonials",
-      path: "admin/testimonials",
+    //   ],
+    // },
+    // {
+    //   icon: MessageSquare,
+    //   label: "Testimonials",
+    //   path: "admin/testimonials",
       
-    },
+    // },
 
   ];
      const pathname = usePathname();

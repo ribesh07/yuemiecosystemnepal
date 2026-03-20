@@ -36,6 +36,7 @@ export default function ProductUploadPage() {
     keySpecifications: "",
     packaging: "",
     warranty: "",
+    warrantyDays: "365",
     productCatalog: null,
     mainImage: null,
     productImages: [],
@@ -123,6 +124,7 @@ export default function ProductUploadPage() {
       keySpecifications: "",
       packaging: "",
       warranty: "",
+      warrantyDays: "365",
       mainImage: null,
       productCatalog: null,
       productImages: [],
@@ -366,6 +368,16 @@ export default function ProductUploadPage() {
                 onChange={handleInputChange}
                 rows={3}
                 placeholder="Enter warranty info..."
+                className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <span>Warranty Days</span>
+              <input
+                type="number"
+                name="warrantyDays"
+                min="0"
+                value={formData.warrantyDays}
+                onChange={handleInputChange}
+                placeholder="365"
                 className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>

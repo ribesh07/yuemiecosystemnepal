@@ -205,6 +205,17 @@ const CheckoutPageContent = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 py-8 px-4">
+      {placingOrder && (
+        <div className="fixed inset-0 z-[100] bg-black/55 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center">
+            <div className="mx-auto h-12 w-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4" />
+            <h3 className="text-lg font-bold text-gray-900">Placing your order</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Please wait while we confirm stock and payment details.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -339,11 +350,15 @@ const CheckoutPageContent = () => {
               <button
                 type="submit"
                 disabled={placingOrder}
-                className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg"
+                className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                {placingOrder ? (
+                  <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
                 {placingOrder
                   ? "Placing Order..."
                   : `Place Order - Rs. ${total.toLocaleString()}`}

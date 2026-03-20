@@ -428,6 +428,9 @@ export default function Ordermanagement() {
                       <div className="text-xs text-gray-500">
                         Qty: {Number(item.quantity || 0)}
                       </div>
+                      <div className="text-xs text-gray-500 font-mono">
+                        Serial: {item.serialNumber || "-"}
+                      </div>
                     </div>
                     <div className="font-semibold">{formatMoney(item.subtotal)}</div>
                   </div>

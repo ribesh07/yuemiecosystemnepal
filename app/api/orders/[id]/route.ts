@@ -65,12 +65,60 @@ export async function PATCH(
         );
       }
 
-      const updated = await prisma.order.update({
-        where: { id: orderId },
-        data: {
-          orderStatus: "cancelled",
-          updatedAt: new Date(),
-        },
+      const updated = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        const changed = await tx.order.update({
+          where: { id: orderId },
+          data: {
+            orderStatus: "cancelled",
+            updatedAt: new Date(),
+          },
+        });
+
+        const rows = (await tx.$queryRawUnsafe(
+          `
+            SELECT productCode, quantity, product_unit_id as productUnitId
+            FROM order_items
+            WHERE orderId = ?
+          `,
+          orderId.toString()
+        )) as any[];
+
+        const qtyByProduct = new Map<string, number>();
+        const unitIds: string[] = [];
+        for (const row of rows || []) {
+          const code = String(row.productCode || "");
+          const qty = Number(row.quantity || 0);
+          if (code) qtyByProduct.set(code, (qtyByProduct.get(code) || 0) + qty);
+          if (row.productUnitId !== null && row.productUnitId !== undefined) {
+            unitIds.push(String(row.productUnitId));
+          }
+        }
+
+        for (const [productCode, qty] of qtyByProduct.entries()) {
+          await tx.$executeRawUnsafe(
+            `
+              UPDATE products
+              SET availableQuantity = availableQuantity + ?
+              WHERE product_code = ?
+            `,
+            qty,
+            productCode
+          );
+        }
+
+        for (const unitId of unitIds) {
+          await tx.$executeRawUnsafe(
+            "UPDATE product_units SET status = 'in_stock' WHERE id = ?",
+            unitId
+          );
+        }
+
+        await tx.$executeRawUnsafe(
+          "DELETE FROM warranties WHERE order_id = ? AND purchase_source = 'online'",
+          orderId.toString()
+        );
+
+        return changed;
       });
 
       return NextResponse.json({

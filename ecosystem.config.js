@@ -7,7 +7,9 @@ module.exports = {
       cwd: "/home/sanjaya/development/yuemiecosystemnepal",
       env: {
         NODE_ENV: "production",
-        PORT:4445
+        PORT:4445,
+        PDFKIT_FONTDIR:
+          "/home/sanjaya/development/yuemiecosystemnepal/node_modules/pdfkit/js/data",
       },
     },
   ],

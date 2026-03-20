@@ -4,6 +4,7 @@ import AddressSection from "./components/AddressSection"
 
 import  OrdersSection  from "./components/OrdersSection"
 import  SecuritySection  from "./components/SecuritySection";
+import WarrantyHistory from "./components/WarrantyHistory";
 
 export default function ProfilePage() {
   return (
@@ -14,6 +15,7 @@ export default function ProfilePage() {
       <div className="lg:col-span-3 space-y-6">
         <AddressSection />
         <OrdersSection />
+        <WarrantyHistory />
         <SecuritySection />
       </div>
 
