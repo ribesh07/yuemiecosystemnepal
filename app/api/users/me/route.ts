@@ -1,8 +1,15 @@
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 import { requireAuth } from "@/lib/auth";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+import { UPLOAD_BASE_DIR, urlToFilePath } from "@/utils/imageUpload";
+
 const safeUserSelect = {
  id: true,
  userId: true,
@@ -41,7 +48,33 @@ export async function GET() {
 export async function PUT(req: Request) {
   try {
     const user = await requireAuth();
-    const { fullName, profilePhotoPath } = await req.json();
+    const userId = BigInt(user.sub);
+    const contentType = req.headers.get("content-type") || "";
+
+    let fullName: string | undefined;
+    let profilePhotoPath: string | null | undefined;
+    let profilePhotoFile: File | null = null;
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      fullName = formData.get("fullName")?.toString();
+      const rawPath = formData.get("profilePhotoPath");
+      if (rawPath !== null) {
+        const value = rawPath?.toString()?.trim();
+        profilePhotoPath = value || null;
+      }
+
+      const rawFile = formData.get("profilePhoto");
+      if (rawFile instanceof File && rawFile.size > 0) {
+        profilePhotoFile = rawFile;
+      }
+    } else {
+      const body = await req.json();
+      fullName = body?.fullName;
+      if (body?.profilePhotoPath !== undefined) {
+        profilePhotoPath = body?.profilePhotoPath || null;
+      }
+    }
 
     if (!fullName || !String(fullName).trim()) {
       return NextResponse.json(
@@ -50,8 +83,38 @@ export async function PUT(req: Request) {
       );
     }
 
+    const existing = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { profilePhotoPath: true },
+    });
+
+    if (profilePhotoFile) {
+      const uploadDir = path.join(
+        UPLOAD_BASE_DIR,
+        "users",
+        String(user.sub),
+        "profile"
+      );
+      fs.mkdirSync(uploadDir, { recursive: true });
+
+      const ext = path.extname(profilePhotoFile.name) || ".jpg";
+      const fileName = `profile-${crypto.randomUUID()}${ext}`;
+      const filePath = path.join(uploadDir, fileName);
+      const bytes = await profilePhotoFile.arrayBuffer();
+      fs.writeFileSync(filePath, Buffer.from(bytes));
+
+      profilePhotoPath = `/uploads/users/${user.sub}/profile/${fileName}`;
+
+      if (existing?.profilePhotoPath?.startsWith("/uploads/")) {
+        const oldFilePath = urlToFilePath(existing.profilePhotoPath);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+    }
+
     const updated = await prisma.user.update({
-      where: { id: BigInt(user.sub) },
+      where: { id: userId },
       data: {
         fullName: String(fullName).trim(),
         ...(profilePhotoPath !== undefined && {
@@ -67,10 +130,17 @@ export async function PUT(req: Request) {
       message: "Profile updated successfully",
       data: serializeBigInt(updated),
     });
-  } catch {
+  } catch (error) {
+    console.error("USER_PROFILE_UPDATE_ERROR", error);
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
     return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
+      { success: false, message: "Failed to update profile" },
+      { status: 500 }
     );
   }
 }
@@ -138,4 +208,3 @@ export async function PATCH(req: Request) {
     );
   }
 }
-
