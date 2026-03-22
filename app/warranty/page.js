@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function WarrantyPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('register');
   const [showWarrantyResult, setShowWarrantyResult] = useState(false);
   const [warrantyResult, setWarrantyResult] = useState(null);
@@ -24,30 +26,8 @@ export default function WarrantyPage() {
     }
 
     setIsSubmitting(true);
-
-    try {
-      const res = await fetch("/api/warranties/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          serialNumber: registerSerial.trim(),
-          purchaseSource: "store",
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.message || "Registration failed");
-      }
-
-      toast.success(data?.message || "Warranty registered successfully!");
-      setRegisterSerial('');
-    } catch (error) {
-      console.error('Error submitting:', error);
-      toast.error('Error registering warranty. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    const serial = registerSerial.trim();
+    router.push(`/warranty/registration?serial=${encodeURIComponent(serial)}`);
   };
 
   const handleCheckWarranty = async (e) => {

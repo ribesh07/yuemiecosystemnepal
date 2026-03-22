@@ -143,6 +143,10 @@ export default function WarrantyAdminPage() {
                     <td className="px-4 py-3">
                       <div className="font-medium">{item.customerName || "-"}</div>
                       <div className="text-xs text-gray-500">{item.customerEmail || "-"}</div>
+                      <div className="text-xs text-gray-500">{item.customerPhone || "-"}</div>
+                      <div className="text-xs text-gray-500 mt-1 max-w-xs">
+                        {item.customerAddress || "-"}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       {item.orderNumber ? `#${item.orderNumber}` : "-"}

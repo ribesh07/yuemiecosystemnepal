@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { requireAuth } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
+import bcrypt from "bcryptjs";
+import { randomCode } from "@/lib/randomCode";
+import { randomBytes } from "crypto";
 
 export async function POST(req: Request) {
   try {
@@ -9,12 +12,43 @@ export async function POST(req: Request) {
     const serialNumber = String(body?.serialNumber || "").trim();
     const purchaseDateRaw = body?.purchaseDate ? new Date(body.purchaseDate) : null;
     const purchaseSource = body?.purchaseSource === "online" ? "online" : "store";
+    const customerName = String(body?.customerName || "").trim();
+    const email = String(body?.email || "").trim().toLowerCase();
+    const phone = String(body?.phone || "").trim();
+    const address = String(body?.address || "").trim();
 
     if (!serialNumber) {
       return NextResponse.json(
         { success: false, message: "Serial number is required" },
         { status: 400 }
       );
+    }
+
+    if (purchaseSource === "store") {
+      if (!customerName) {
+        return NextResponse.json(
+          { success: false, message: "Customer name is required" },
+          { status: 400 }
+        );
+      }
+      if (!email) {
+        return NextResponse.json(
+          { success: false, message: "Email is required" },
+          { status: 400 }
+        );
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return NextResponse.json(
+          { success: false, message: "Please enter a valid email address" },
+          { status: 400 }
+        );
+      }
+      if (!phone) {
+        return NextResponse.json(
+          { success: false, message: "Contact number is required" },
+          { status: 400 }
+        );
+      }
     }
 
     const prismaAny = prisma as any;
@@ -96,11 +130,205 @@ export async function POST(req: Request) {
     }
 
     let customerId: bigint | null = null;
+    let customerInfo: {
+      customerId: bigint | null;
+      customerName: string | null;
+      email: string | null;
+      phone: string | null;
+      address: string | null;
+    } = {
+      customerId: null,
+      customerName: customerName || null,
+      email: email || null,
+      phone: phone || null,
+      address: address || null,
+    };
+
     try {
       const user = await requireAuth();
       customerId = BigInt(user.sub);
     } catch {
-      customerId = null;
+      // continue with offline customer mapping
+    }
+
+    if (customerId && (customerName || email || phone)) {
+      const authUser = await prisma.user.findUnique({
+        where: { id: customerId },
+        select: { id: true, fullName: true, email: true, phone: true },
+      });
+
+      if (authUser?.id) {
+        const updateData: any = {
+          updatedAt: new Date(),
+        };
+
+        if (customerName && customerName !== authUser.fullName) {
+          updateData.fullName = customerName;
+        }
+
+        if (phone && phone !== authUser.phone) {
+          const phoneTaken = await prisma.user.findFirst({
+            where: {
+              phone,
+              id: { not: authUser.id },
+            },
+            select: { id: true },
+          });
+          if (!phoneTaken) {
+            updateData.phone = phone;
+          }
+        }
+
+        if (email && email !== authUser.email) {
+          const emailTaken = await prisma.user.findFirst({
+            where: {
+              email,
+              id: { not: authUser.id },
+            },
+            select: { id: true },
+          });
+          if (!emailTaken) {
+            updateData.email = email;
+          }
+        }
+
+        const updatedAuthUser = await prisma.user.update({
+          where: { id: authUser.id },
+          data: updateData,
+          select: { id: true, fullName: true, email: true, phone: true },
+        });
+
+        customerInfo = {
+          customerId: updatedAuthUser.id,
+          customerName: updatedAuthUser.fullName || customerName || null,
+          email: updatedAuthUser.email || email || null,
+          phone: updatedAuthUser.phone || phone || null,
+          address: address || null,
+        };
+      }
+    }
+
+    if (!customerId && (email || phone || customerName)) {
+      let userByEmail: any = null;
+      let userByPhone: any = null;
+
+      if (email) {
+        userByEmail = await prisma.user.findUnique({
+          where: { email },
+          select: { id: true, fullName: true, email: true, phone: true },
+        });
+      }
+
+      if (!userByEmail && phone) {
+        userByPhone = await prisma.user.findFirst({
+          where: { phone },
+          select: { id: true, fullName: true, email: true, phone: true },
+        });
+      }
+
+      const existingUser = userByEmail || userByPhone;
+
+      if (existingUser?.id) {
+        const safeName = customerName || existingUser.fullName || "Store Customer";
+        const updateData: any = {
+          fullName: safeName,
+          updatedAt: new Date(),
+        };
+
+        // update phone safely (unique)
+        if (phone && phone !== existingUser.phone) {
+          const phoneTaken = await prisma.user.findFirst({
+            where: {
+              phone,
+              id: { not: existingUser.id },
+            },
+            select: { id: true },
+          });
+          if (!phoneTaken) {
+            updateData.phone = phone;
+          }
+        }
+
+        // update email safely (unique)
+        if (email && email !== existingUser.email) {
+          const emailTaken = await prisma.user.findFirst({
+            where: {
+              email,
+              id: { not: existingUser.id },
+            },
+            select: { id: true },
+          });
+          if (!emailTaken) {
+            updateData.email = email;
+          }
+        }
+
+        const updatedUser = await prisma.user.update({
+          where: { id: existingUser.id },
+          data: updateData,
+          select: { id: true, fullName: true, email: true, phone: true },
+        });
+
+        customerId = updatedUser.id;
+        customerInfo = {
+          customerId,
+          customerName: updatedUser.fullName || null,
+          email: updatedUser.email || null,
+          phone: updatedUser.phone || null,
+          address: address || null,
+        };
+      } else if (email) {
+        const safeName = customerName || "Store Customer";
+        const tempPassword = randomBytes(16).toString("hex");
+        const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+        let safePhone: string | null = null;
+        if (phone) {
+          const phoneTaken = await prisma.user.findFirst({
+            where: { phone },
+            select: { id: true },
+          });
+          if (!phoneTaken) {
+            safePhone = phone;
+          }
+        }
+
+        const createdUser = await prisma.user.create({
+          data: {
+            userId: randomCode("U"),
+            fullName: safeName,
+            email,
+            phone: safePhone,
+            password: hashedPassword,
+            status: false,
+            isEmailVerified: false,
+          },
+          select: { id: true, fullName: true, email: true, phone: true },
+        });
+
+        customerId = createdUser.id;
+        customerInfo = {
+          customerId,
+          customerName: createdUser.fullName || null,
+          email: createdUser.email || null,
+          phone: createdUser.phone || null,
+          address: address || null,
+        };
+      }
+    }
+
+    if (customerId && customerInfo.customerName === null) {
+      const mappedUser = await prisma.user.findUnique({
+        where: { id: customerId },
+        select: { fullName: true, email: true, phone: true },
+      });
+      customerInfo = {
+        customerId,
+        customerName: mappedUser?.fullName || customerName || null,
+        email: mappedUser?.email || email || null,
+        phone: mappedUser?.phone || phone || null,
+        address: address || null,
+      };
     }
 
     const purchaseDate = purchaseDateRaw && !Number.isNaN(purchaseDateRaw.valueOf())
@@ -159,6 +387,13 @@ export async function POST(req: Request) {
         product: {
           name: unitInfo.product?.name || unitInfo.productName || null,
           productCode: unitInfo.product?.productCode || unitInfo.productCode || null,
+        },
+        customer: {
+          customerId: customerInfo.customerId,
+          customerName: customerInfo.customerName,
+          email: customerInfo.email,
+          phone: customerInfo.phone,
+          address: customerInfo.address,
         },
       }),
     });

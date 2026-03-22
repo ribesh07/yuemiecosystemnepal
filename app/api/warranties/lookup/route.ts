@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
+function formatWarrantyPeriod(daysInput: unknown) {
+  const days = Number(daysInput || 365);
+  if (!Number.isFinite(days) || days <= 0) return "365 Days";
+  const years = Math.floor(days / 365);
+  return years >= 1 ? `${years} Year${years > 1 ? "s" : ""}` : `${days} Days`;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -26,6 +33,7 @@ export async function POST(req: Request) {
                 select: {
                   name: true,
                   productCode: true,
+                  categoryName: true,
                 },
               },
               warranty: true,
@@ -41,7 +49,7 @@ export async function POST(req: Request) {
         const rows = (await prisma.$queryRawUnsafe(
           `
             SELECT pu.id, pu.serial_number as serialNumber, pu.product_code as productCode,
-                   p.product_name as productName, p.warranty_days as warrantyDays
+                   p.product_name as productName, p.categoryName as categoryName, p.warranty_days as warrantyDays
             FROM product_units pu
             LEFT JOIN products p ON p.product_code = pu.product_code
             WHERE pu.serial_number = ?
@@ -82,6 +90,9 @@ export async function POST(req: Request) {
               serialNumber: unitInfo.serialNumber,
               productName: unitInfo.product?.name || unitInfo.productName || null,
               productCode: unitInfo.product?.productCode || unitInfo.productCode || null,
+              categoryName: unitInfo.product?.categoryName || unitInfo.categoryName || null,
+              warrantyDays,
+              warrantyPeriod: formatWarrantyPeriod(warrantyDays),
             },
           },
           { status: 200 }
@@ -99,9 +110,11 @@ export async function POST(req: Request) {
           serialNumber: unitInfo.serialNumber,
           productName: unitInfo.product?.name || unitInfo.productName || null,
           productCode: unitInfo.product?.productCode || unitInfo.productCode || null,
+          categoryName: unitInfo.product?.categoryName || unitInfo.categoryName || null,
           purchaseDate: warranty.purchaseDate,
           expiryDate: warranty.expiryDate,
           warrantyDays,
+          warrantyPeriod: formatWarrantyPeriod(warrantyDays),
           purchaseSource: warranty.purchaseSource || warranty.purchase_source,
         }),
       });
@@ -159,6 +172,7 @@ export async function POST(req: Request) {
         purchaseDate: w.purchaseDate,
         expiryDate: w.expiryDate,
         warrantyDays: Number(w.warrantyDays || 365),
+        warrantyPeriod: formatWarrantyPeriod(w.warrantyDays),
         purchaseSource: w.purchaseSource,
       };
     });
