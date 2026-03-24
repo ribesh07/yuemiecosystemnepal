@@ -42,9 +42,22 @@ export async function GET(
       );
     }
 
+    const warrantyRows = (await prisma.$queryRawUnsafe(
+      "SELECT warranty_days as warrantyDays FROM products WHERE id = ? LIMIT 1",
+      id
+    )) as any[];
+    const warrantyDaysValue =
+      warrantyRows?.[0]?.warrantyDays !== undefined &&
+      warrantyRows?.[0]?.warrantyDays !== null
+        ? Number(warrantyRows[0].warrantyDays)
+        : null;
+
     return NextResponse.json({
       success: true,
-      data: serializeBigInt(product),
+      data: serializeBigInt({
+        ...product,
+        warrantyDays: warrantyDaysValue,
+      }),
     });
   } catch (error) {
     console.error("PRODUCT_GET_BY_ID_ERROR", error);
@@ -251,12 +264,15 @@ export async function PUT(
       return product;
     });
 
-    if (warrantyDays !== null) {
+    if (warrantyDays !== null && warrantyDays !== undefined && warrantyDays !== "") {
+      const numericWarrantyDays = Number(warrantyDays);
+      if (!Number.isNaN(numericWarrantyDays) && numericWarrantyDays > 0) {
       await prisma.$executeRawUnsafe(
         "UPDATE products SET warranty_days = ? WHERE id = ?",
-        Number(warrantyDays || 365),
+        numericWarrantyDays,
         productId.toString()
       );
+      }
     }
 
     return NextResponse.json({
