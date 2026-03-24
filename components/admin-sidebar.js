@@ -126,12 +126,11 @@ const SideHeaderBar = () => {
 
     //   ],
     // },
-    // {
-    //   icon: MessageSquare,
-    //   label: "Testimonials",
-    //   path: "admin/testimonials",
-      
-    // },
+    {
+      icon: MessageSquare,
+      label: "Testimonials",
+      path: "/admin/testimonials",
+    },
 
   ];
      const pathname = usePathname();
