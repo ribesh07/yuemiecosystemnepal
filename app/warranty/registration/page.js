@@ -18,6 +18,10 @@ function WarrantyRegisterContent() {
   const [details, setDetails] = useState(null);
   const [isChecking, setIsChecking] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const maxPurchaseDate = useMemo(
+    () => new Date().toISOString().split("T")[0],
+    []
+  );
 
   const isAlreadyRegistered = details?.status === "active" || details?.status === "expired";
   const warrantyPeriodText = useMemo(() => {
@@ -115,6 +119,10 @@ function WarrantyRegisterContent() {
       toast.error("This serial number is already registered");
       return;
     }
+    if (purchaseDate && purchaseDate > maxPurchaseDate) {
+      toast.error("Purchase date cannot be in the future");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -210,6 +218,7 @@ function WarrantyRegisterContent() {
                 type="date"
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
+                max={maxPurchaseDate}
                 className="w-full md:w-72 border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
               />
             </div>
