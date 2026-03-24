@@ -24,6 +24,25 @@ function parseOrderId(id: string) {
   }
 }
 
+async function hasColumn(
+  tableName: string,
+  columnName: string
+): Promise<boolean> {
+  const rows = (await prisma.$queryRawUnsafe(
+    `
+      SELECT 1
+      FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = ?
+        AND COLUMN_NAME = ?
+      LIMIT 1
+    `,
+    tableName,
+    columnName
+  )) as any[];
+  return Array.isArray(rows) && rows.length > 0;
+}
+
 export async function GET(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -299,11 +318,18 @@ export async function PATCH(
         INDEX idx_order_update_logs_event_type (event_type)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-    await prisma.$executeRawUnsafe(`
-      ALTER TABLE order_update_logs
-      ADD COLUMN IF NOT EXISTS cn_number VARCHAR(191) NULL AFTER transaction_id,
-      ADD COLUMN IF NOT EXISTS cn_date DATE NULL AFTER cn_number;
-    `);
+    if (!(await hasColumn("order_update_logs", "cn_number"))) {
+      await prisma.$executeRawUnsafe(
+        "ALTER TABLE order_update_logs ADD COLUMN cn_number VARCHAR(191) NULL AFTER transaction_id"
+      );
+    }
+    if (!(await hasColumn("order_update_logs", "cn_date"))) {
+      await prisma.$executeRawUnsafe(
+        "ALTER TABLE order_update_logs ADD COLUMN cn_date DATE NULL AFTER cn_number"
+      );
+    }
+
+    const hasProductUnitIdColumn = await hasColumn("order_items", "product_unit_id");
 
     const adminId = admin?.sub ? BigInt(admin.sub) : null;
 
@@ -369,7 +395,9 @@ export async function PATCH(
 
       const currentStatus = String(existingOrder.orderStatus || "").toLowerCase();
       const unitRows = (await tx.$queryRawUnsafe(
-        "SELECT id, productCode, product_unit_id as productUnitId FROM order_items WHERE orderId = ?",
+        hasProductUnitIdColumn
+          ? "SELECT id, productCode, product_unit_id as productUnitId FROM order_items WHERE orderId = ?"
+          : "SELECT id, productCode, NULL as productUnitId FROM order_items WHERE orderId = ?",
         orderId.toString()
       )) as any[];
       const unitIdByItemId = new Map<string, bigint | null>();
