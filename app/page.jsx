@@ -5,6 +5,7 @@ import ImageSlider from "@/components/ImageSlider";
 import FeaturedCollections from "@/components/FeaturedCollection";
 import Bestseller from "@/components/BestSeller";
 import Testimonials from "@/components/Testimonials";
+import YoutubeVideoTestimonials from "@/components/YoutubeVideoTestimonials";
 import Support from "@/components/Support";
 //import YuemiCategories from "@/components/YuemiCategories";
 import CategoriesPage from "./categories/page";
@@ -22,6 +23,8 @@ export default function Home() {
        <FeaturedCollections />
        <ImageSlider />
        <Bestseller /> 
+       
+       <YoutubeVideoTestimonials />
        <Testimonials />
        <Support />
       

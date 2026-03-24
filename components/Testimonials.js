@@ -5,34 +5,38 @@ import Image from 'next/image';
 const Testimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [testimonials, setTestimonials] = useState([]);
 
-  const testimonials = [
-    {
-      id: 1,
-      text: "I've been using these YuéMi lights for a few months now and I'm so impressed. They're durable, easy to install, and provide great visibility. It's easy to use, Highly recommend!",
-      name: "Nur ",
-      location: "Kathmandu",
-      image: "/employee.jpeg"
-    },
-    {
-      id: 2,
-      text: "I was impressed with the build quality and ease of installation of this camera. The picture quality is crystal clear, even in low light conditions. I've used it to record my driving trips.",
-      name: "Anjali Rauniyar",
-      location: "Lalitpur",
-      image: "/ladies _emp.jpeg"
-    },
-    {
-      id: 3,
-      text: "I recently bought the YuéMi Amplifier, and I am really happy with it! The sound is powerful and clear, perfect for listening to music or watching movies. Even though it's small, it gives great sound quality.",
-      name: "Gyanendra Shah",
-      location: "Bhaktapur",
-      image: "/manager.jpeg"
-    }
-  ];
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await fetch("/api/testimonials?active=1", {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const rows = Array.isArray(data) ? data : [];
+        setTestimonials(
+          rows.map((item) => ({
+            id: item.id,
+            text: item.message || "",
+            name: item.name || "Yuemi Customer",
+            location: [item.destination, item.address].filter(Boolean).join(" - "),
+            image: item.profile_image || "/employee.jpeg",
+          }))
+        );
+      } catch (error) {
+        console.error("TESTIMONIALS_FETCH_ERROR", error);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
+
 
   // Auto slide functionality
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || testimonials.length <= 1) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => 
@@ -46,7 +50,6 @@ const Testimonials = () => {
   const goToSlide = (index) => {
     setCurrentIndex(index);
     setIsAutoPlaying(false);
-    // Resume auto-play after 10 seconds
     setTimeout(() => setIsAutoPlaying(true), 10000);
   };
 
@@ -68,16 +71,20 @@ const Testimonials = () => {
 
   // Calculate which testimonials to show based on screen size
   const getVisibleTestimonials = () => {
+    if (testimonials.length === 0) return [];
     const visible = [];
-    for (let i = 0; i < 3; i++) {
+    const itemsToShow = Math.min(3, testimonials.length);
+    for (let i = 0; i < itemsToShow; i++) {
       const index = (currentIndex + i) % testimonials.length;
       visible.push(testimonials[index]);
     }
     return visible;
   };
 
+  if (testimonials.length === 0) return null;
+
   return (
-    <section className="py-16 px-4" style={{ backgroundColor: '#F5EFE0' }}>
+    <section className="py-16 px-4" style={{ backgroundColor: '#F3F4F6' }}>
       <div className="max-w-7xl mx-auto">
         <h2 className="text-4xl font-bold text-center mb-12 text-gray-900">
           Testimonials

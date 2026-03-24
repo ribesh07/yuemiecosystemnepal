@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Upload, Save, RotateCcw, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
+import useConfirmModalStore from "@/store/confirmModalStore";
 
 export default function ProductEditPage() {
+  const openConfirm = useConfirmModalStore((state) => state.open);
   const params = useParams();
   const router = useRouter();
   const productId = Array.isArray(params?.id) ? params.id[0] : params?.id;
@@ -209,31 +211,35 @@ export default function ProductEditPage() {
 
   const handleDeleteGalleryImage = async (imagePath) => {
     if (!productId) return;
-    if (!window.confirm("Remove this image from the gallery?")) return;
+    openConfirm({
+      title: "Remove Gallery Image",
+      message: "Are you sure you want to remove this image from gallery?",
+      onConfirm: async () => {
+        try {
+          setDeletingImage(imagePath);
+          const res = await fetch("/api/products/images", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              productCode: formData.productCode,
+              imagePath,
+              type: "gallery",
+            }),
+          });
 
-    try {
-      setDeletingImage(imagePath);
-      const res = await fetch("/api/products/images", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productCode: formData.productCode,
-          imagePath,
-          type: "gallery",
-        }),
-      });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.message || "Failed to delete image");
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Failed to delete image");
-
-      setExistingGallery((prev) => prev.filter((img) => img !== imagePath));
-      toast.success("Image removed");
-    } catch (error) {
-      console.error(error);
-      toast.error(error.message || "Failed to remove image");
-    } finally {
-      setDeletingImage("");
-    }
+          setExistingGallery((prev) => prev.filter((img) => img !== imagePath));
+          toast.success("Image removed");
+        } catch (error) {
+          console.error(error);
+          toast.error(error.message || "Failed to remove image");
+        } finally {
+          setDeletingImage("");
+        }
+      },
+    });
   };
 
   const canSave = useMemo(() => formData.name && formData.productCode, [formData]);

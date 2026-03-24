@@ -19,12 +19,30 @@ export async function GET(req: Request) {
              pu.serial_number as serialNumber,
              p.product_name as productName, p.product_code as productCode, p.warranty_days as warrantyDays,
              o.order_id as orderNumber,
-             u.full_name as customerName, u.email as customerEmail, u.phone as customerPhone
+             u.id as customerId,
+             u.full_name as customerName, u.email as customerEmail, u.phone as customerPhone,
+             CONCAT_WS(', ',
+               NULLIF(cab.address, ''),
+               NULLIF(cab.landmark, ''),
+               NULLIF(az.zone_name, ''),
+               NULLIF(sc.city, ''),
+               NULLIF(pr.province_name, '')
+             ) as customerAddress
       FROM warranties w
       JOIN product_units pu ON pu.id = w.product_unit_id
       LEFT JOIN products p ON p.product_code = pu.product_code
       LEFT JOIN orders o ON o.id = w.order_id
       LEFT JOIN users u ON u.id = w.customer_id
+      LEFT JOIN customer_address_book cab ON cab.id = (
+        SELECT cab2.id
+        FROM customer_address_book cab2
+        WHERE cab2.customer_id = u.id
+        ORDER BY cab2.defaultShipping DESC, cab2.id DESC
+        LIMIT 1
+      )
+      LEFT JOIN address_zone az ON az.id = cab.zone_id
+      LEFT JOIN set_shipping sc ON sc.id = cab.city_id
+      LEFT JOIN provinces pr ON pr.id = cab.province_id
       WHERE 1=1
     `;
     const args: any[] = [];
@@ -55,6 +73,7 @@ export async function GET(req: Request) {
       customerName: w.customerName || null,
       customerEmail: w.customerEmail || null,
       customerPhone: w.customerPhone || null,
+      customerAddress: w.customerAddress || null,
       purchaseDate: w.purchaseDate,
       expiryDate: w.expiryDate,
       warrantyDays: Number(w.warrantyDays || 365),

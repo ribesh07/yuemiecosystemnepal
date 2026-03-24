@@ -1,46 +1,141 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
-export default function WarrantyRegisterPage() {
-  const [formData, setFormData] = useState({
-    serialNumber: "",
-    productCategory: "",
-    productModel: "",
-    purchaseDate: "",
-    purchasePrice: "",
-    warrantyPeriod: "",
-    customerName: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    zip: "",
-    receiptNumber: "",
-    dealerName: "",
-    additionalNotes: "",
-  });
+function WarrantyRegisterContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const serialFromQuery = (searchParams.get("serial") || "").trim();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const [serialNumber, setSerialNumber] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [details, setDetails] = useState(null);
+  const [isChecking, setIsChecking] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const maxPurchaseDate = useMemo(
+    () => new Date().toISOString().split("T")[0],
+    []
+  );
+
+  const isAlreadyRegistered = details?.status === "active" || details?.status === "expired";
+  const warrantyPeriodText = useMemo(() => {
+    const days = Number(details?.warrantyDays || 365);
+    if (!Number.isFinite(days) || days <= 0) return "-";
+    const years = Math.floor(days / 365);
+    return years >= 1 ? `${years} Year${years > 1 ? "s" : ""}` : `${days} Days`;
+  }, [details?.warrantyDays]);
+
+  const loadDetailsBySerial = async (serial) => {
+    const cleanSerial = String(serial || "").trim();
+    if (!cleanSerial) return;
+
+    setIsChecking(true);
+    try {
+      const res = await fetch("/api/warranties/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ serialNumber: cleanSerial }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          setDetails({
+            status: "serial_not_found",
+            productName: "-",
+            categoryName: "-",
+            warrantyDays: 365,
+          });
+          return;
+        }
+        throw new Error(data?.message || "Failed to fetch product details");
+      }
+
+      if (data?.data?.status === "not_registered") {
+        setDetails({
+          status: "not_registered",
+          productName: data?.data?.productName || "-",
+          categoryName: data?.data?.categoryName || "-",
+          warrantyDays: Number(data?.data?.warrantyDays || 365),
+        });
+        return;
+      }
+
+      setDetails({
+        status: data?.data?.status || "active",
+        productName: data?.data?.productName || "-",
+        categoryName: data?.data?.categoryName || "-",
+        warrantyDays: Number(data?.data?.warrantyDays || 365),
+        purchaseDate: data?.data?.purchaseDate || null,
+        expiryDate: data?.data?.expiryDate || null,
+      });
+    } catch (error) {
+      setDetails(null);
+      toast.error(error?.message || "Failed to fetch serial details");
+    } finally {
+      setIsChecking(false);
+    }
   };
 
-  const handleSubmit = async () => {
-    if (!formData.serialNumber) {
+  useEffect(() => {
+    if (!serialFromQuery) return;
+    setSerialNumber(serialFromQuery);
+    loadDetailsBySerial(serialFromQuery);
+  }, [serialFromQuery]);
+
+  const handleCheckSerial = async () => {
+    if (!serialNumber.trim()) {
       toast.error("Serial number is required");
       return;
     }
+    await loadDetailsBySerial(serialNumber.trim());
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!serialNumber.trim()) {
+      toast.error("Serial number is required");
+      return;
+    }
+    if (!customerName.trim()) {
+      toast.error("Customer name is required");
+      return;
+    }
+    if (!email.trim()) {
+      toast.error("Email is required");
+      return;
+    }
+    if (!phone.trim()) {
+      toast.error("Contact number is required");
+      return;
+    }
+    if (isAlreadyRegistered) {
+      toast.error("This serial number is already registered");
+      return;
+    }
+    if (purchaseDate && purchaseDate > maxPurchaseDate) {
+      toast.error("Purchase date cannot be in the future");
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const res = await fetch("/api/warranties/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          serialNumber: formData.serialNumber,
-          purchaseDate: formData.purchaseDate || undefined,
+          serialNumber: serialNumber.trim(),
+          purchaseDate: purchaseDate || undefined,
+          customerName: customerName.trim() || undefined,
+          email: email.trim() || undefined,
+          phone: phone.trim() || undefined,
+          address: address.trim() || undefined,
           purchaseSource: "store",
         }),
       });
@@ -48,295 +143,194 @@ export default function WarrantyRegisterPage() {
       if (!res.ok) {
         throw new Error(data?.message || "Registration failed");
       }
+
       toast.success(data?.message || "Warranty registered successfully!");
+      await loadDetailsBySerial(serialNumber.trim());
     } catch (error) {
-      console.error("Warranty register error:", error);
-      toast.error("Warranty registration failed");
+      toast.error(error?.message || "Warranty registration failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
         <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
-          {/* Header */}
           <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-6">
             <h1 className="text-3xl font-bold text-white">Warranty Registration</h1>
-            <p className="text-orange-100 mt-2">Complete the form below to register your product warranty</p>
+            <p className="text-orange-100 mt-2">
+              Verify serial and register store purchase warranty
+            </p>
           </div>
 
-          <div className="p-8 space-y-8">
-            {/* Product Details Section */}
-            <div className="space-y-4">
-              <div className="border-b border-gray-200 pb-2">
-                <h2 className="text-xl font-semibold text-gray-800">Product Details</h2>
+          <form onSubmit={handleSubmit} className="p-8 space-y-7">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Serial Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={serialNumber}
+                  onChange={(e) => setSerialNumber(e.target.value)}
+                  placeholder="Enter product serial number"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Serial Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="serialNumber"
-                    placeholder="Enter serial number"
-                    value={formData.serialNumber}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
-                </div>
+              <button
+                type="button"
+                onClick={handleCheckSerial}
+                disabled={isChecking || !serialNumber.trim()}
+                className="h-[46px] px-5 rounded-lg border border-orange-500 text-orange-600 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isChecking ? "Checking..." : "Check Serial"}
+              </button>
+            </div>
 
+            <div className="rounded-xl border border-gray-200 p-5 bg-gray-50">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Product Details</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Category
-                  </label>
-                  <select
-                    name="productCategory"
-                    value={formData.productCategory}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  >
-                    <option value="">Select category</option>
-                    <option value="electronics">Electronics</option>
-                    <option value="appliances">Home Appliances</option>
-                    <option value="furniture">Furniture</option>
-                    <option value="automotive">Automotive</option>
-                    <option value="tools">Tools & Equipment</option>
-                    <option value="other">Other</option>
-                  </select>
+                  <p className="text-xs text-gray-500 mb-1">Product Name</p>
+                  <p className="font-medium text-gray-800">{details?.productName || "-"}</p>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Model
-                  </label>
-                  <input
-                    type="text"
-                    name="productModel"
-                    placeholder="Enter product model"
-                    value={formData.productModel}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
+                  <p className="text-xs text-gray-500 mb-1">Category</p>
+                  <p className="font-medium text-gray-800">{details?.categoryName || "-"}</p>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Purchase Date
-                  </label>
-                  <input
-                    type="date"
-                    name="purchaseDate"
-                    value={formData.purchaseDate}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
+                  <p className="text-xs text-gray-500 mb-1">Warranty Period</p>
+                  <p className="font-medium text-gray-800">{warrantyPeriodText}</p>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Purchase Price
-                  </label>
-                  <input
-                    type="number"
-                    name="purchasePrice"
-                    placeholder="0.00"
-                    value={formData.purchasePrice}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Warranty Period
-                  </label>
-                  <select
-                    name="warrantyPeriod"
-                    value={formData.warrantyPeriod}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  >
-                    <option value="">Select warranty period</option>
-                    <option value="6months">6 Months</option>
-                    <option value="1year">1 Year</option>
-                    <option value="2years">2 Years</option>
-                    <option value="3years">3 Years</option>
-                    <option value="5years">5 Years</option>
-                    <option value="lifetime">Lifetime</option>
-                  </select>
+                  <p className="text-xs text-gray-500 mb-1">Current Status</p>
+                  <p className="font-medium text-gray-800 capitalize">{details?.status || "-"}</p>
                 </div>
               </div>
             </div>
 
-            {/* Customer Details Section */}
-            <div className="space-y-4">
-              <div className="border-b border-gray-200 pb-2">
-                <h2 className="text-xl font-semibold text-gray-800">Customer Information</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Purchase Date (optional)
+              </label>
+              <input
+                type="date"
+                value={purchaseDate}
+                onChange={(e) => setPurchaseDate(e.target.value)}
+                max={maxPurchaseDate}
+                className="w-full md:w-72 border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+              />
+            </div>
+
+            <div className="rounded-xl border border-gray-200 p-5 bg-white">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Customer Details</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
+                    Customer Name
                   </label>
                   <input
                     type="text"
-                    name="customerName"
-                    placeholder="Enter your full name"
-                    value={formData.customerName}
-                    onChange={handleChange}
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Enter customer name"
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                    Contact Number
+                  </label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Enter phone number"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
                   </label>
                   <input
                     type="email"
-                    name="email"
-                    placeholder="your.email@example.com"
-                    value={formData.email}
-                    onChange={handleChange}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter email address"
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    placeholder="+1 (555) 123-4567"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    placeholder="Enter your city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    State/Province
-                  </label>
-                  <input
-                    type="text"
-                    name="state"
-                    placeholder="Enter your state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    ZIP/Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    name="zip"
-                    placeholder="Enter ZIP code"
-                    value={formData.zip}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
+                {/* <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Address
                   </label>
-                  <input
-                    type="text"
-                    name="address"
-                    placeholder="Enter your full address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Purchase Details Section */}
-            <div className="space-y-4">
-              <div className="border-b border-gray-200 pb-2">
-                <h2 className="text-xl font-semibold text-gray-800">Purchase Information</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Receipt Number
-                  </label>
-                  <input
-                    type="text"
-                    name="receiptNumber"
-                    placeholder="Enter receipt number"
-                    value={formData.receiptNumber}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dealer Name
-                  </label>
-                  <input
-                    type="text"
-                    name="dealerName"
-                    placeholder="Enter dealer name"
-                    value={formData.dealerName}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Additional Notes
-                  </label>
                   <textarea
-                    name="additionalNotes"
-                    placeholder="Any additional information or special notes..."
-                    value={formData.additionalNotes}
-                    onChange={handleChange}
-                    rows="4"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition resize-none"
+                    rows={3}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Enter full address"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end pt-4">
+            {isAlreadyRegistered && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                This serial number already has a registered warranty.
+              </div>
+            )}
+            {details?.status === "serial_not_found" && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                Serial number not found in product units. Please check and try again.
+              </div>
+            )}
+
+            <div className="flex gap-3">
               <button
-                onClick={handleSubmit}
-                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-orange-700 hover:to-orange-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                type="button"
+                onClick={() => router.push("/warranty")}
+                className="px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
               >
-                Register Warranty
+                Back
+              </button>
+              <button
+                type="submit"
+                disabled={
+                  isSubmitting ||
+                  isChecking ||
+                  !serialNumber.trim() ||
+                  !customerName.trim() ||
+                  !email.trim() ||
+                  !phone.trim() ||
+                  !details ||
+                  isAlreadyRegistered ||
+                  details?.status === "serial_not_found"
+                }
+                className="px-8 py-3 rounded-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-700 hover:to-orange-800 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? "Registering..." : "Register Warranty"}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WarrantyRegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="h-10 w-10 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <WarrantyRegisterContent />
+    </Suspense>
   );
 }

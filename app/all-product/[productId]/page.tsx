@@ -7,6 +7,7 @@ import { apiRequest } from "@/utils/ApisafeCalls";
 import { isAuthenticatedClient } from "@/utils/clientAuth";
 import { addCartItem } from "@/utils/cartClient";
 import toast from "react-hot-toast";
+import { Share2 } from "lucide-react";
 
 interface ProductImage {
   id: string;
@@ -146,6 +147,42 @@ export default function ProductDetailPage() {
   };
 
   const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+
+  const handleShareProduct = async () => {
+    if (!product) return;
+    const shareUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/all-product/${product.id}`
+        : "";
+
+    try {
+      if ((navigator as any).share) {
+        await (navigator as any).share({
+          title: product.name,
+          text: `Check this product: ${product.name}`,
+          url: shareUrl,
+        });
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Product link copied");
+        return;
+      }
+
+      const tempInput = document.createElement("input");
+      tempInput.value = shareUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      toast.success("Product link copied");
+    } catch (error: any) {
+      if (error?.name === "AbortError") return;
+      toast.error("Unable to share product");
+    }
+  };
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -411,9 +448,20 @@ export default function ProductDetailPage() {
 
             {/* Product Name */}
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-2">
-                {product.name}
-              </h1>
+              <div className="flex items-start justify-between gap-3">
+                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-2">
+                  {product.name}
+                </h1>
+                <button
+                  type="button"
+                  onClick={handleShareProduct}
+                  className="shrink-0 h-11 w-11 rounded-full border border-orange-200 bg-orange-50 text-orange-600 shadow-sm hover:bg-orange-100 hover:border-orange-300 hover:shadow transition flex items-center justify-center"
+                  title="Share product"
+                  aria-label="Share product"
+                >
+                  <Share2 className="w-5 h-5" />
+                </button>
+              </div>
               {product.category && (
                 <p className="text-sm text-gray-600">
                   Category: <span className="font-medium text-gray-900">{product.categoryName}</span>
@@ -839,7 +887,10 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Related Products */}
-        <RelatedProduct />
+        <RelatedProduct
+          categoryId={product.categoryId}
+          currentProductId={product.id}
+        />
       </div>
 
       <style jsx>{`

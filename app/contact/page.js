@@ -92,7 +92,7 @@ const ContactPage = () => {
                 href="mailto:support@yuemiecosystem.com"
                 className="text-blue-600 hover:underline"
               >
-                yuemiecosystemnepal@gmail.com
+                yueminepal@gmail.com
               </a>
             </p>
           </div>

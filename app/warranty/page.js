@@ -1,17 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function WarrantyPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('register');
   const [showWarrantyResult, setShowWarrantyResult] = useState(false);
   const [warrantyResult, setWarrantyResult] = useState(null);
   
   const [registerSerial, setRegisterSerial] = useState('');
   const [checkSerial, setCheckSerial] = useState('');
-  const [checkOrderId, setCheckOrderId] = useState('');
-  const [checkEmail, setCheckEmail] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -24,37 +24,15 @@ export default function WarrantyPage() {
     }
 
     setIsSubmitting(true);
-
-    try {
-      const res = await fetch("/api/warranties/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          serialNumber: registerSerial.trim(),
-          purchaseSource: "store",
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.message || "Registration failed");
-      }
-
-      toast.success(data?.message || "Warranty registered successfully!");
-      setRegisterSerial('');
-    } catch (error) {
-      console.error('Error submitting:', error);
-      toast.error('Error registering warranty. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    const serial = registerSerial.trim();
+    router.push(`/warranty/registration?serial=${encodeURIComponent(serial)}`);
   };
 
   const handleCheckWarranty = async (e) => {
     e.preventDefault();
     
-    if (!checkSerial.trim() && !checkOrderId.trim()) {
-      toast.error('Please enter serial number or order ID');
+    if (!checkSerial.trim()) {
+      toast.error('Please enter serial number');
       return;
     }
 
@@ -65,9 +43,7 @@ export default function WarrantyPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          serialNumber: checkSerial.trim() || undefined,
-          orderId: checkOrderId.trim() || undefined,
-          email: checkEmail.trim() || undefined,
+          serialNumber: checkSerial.trim(),
         }),
       });
       const data = await res.json();
@@ -85,6 +61,12 @@ export default function WarrantyPage() {
           isValid: item.status === "active",
           serialNumber: item.serialNumber || checkSerial,
           productName: item.productName || "Unknown Product",
+          productCode: item.productCode || "-",
+          categoryName: item.categoryName || "-",
+          customerName: item.customerName || "-",
+          customerEmail: item.customerEmail || "-",
+          customerPhone: item.customerPhone || "-",
+          customerAddress: item.customerAddress || "-",
           purchaseDate: item.purchaseDate
             ? new Date(item.purchaseDate).toISOString().split('T')[0]
             : null,
@@ -92,6 +74,7 @@ export default function WarrantyPage() {
             ? new Date(item.expiryDate).toISOString().split('T')[0]
             : null,
           warrantyPeriod: `${item.warrantyDays || 365} Days`,
+          purchaseSource: item.purchaseSource || "-",
           status: item.status === "active" ? "Active" : "Expired",
         });
       } else if (data?.data?.status === "not_registered") {
@@ -99,9 +82,16 @@ export default function WarrantyPage() {
           isValid: false,
           serialNumber: checkSerial,
           productName: data?.data?.productName || "Unknown Product",
+          productCode: data?.data?.productCode || "-",
+          categoryName: data?.data?.categoryName || "-",
+          customerName: "-",
+          customerEmail: "-",
+          customerPhone: "-",
+          customerAddress: "-",
           purchaseDate: null,
           expiryDate: null,
           warrantyPeriod: null,
+          purchaseSource: "-",
           status: "Not Found",
         });
       } else {
@@ -119,9 +109,16 @@ export default function WarrantyPage() {
           isValid: data?.data?.status === "active",
           serialNumber: checkSerial || data?.data?.serialNumber || "",
           productName: data?.data?.productName || "Unknown Product",
+          productCode: data?.data?.productCode || "-",
+          categoryName: data?.data?.categoryName || "-",
+          customerName: data?.data?.customerName || "-",
+          customerEmail: data?.data?.customerEmail || "-",
+          customerPhone: data?.data?.customerPhone || "-",
+          customerAddress: data?.data?.customerAddress || "-",
           purchaseDate,
           expiryDate,
           warrantyPeriod,
+          purchaseSource: data?.data?.purchaseSource || "-",
           status: data?.data?.status === "active" ? "Active" : "Expired",
         });
       }
@@ -140,7 +137,7 @@ export default function WarrantyPage() {
       {/* Warranty Check Result Modal */}
       {showWarrantyResult && warrantyResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 transform transition-all">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 transform transition-all max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Warranty Status</h2>
               <button
@@ -177,8 +174,36 @@ export default function WarrantyPage() {
                     <span className="font-mono font-semibold text-gray-800">{warrantyResult.serialNumber}</span>
                   </div>
                   <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <span className="text-gray-600 font-medium">Product Code</span>
+                    <span className="font-semibold text-gray-800">{warrantyResult.productCode}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <span className="text-gray-600 font-medium">Category</span>
+                    <span className="font-semibold text-gray-800">{warrantyResult.categoryName}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <span className="text-gray-600 font-medium">Customer Name</span>
+                    <span className="font-semibold text-gray-800">{warrantyResult.customerName}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <span className="text-gray-600 font-medium">Contact Number</span>
+                    <span className="font-semibold text-gray-800">{warrantyResult.customerPhone}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <span className="text-gray-600 font-medium">Email</span>
+                    <span className="font-semibold text-gray-800">{warrantyResult.customerEmail}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <span className="text-gray-600 font-medium">Address</span>
+                    <span className="font-semibold text-gray-800 text-right max-w-[60%]">{warrantyResult.customerAddress}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Purchase Date</span>
                     <span className="font-semibold text-gray-800">{warrantyResult.purchaseDate}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <span className="text-gray-600 font-medium">Purchase Source</span>
+                    <span className="font-semibold text-gray-800 capitalize">{warrantyResult.purchaseSource}</span>
                   </div>
                   <div className="flex justify-between items-center pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Warranty Period</span>
@@ -200,6 +225,13 @@ export default function WarrantyPage() {
                     </p>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => router.push('/home')}
+                  className="w-full mt-4 border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-all font-semibold"
+                >
+                  Back to Home
+                </button>
               </div>
             ) : (
               <div className="text-center">
@@ -242,6 +274,13 @@ export default function WarrantyPage() {
                   className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 px-4 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all font-medium shadow-lg"
                 >
                   Register Your Warranty Now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push('/home')}
+                  className="w-full mt-3 border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-all font-semibold"
+                >
+                  Back to Home
                 </button>
               </div>
             )}
@@ -466,10 +505,10 @@ export default function WarrantyPage() {
               <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-8"></div>
 
               <form onSubmit={handleCheckWarranty} className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-1">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-3">
-                      Product Serial Number
+                      Product Serial Number *
                     </label>
                     <input
                       type="text"
@@ -485,38 +524,11 @@ export default function WarrantyPage() {
                       <span>Find your serial number on the product label or box</span>
                     </p>
                   </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-3">
-                      Order ID
-                    </label>
-                    <input
-                      type="text"
-                      value={checkOrderId}
-                      onChange={(e) => setCheckOrderId(e.target.value)}
-                      placeholder="Enter order ID"
-                      className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-lg"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Provide your email below to verify the order.
-                    </p>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-bold text-gray-700 mb-3">
-                      Email (for order lookup)
-                    </label>
-                    <input
-                      type="email"
-                      value={checkEmail}
-                      onChange={(e) => setCheckEmail(e.target.value)}
-                      placeholder="Enter email used in order"
-                      className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-lg"
-                    />
-                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isChecking || (!checkSerial.trim() && !checkOrderId.trim())}
+                  disabled={isChecking || !checkSerial.trim()}
                   className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-bold text-lg disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
                 >
                   {isChecking ? (
@@ -547,15 +559,15 @@ export default function WarrantyPage() {
                       <ul className="text-sm text-gray-700 space-y-2">
                         <li className="flex items-start gap-2">
                           <span className="text-green-500">•</span>
-                          <span>Product name and model information</span>
+                          <span>Product and serial details</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-green-500">•</span>
-                          <span>Purchase date and warranty period</span>
+                          <span>Customer name, contact number and email</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-green-500">•</span>
-                          <span>Warranty expiration date</span>
+                          <span>Purchase date, source and warranty period</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-green-500">•</span>

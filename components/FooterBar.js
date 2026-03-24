@@ -24,7 +24,7 @@ export default function FooterBar() {
     company_logo_footer: null,
     company_name: "Autozone Traders",
     address: "Autozone Traders, Kathmandu, Nepal",
-    primary_email: "yuemiecosystemnepal@gmail.com",
+    primary_email: "yueminepal@gmail.com",
     primary_phone: "9802341806",
   });
   // const [gender, setGender] = useState("male");

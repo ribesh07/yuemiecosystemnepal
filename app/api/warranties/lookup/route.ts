@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
+function formatWarrantyPeriod(daysInput: unknown) {
+  const days = Number(daysInput || 365);
+  if (!Number.isFinite(days) || days <= 0) return "365 Days";
+  const years = Math.floor(days / 365);
+  return years >= 1 ? `${years} Year${years > 1 ? "s" : ""}` : `${days} Days`;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -17,71 +24,63 @@ export async function POST(req: Request) {
     }
 
     if (serialNumber) {
-      const prismaAny = prisma as any;
-      const unit = prismaAny.productUnit?.findUnique
-        ? await prismaAny.productUnit.findUnique({
-            where: { serialNumber },
-            include: {
-              product: {
-                select: {
-                  name: true,
-                  productCode: true,
-                },
-              },
-              warranty: true,
-            },
-          })
-        : null;
-
-      let unitInfo: any = unit;
-      let warranty: any = unit?.warranty || null;
-      let warrantyDays = 365;
-
-      if (!unitInfo) {
-        const rows = (await prisma.$queryRawUnsafe(
-          `
-            SELECT pu.id, pu.serial_number as serialNumber, pu.product_code as productCode,
-                   p.product_name as productName, p.warranty_days as warrantyDays
-            FROM product_units pu
-            LEFT JOIN products p ON p.product_code = pu.product_code
-            WHERE pu.serial_number = ?
+      const rows = (await prisma.$queryRawUnsafe(
+        `
+          SELECT pu.id, pu.serial_number as serialNumber, pu.product_code as productCode,
+                 p.product_name as productName, p.categoryName as categoryName, p.warranty_days as warrantyDays,
+                 w.purchase_date as purchaseDate, w.expiry_date as expiryDate, w.purchase_source as purchaseSource, w.customer_id as customerId,
+                 u.full_name as customerName, u.email as customerEmail, u.phone as customerPhone,
+                 CONCAT_WS(', ',
+                   NULLIF(cab.address, ''),
+                   NULLIF(cab.landmark, ''),
+                   NULLIF(az.zone_name, ''),
+                   NULLIF(sc.city, ''),
+                   NULLIF(pr.province_name, '')
+                 ) as customerAddress
+          FROM product_units pu
+          LEFT JOIN products p ON p.product_code = pu.product_code
+          LEFT JOIN warranties w ON w.product_unit_id = pu.id
+          LEFT JOIN users u ON u.id = w.customer_id
+          LEFT JOIN customer_address_book cab ON cab.id = (
+            SELECT cab2.id
+            FROM customer_address_book cab2
+            WHERE cab2.customer_id = u.id
+            ORDER BY cab2.defaultShipping DESC, cab2.id DESC
             LIMIT 1
-          `,
-          serialNumber
-        )) as any[];
-        unitInfo = rows?.[0] || null;
-        warrantyDays = Number(unitInfo?.warrantyDays || 365);
-        if (unitInfo?.id) {
-          const warrantyRows = (await prisma.$queryRawUnsafe(
-            "SELECT * FROM warranties WHERE product_unit_id = ? LIMIT 1",
-            unitInfo.id
-          )) as any[];
-          warranty = warrantyRows?.[0] || null;
-        }
-      } else {
-        const wdRows = (await prisma.$queryRawUnsafe(
-          "SELECT warranty_days as warrantyDays FROM products WHERE product_code = ? LIMIT 1",
-          unitInfo.productCode
-        )) as any[];
-        warrantyDays = Number(wdRows?.[0]?.warrantyDays || 365);
-      }
+          )
+          LEFT JOIN address_zone az ON az.id = cab.zone_id
+          LEFT JOIN set_shipping sc ON sc.id = cab.city_id
+          LEFT JOIN provinces pr ON pr.id = cab.province_id
+          WHERE pu.serial_number = ?
+          LIMIT 1
+        `,
+        serialNumber
+      )) as any[];
 
-      if (!unitInfo) {
+      const row = rows?.[0] || null;
+
+      if (!row) {
         return NextResponse.json(
           { success: false, message: "Serial number not found" },
           { status: 404 }
         );
       }
 
-      if (!warranty) {
+      const warrantyDays = Number(row?.warrantyDays || 365);
+      const hasWarranty = Boolean(row?.purchaseDate && row?.expiryDate);
+
+      if (!hasWarranty) {
         return NextResponse.json(
           {
             success: true,
             data: {
               status: "not_registered",
-              serialNumber: unitInfo.serialNumber,
-              productName: unitInfo.product?.name || unitInfo.productName || null,
-              productCode: unitInfo.product?.productCode || unitInfo.productCode || null,
+              serialNumber: row.serialNumber,
+              productName: row.productName || null,
+              productCode: row.productCode || null,
+              categoryName: row.categoryName || null,
+              warrantyDays,
+              warrantyPeriod: formatWarrantyPeriod(warrantyDays),
             },
           },
           { status: 200 }
@@ -89,20 +88,27 @@ export async function POST(req: Request) {
       }
 
       const now = new Date();
-      const expiryDate = new Date(warranty.expiryDate);
+      const expiryDate = new Date(row.expiryDate);
       const status = expiryDate >= now ? "active" : "expired";
 
       return NextResponse.json({
         success: true,
         data: serializeBigInt({
           status,
-          serialNumber: unitInfo.serialNumber,
-          productName: unitInfo.product?.name || unitInfo.productName || null,
-          productCode: unitInfo.product?.productCode || unitInfo.productCode || null,
-          purchaseDate: warranty.purchaseDate,
-          expiryDate: warranty.expiryDate,
+          serialNumber: row.serialNumber,
+          productName: row.productName || null,
+          productCode: row.productCode || null,
+          categoryName: row.categoryName || null,
+          purchaseDate: row.purchaseDate,
+          expiryDate: row.expiryDate,
           warrantyDays,
-          purchaseSource: warranty.purchaseSource || warranty.purchase_source,
+          warrantyPeriod: formatWarrantyPeriod(warrantyDays),
+          purchaseSource: row.purchaseSource,
+          customerId: row.customerId || null,
+          customerName: row.customerName || null,
+          customerEmail: row.customerEmail || null,
+          customerPhone: row.customerPhone || null,
+          customerAddress: row.customerAddress || null,
         }),
       });
     }
@@ -159,6 +165,7 @@ export async function POST(req: Request) {
         purchaseDate: w.purchaseDate,
         expiryDate: w.expiryDate,
         warrantyDays: Number(w.warrantyDays || 365),
+        warrantyPeriod: formatWarrantyPeriod(w.warrantyDays),
         purchaseSource: w.purchaseSource,
       };
     });

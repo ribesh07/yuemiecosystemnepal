@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-const PAYMENT_STATUS_OPTIONS = ["unpaid", "paid", "partial", "refunded"];
+const PAYMENT_STATUS_OPTIONS = ["unpaid", "paid", "refunded"];
 
 const ALLOWED_TRANSITIONS = {
   processing: ["processing", "shipped", "cancelled"],
@@ -15,6 +15,15 @@ const ALLOWED_TRANSITIONS = {
 };
 
 const PAGE_SIZE = 20;
+const PAYMENT_MODE_OPTIONS = ["Cash on Delivery", "ConnectIPS", "QR Pay"];
+const STATUS_TABS = [
+  { key: "all", label: "all" },
+  { key: "processing", label: "processing" },
+  { key: "shipped", label: "shipped" },
+  { key: "delivered", label: "delivered" },
+  { key: "cancelled", label: "cancelled" },
+  { key: "returns", label: "return" },
+];
 
 function getAdminToken() {
   if (typeof window === "undefined") return null;
@@ -78,8 +87,30 @@ export default function Ordermanagement() {
   const [meta, setMeta] = useState({ page: 1, totalPages: 1, total: 0 });
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("processing");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [statusModal, setStatusModal] = useState({
+    open: false,
+    type: "", // shipped | cancelled
+    orderId: null,
+    nextStatus: "",
+    courierName: "",
+    cnNumber: "",
+    cnDate: "",
+    cancelReason: "",
+    remark: "",
+  });
+  const [paymentModal, setPaymentModal] = useState({
+    open: false,
+    orderId: null,
+    nextStatus: "paid",
+    paymentMode: "COD",
+    transactionId: "",
+    remark: "",
+  });
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -108,6 +139,8 @@ export default function Ordermanagement() {
       });
 
       if (search) query.set("search", search);
+      if (dateFrom) query.set("dateFrom", dateFrom);
+      if (dateTo) query.set("dateTo", dateTo);
 
       const response = await fetch(`/api/admin/orders?${query.toString()}`, {
         headers: {
@@ -135,7 +168,7 @@ export default function Ordermanagement() {
     } finally {
       setLoading(false);
     }
-  }, [page, router, search, statusFilter]);
+  }, [dateFrom, dateTo, page, router, search, statusFilter]);
 
   useEffect(() => {
     fetchOrders();
@@ -191,23 +224,162 @@ export default function Ordermanagement() {
     [router]
   );
 
-  const statusCounts = useMemo(() => {
-    const counts = {
-      all: meta.total || 0,
-      processing: 0,
-      shipped: 0,
-      delivered: 0,
-      cancelled: 0,
-      returns: 0,
-    };
+  const openStatusModal = (orderId, nextStatus) => {
+    setStatusModal({
+      open: true,
+      type: nextStatus,
+      orderId,
+      nextStatus,
+      courierName: "",
+      cnNumber: "",
+      cnDate: "",
+      cancelReason: "",
+      remark: "",
+    });
+  };
 
-    for (const order of orders) {
-      const key = String(order.orderStatus || "").toLowerCase();
-      if (counts[key] !== undefined) counts[key] += 1;
+  const closeStatusModal = () => {
+    setStatusModal({
+      open: false,
+      type: "",
+      orderId: null,
+      nextStatus: "",
+      courierName: "",
+      cnNumber: "",
+      cnDate: "",
+      cancelReason: "",
+      remark: "",
+    });
+  };
+
+  const submitStatusModal = async () => {
+    if (!statusModal.orderId || !statusModal.nextStatus) return;
+    if (statusModal.nextStatus === "shipped" && !statusModal.courierName.trim()) {
+      toast.error("Courier name is required");
+      return;
+    }
+    if (statusModal.nextStatus === "cancelled" && !statusModal.cancelReason.trim()) {
+      toast.error("Cancel reason is required");
+      return;
     }
 
-    return counts;
-  }, [meta.total, orders]);
+    await updateOrder(statusModal.orderId, {
+      orderStatus: statusModal.nextStatus,
+      courierName:
+        statusModal.nextStatus === "shipped"
+          ? statusModal.courierName.trim()
+          : undefined,
+      cnNumber:
+        statusModal.nextStatus === "shipped"
+          ? statusModal.cnNumber.trim() || undefined
+          : undefined,
+      cnDate:
+        statusModal.nextStatus === "shipped"
+          ? statusModal.cnDate || undefined
+          : undefined,
+      cancelReason:
+        statusModal.nextStatus === "cancelled"
+          ? statusModal.cancelReason.trim()
+          : undefined,
+      remark: statusModal.remark.trim() || undefined,
+    });
+    closeStatusModal();
+  };
+
+  const openPaymentModal = (orderId, nextStatus) => {
+    setPaymentModal({
+      open: true,
+      orderId,
+      nextStatus,
+      paymentMode: "COD",
+      transactionId: "",
+      remark: "",
+    });
+  };
+
+  const closePaymentModal = () => {
+    setPaymentModal({
+      open: false,
+      orderId: null,
+      nextStatus: "paid",
+      paymentMode: "COD",
+      transactionId: "",
+      remark: "",
+    });
+  };
+
+  const submitPaymentModal = async () => {
+    if (!paymentModal.orderId) return;
+    if (!paymentModal.paymentMode) {
+      toast.error("Payment mode is required");
+      return;
+    }
+    if (
+      paymentModal.paymentMode !== "COD" &&
+      !paymentModal.transactionId.trim()
+    ) {
+      toast.error("Transaction number is required");
+      return;
+    }
+
+    await updateOrder(paymentModal.orderId, {
+      paymentStatus: paymentModal.nextStatus,
+      paymentMode: paymentModal.paymentMode,
+      transactionId: paymentModal.transactionId.trim() || undefined,
+      remark: paymentModal.remark.trim() || undefined,
+    });
+    closePaymentModal();
+  };
+
+  const openOrderDetails = async (order) => {
+    const token = getAdminToken();
+    if (!token) {
+      toast.error("Admin login required");
+      router.replace("/login-admin");
+      return;
+    }
+    try {
+      setDetailLoading(true);
+      const res = await fetch(`/api/admin/orders/${order.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload?.message || "Failed to load order details");
+      setSelectedOrder(payload?.data || order);
+    } catch (error) {
+      toast.error(error?.message || "Failed to load order details");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const statusCounts = useMemo(() => {
+    const serverCounts = meta?.statusCounts || {};
+    return {
+      all: Number(serverCounts.all || 0),
+      processing: Number(serverCounts.processing || 0),
+      shipped: Number(serverCounts.shipped || 0),
+      delivered: Number(serverCounts.delivered || 0),
+      cancelled: Number(serverCounts.cancelled || 0),
+      returns: Number(serverCounts.returns || 0),
+    };
+  }, [meta]);
+
+  const detailLogGroups = useMemo(() => {
+    const logs = selectedOrder?.updateLogs || [];
+    return {
+      payment: logs.filter((log) => log.eventType === "payment_status"),
+      shipped: logs.filter(
+        (log) => log.eventType === "order_status" && log.toOrderStatus === "shipped"
+      ),
+      cancelled: logs.filter(
+        (log) => log.eventType === "order_status" && log.toOrderStatus === "cancelled"
+      ),
+      returns: logs.filter(
+        (log) => log.eventType === "order_status" && log.toOrderStatus === "returns"
+      ),
+    };
+  }, [selectedOrder]);
 
   return (
     <div className="p-4 md:p-6 space-y-4">
@@ -220,7 +392,9 @@ export default function Ordermanagement() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-        {Object.entries(statusCounts).map(([key, value]) => {
+        {STATUS_TABS.map((tab) => {
+          const key = tab.key;
+          const value = statusCounts[key] || 0;
           const active = statusFilter === key;
           return (
             <button
@@ -235,7 +409,7 @@ export default function Ordermanagement() {
                   : "border-gray-200 bg-white text-gray-700 hover:border-orange-300"
               }`}
             >
-              <div className="text-xs uppercase font-semibold">{key}</div>
+              <div className="text-xs uppercase font-semibold">{tab.label}</div>
               <div className="text-lg font-bold">{value}</div>
             </button>
           );
@@ -243,11 +417,56 @@ export default function Ordermanagement() {
       </div>
 
       <div className="bg-white border rounded-xl p-3 md:p-4">
-        <div className="flex flex-col md:flex-row gap-2 md:items-center">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:items-center">
           <input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search by order no, customer, email, product"
+            className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 md:col-span-2"
+          />
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200"
+          >
+            {STATUS_TABS.map((tab) => (
+              <option key={tab.key} value={tab.key}>
+                {tab.label}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              setDateFrom("");
+              setDateTo("");
+              setSearchInput("");
+              setSearch("");
+              setStatusFilter("processing");
+              setPage(1);
+            }}
+            className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+          >
+            Reset Filters
+          </button>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => {
+              setDateFrom(e.target.value);
+              setPage(1);
+            }}
+            className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200"
+          />
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => {
+              setDateTo(e.target.value);
+              setPage(1);
+            }}
             className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200"
           />
         </div>
@@ -307,9 +526,15 @@ export default function Ordermanagement() {
                           <select
                             disabled={updatingId === id}
                             value={order.orderStatus}
-                            onChange={(e) =>
-                              updateOrder(id, { orderStatus: e.target.value })
-                            }
+                            onChange={(e) => {
+                              const nextStatus = e.target.value;
+                              if (nextStatus === order.orderStatus) return;
+                              if (nextStatus === "shipped" || nextStatus === "cancelled") {
+                                openStatusModal(id, nextStatus);
+                                return;
+                              }
+                              updateOrder(id, { orderStatus: nextStatus });
+                            }}
                             className="w-full rounded-md border px-2 py-1 text-xs"
                           >
                             {transitionOptions.map((status) => (
@@ -326,9 +551,18 @@ export default function Ordermanagement() {
                           <select
                             disabled={updatingId === id}
                             value={order.paymentStatus}
-                            onChange={(e) =>
-                              updateOrder(id, { paymentStatus: e.target.value })
-                            }
+                            onChange={(e) => {
+                              const nextPaymentStatus = e.target.value;
+                              if (nextPaymentStatus === order.paymentStatus) return;
+                              if (
+                                nextPaymentStatus === "paid" ||
+                                nextPaymentStatus === "refunded"
+                              ) {
+                                openPaymentModal(id, nextPaymentStatus);
+                                return;
+                              }
+                              updateOrder(id, { paymentStatus: nextPaymentStatus });
+                            }}
                             className="w-full rounded-md border px-2 py-1 text-xs"
                           >
                             {PAYMENT_STATUS_OPTIONS.map((status) => (
@@ -341,7 +575,7 @@ export default function Ordermanagement() {
                       </td>
                       <td className="px-4 py-3">
                         <button
-                          onClick={() => setSelectedOrder(order)}
+                          onClick={() => openOrderDetails(order)}
                           className="rounded-md border px-3 py-1 text-xs hover:bg-gray-50"
                         >
                           View
@@ -437,6 +671,323 @@ export default function Ordermanagement() {
                 ))}
               </div>
             </div>
+
+            {detailLogGroups.payment.length > 0 && (
+            <div>
+              <div className="text-sm font-semibold mb-2">Payment Details</div>
+              <div className="overflow-auto rounded-md border">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 border-b">
+                    <tr className="text-left">
+                      <th className="px-3 py-2">From</th>
+                      <th className="px-3 py-2">To</th>
+                      <th className="px-3 py-2">Mode</th>
+                      <th className="px-3 py-2">Txn No.</th>
+                      <th className="px-3 py-2">Remark</th>
+                      <th className="px-3 py-2">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detailLogGroups.payment.map((log) => (
+                        <tr key={`p-${log.id}`} className="border-b last:border-0">
+                          <td className="px-3 py-2 capitalize">{log.fromPaymentStatus || "-"}</td>
+                          <td className="px-3 py-2 capitalize font-medium">{log.toPaymentStatus || "-"}</td>
+                          <td className="px-3 py-2">{log.paymentMode || "-"}</td>
+                          <td className="px-3 py-2 font-mono">{log.transactionId || "-"}</td>
+                          <td className="px-3 py-2">{log.remark || "-"}</td>
+                          <td className="px-3 py-2">{formatDate(log.createdAt)}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            )}
+
+            {detailLogGroups.shipped.length > 0 && (
+            <div>
+              <div className="text-sm font-semibold mb-2">Shipment Details</div>
+              <div className="overflow-auto rounded-md border">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 border-b">
+                    <tr className="text-left">
+                      <th className="px-3 py-2">From</th>
+                      <th className="px-3 py-2">To</th>
+                      <th className="px-3 py-2">Courier</th>
+                      <th className="px-3 py-2">CN Number</th>
+                      <th className="px-3 py-2">CN Date</th>
+                      <th className="px-3 py-2">Remark</th>
+                      <th className="px-3 py-2">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detailLogGroups.shipped.map((log) => (
+                        <tr key={`s-${log.id}`} className="border-b last:border-0">
+                          <td className="px-3 py-2 capitalize">{log.fromOrderStatus || "-"}</td>
+                          <td className="px-3 py-2 capitalize font-medium">{log.toOrderStatus || "-"}</td>
+                          <td className="px-3 py-2">{log.courierName || "-"}</td>
+                          <td className="px-3 py-2">{log.cnNumber || "-"}</td>
+                          <td className="px-3 py-2">{log.cnDate ? String(log.cnDate).slice(0, 10) : "-"}</td>
+                          <td className="px-3 py-2">{log.remark || "-"}</td>
+                          <td className="px-3 py-2">{formatDate(log.createdAt)}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            )}
+
+            {(detailLogGroups.cancelled.length > 0 ||
+              detailLogGroups.returns.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {detailLogGroups.cancelled.length > 0 && (
+              <div>
+                <div className="text-sm font-semibold mb-2">Cancelled Details</div>
+                <div className="overflow-auto rounded-md border">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-50 border-b">
+                      <tr className="text-left">
+                        <th className="px-3 py-2">Reason</th>
+                        <th className="px-3 py-2">Remark</th>
+                        <th className="px-3 py-2">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detailLogGroups.cancelled.map((log) => (
+                          <tr key={`c-${log.id}`} className="border-b last:border-0">
+                            <td className="px-3 py-2">{log.cancelReason || "-"}</td>
+                            <td className="px-3 py-2">{log.remark || "-"}</td>
+                            <td className="px-3 py-2">{formatDate(log.createdAt)}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              )}
+
+              {detailLogGroups.returns.length > 0 && (
+              <div>
+                <div className="text-sm font-semibold mb-2">Return Details</div>
+                <div className="overflow-auto rounded-md border">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-50 border-b">
+                      <tr className="text-left">
+                        <th className="px-3 py-2">From</th>
+                        <th className="px-3 py-2">To</th>
+                        <th className="px-3 py-2">Remark</th>
+                        <th className="px-3 py-2">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detailLogGroups.returns.map((log) => (
+                          <tr key={`r-${log.id}`} className="border-b last:border-0">
+                            <td className="px-3 py-2 capitalize">{log.fromOrderStatus || "-"}</td>
+                            <td className="px-3 py-2 capitalize font-medium">{log.toOrderStatus || "-"}</td>
+                            <td className="px-3 py-2">{log.remark || "-"}</td>
+                            <td className="px-3 py-2">{formatDate(log.createdAt)}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              )}
+            </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {statusModal.open && (
+        <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
+          <div className="w-full max-w-lg rounded-xl bg-white border p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900 capitalize">
+                {statusModal.nextStatus} Order
+              </h3>
+              <button onClick={closeStatusModal} className="text-gray-500 hover:text-gray-700">
+                Close
+              </button>
+            </div>
+
+            {statusModal.nextStatus === "shipped" && (
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-700">Courier Name</label>
+                  <input
+                    value={statusModal.courierName}
+                    onChange={(e) =>
+                      setStatusModal((prev) => ({ ...prev, courierName: e.target.value }))
+                    }
+                    className="w-full rounded-md border px-3 py-2 text-sm"
+                    placeholder="Enter Courier Name."
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-sm text-gray-700">CN Number (optional)</label>
+                    <input
+                      value={statusModal.cnNumber}
+                      onChange={(e) =>
+                        setStatusModal((prev) => ({ ...prev, cnNumber: e.target.value }))
+                      }
+                      className="w-full rounded-md border px-3 py-2 text-sm"
+                      placeholder="Consignment number"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm text-gray-700">CN Date (optional)</label>
+                    <input
+                      type="date"
+                      value={statusModal.cnDate}
+                      onChange={(e) =>
+                        setStatusModal((prev) => ({ ...prev, cnDate: e.target.value }))
+                      }
+                      className="w-full rounded-md border px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {statusModal.nextStatus === "cancelled" && (
+              <div className="space-y-1">
+                <label className="text-sm text-gray-700">Cancelled Reason</label>
+                <textarea
+                  value={statusModal.cancelReason}
+                  onChange={(e) =>
+                    setStatusModal((prev) => ({ ...prev, cancelReason: e.target.value }))
+                  }
+                  rows={3}
+                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  placeholder="Enter cancellation reason"
+                />
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <label className="text-sm text-gray-700">Remark (optional)</label>
+              <textarea
+                value={statusModal.remark}
+                onChange={(e) =>
+                  setStatusModal((prev) => ({ ...prev, remark: e.target.value }))
+                }
+                rows={2}
+                className="w-full rounded-md border px-3 py-2 text-sm"
+                placeholder="Any internal note"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={closeStatusModal}
+                className="rounded-md border px-4 py-2 text-sm hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitStatusModal}
+                className="rounded-md bg-orange-500 text-white px-4 py-2 text-sm hover:bg-orange-600"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {paymentModal.open && (
+        <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
+          <div className="w-full max-w-lg rounded-xl bg-white border p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900 capitalize">
+                Mark Payment as {paymentModal.nextStatus}
+              </h3>
+              <button onClick={closePaymentModal} className="text-gray-500 hover:text-gray-700">
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm text-gray-700">Payment Mode</label>
+              <select
+                value={paymentModal.paymentMode}
+                onChange={(e) =>
+                  setPaymentModal((prev) => ({ ...prev, paymentMode: e.target.value }))
+                }
+                className="w-full rounded-md border px-3 py-2 text-sm"
+              >
+                {PAYMENT_MODE_OPTIONS.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {mode}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm text-gray-700">
+                Transaction Number {paymentModal.paymentMode === "COD" ? "(optional)" : "*"}
+              </label>
+              <input
+                value={paymentModal.transactionId}
+                onChange={(e) =>
+                  setPaymentModal((prev) => ({ ...prev, transactionId: e.target.value }))
+                }
+                className="w-full rounded-md border px-3 py-2 text-sm"
+                placeholder="TXN123456"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm text-gray-700">Remark (optional)</label>
+              <textarea
+                value={paymentModal.remark}
+                onChange={(e) =>
+                  setPaymentModal((prev) => ({ ...prev, remark: e.target.value }))
+                }
+                rows={2}
+                className="w-full rounded-md border px-3 py-2 text-sm"
+                placeholder="Payment note"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={closePaymentModal}
+                disabled={Boolean(updatingId)}
+                className="rounded-md border px-4 py-2 text-sm hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitPaymentModal}
+                disabled={Boolean(updatingId)}
+                className="rounded-md bg-orange-500 text-white px-4 py-2 text-sm hover:bg-orange-600"
+              >
+                {updatingId ? "Updating..." : "Update"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {updatingId && (
+        <div className="fixed inset-0 z-[80] bg-black/35 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-xl border px-6 py-5 flex items-center gap-3">
+            <div className="h-6 w-6 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+            <div className="text-sm font-medium text-gray-800">Updating order status...</div>
+          </div>
+        </div>
+      )}
+
+      {detailLoading && (
+        <div className="fixed inset-0 z-[85] bg-black/35 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-xl border px-6 py-5 flex items-center gap-3">
+            <div className="h-6 w-6 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+            <div className="text-sm font-medium text-gray-800">Loading order details...</div>
           </div>
         </div>
       )}
