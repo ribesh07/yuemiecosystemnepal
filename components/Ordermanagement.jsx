@@ -15,7 +15,7 @@ const ALLOWED_TRANSITIONS = {
 };
 
 const PAGE_SIZE = 20;
-const PAYMENT_MODE_OPTIONS = ["COD", "ConnectIPS", "QR Pay"];
+const PAYMENT_MODE_OPTIONS = ["Cash on Delivery", "ConnectIPS", "QR Pay"];
 const STATUS_TABS = [
   { key: "all", label: "all" },
   { key: "processing", label: "processing" },
@@ -91,12 +91,15 @@ export default function Ordermanagement() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [statusModal, setStatusModal] = useState({
     open: false,
     type: "", // shipped | cancelled
     orderId: null,
     nextStatus: "",
     courierName: "",
+    cnNumber: "",
+    cnDate: "",
     cancelReason: "",
     remark: "",
   });
@@ -228,6 +231,8 @@ export default function Ordermanagement() {
       orderId,
       nextStatus,
       courierName: "",
+      cnNumber: "",
+      cnDate: "",
       cancelReason: "",
       remark: "",
     });
@@ -240,6 +245,8 @@ export default function Ordermanagement() {
       orderId: null,
       nextStatus: "",
       courierName: "",
+      cnNumber: "",
+      cnDate: "",
       cancelReason: "",
       remark: "",
     });
@@ -261,6 +268,14 @@ export default function Ordermanagement() {
       courierName:
         statusModal.nextStatus === "shipped"
           ? statusModal.courierName.trim()
+          : undefined,
+      cnNumber:
+        statusModal.nextStatus === "shipped"
+          ? statusModal.cnNumber.trim() || undefined
+          : undefined,
+      cnDate:
+        statusModal.nextStatus === "shipped"
+          ? statusModal.cnDate || undefined
           : undefined,
       cancelReason:
         statusModal.nextStatus === "cancelled"
@@ -316,6 +331,28 @@ export default function Ordermanagement() {
     closePaymentModal();
   };
 
+  const openOrderDetails = async (order) => {
+    const token = getAdminToken();
+    if (!token) {
+      toast.error("Admin login required");
+      router.replace("/login-admin");
+      return;
+    }
+    try {
+      setDetailLoading(true);
+      const res = await fetch(`/api/admin/orders/${order.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload?.message || "Failed to load order details");
+      setSelectedOrder(payload?.data || order);
+    } catch (error) {
+      toast.error(error?.message || "Failed to load order details");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
   const statusCounts = useMemo(() => {
     const serverCounts = meta?.statusCounts || {};
     return {
@@ -327,6 +364,22 @@ export default function Ordermanagement() {
       returns: Number(serverCounts.returns || 0),
     };
   }, [meta]);
+
+  const detailLogGroups = useMemo(() => {
+    const logs = selectedOrder?.updateLogs || [];
+    return {
+      payment: logs.filter((log) => log.eventType === "payment_status"),
+      shipped: logs.filter(
+        (log) => log.eventType === "order_status" && log.toOrderStatus === "shipped"
+      ),
+      cancelled: logs.filter(
+        (log) => log.eventType === "order_status" && log.toOrderStatus === "cancelled"
+      ),
+      returns: logs.filter(
+        (log) => log.eventType === "order_status" && log.toOrderStatus === "returns"
+      ),
+    };
+  }, [selectedOrder]);
 
   return (
     <div className="p-4 md:p-6 space-y-4">
@@ -522,7 +575,7 @@ export default function Ordermanagement() {
                       </td>
                       <td className="px-4 py-3">
                         <button
-                          onClick={() => setSelectedOrder(order)}
+                          onClick={() => openOrderDetails(order)}
                           className="rounded-md border px-3 py-1 text-xs hover:bg-gray-50"
                         >
                           View
@@ -618,6 +671,131 @@ export default function Ordermanagement() {
                 ))}
               </div>
             </div>
+
+            {detailLogGroups.payment.length > 0 && (
+            <div>
+              <div className="text-sm font-semibold mb-2">Payment Details</div>
+              <div className="overflow-auto rounded-md border">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 border-b">
+                    <tr className="text-left">
+                      <th className="px-3 py-2">From</th>
+                      <th className="px-3 py-2">To</th>
+                      <th className="px-3 py-2">Mode</th>
+                      <th className="px-3 py-2">Txn No.</th>
+                      <th className="px-3 py-2">Remark</th>
+                      <th className="px-3 py-2">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detailLogGroups.payment.map((log) => (
+                        <tr key={`p-${log.id}`} className="border-b last:border-0">
+                          <td className="px-3 py-2 capitalize">{log.fromPaymentStatus || "-"}</td>
+                          <td className="px-3 py-2 capitalize font-medium">{log.toPaymentStatus || "-"}</td>
+                          <td className="px-3 py-2">{log.paymentMode || "-"}</td>
+                          <td className="px-3 py-2 font-mono">{log.transactionId || "-"}</td>
+                          <td className="px-3 py-2">{log.remark || "-"}</td>
+                          <td className="px-3 py-2">{formatDate(log.createdAt)}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            )}
+
+            {detailLogGroups.shipped.length > 0 && (
+            <div>
+              <div className="text-sm font-semibold mb-2">Shipment Details</div>
+              <div className="overflow-auto rounded-md border">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 border-b">
+                    <tr className="text-left">
+                      <th className="px-3 py-2">From</th>
+                      <th className="px-3 py-2">To</th>
+                      <th className="px-3 py-2">Courier</th>
+                      <th className="px-3 py-2">CN Number</th>
+                      <th className="px-3 py-2">CN Date</th>
+                      <th className="px-3 py-2">Remark</th>
+                      <th className="px-3 py-2">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detailLogGroups.shipped.map((log) => (
+                        <tr key={`s-${log.id}`} className="border-b last:border-0">
+                          <td className="px-3 py-2 capitalize">{log.fromOrderStatus || "-"}</td>
+                          <td className="px-3 py-2 capitalize font-medium">{log.toOrderStatus || "-"}</td>
+                          <td className="px-3 py-2">{log.courierName || "-"}</td>
+                          <td className="px-3 py-2">{log.cnNumber || "-"}</td>
+                          <td className="px-3 py-2">{log.cnDate ? String(log.cnDate).slice(0, 10) : "-"}</td>
+                          <td className="px-3 py-2">{log.remark || "-"}</td>
+                          <td className="px-3 py-2">{formatDate(log.createdAt)}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            )}
+
+            {(detailLogGroups.cancelled.length > 0 ||
+              detailLogGroups.returns.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {detailLogGroups.cancelled.length > 0 && (
+              <div>
+                <div className="text-sm font-semibold mb-2">Cancelled Details</div>
+                <div className="overflow-auto rounded-md border">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-50 border-b">
+                      <tr className="text-left">
+                        <th className="px-3 py-2">Reason</th>
+                        <th className="px-3 py-2">Remark</th>
+                        <th className="px-3 py-2">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detailLogGroups.cancelled.map((log) => (
+                          <tr key={`c-${log.id}`} className="border-b last:border-0">
+                            <td className="px-3 py-2">{log.cancelReason || "-"}</td>
+                            <td className="px-3 py-2">{log.remark || "-"}</td>
+                            <td className="px-3 py-2">{formatDate(log.createdAt)}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              )}
+
+              {detailLogGroups.returns.length > 0 && (
+              <div>
+                <div className="text-sm font-semibold mb-2">Return Details</div>
+                <div className="overflow-auto rounded-md border">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-50 border-b">
+                      <tr className="text-left">
+                        <th className="px-3 py-2">From</th>
+                        <th className="px-3 py-2">To</th>
+                        <th className="px-3 py-2">Remark</th>
+                        <th className="px-3 py-2">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detailLogGroups.returns.map((log) => (
+                          <tr key={`r-${log.id}`} className="border-b last:border-0">
+                            <td className="px-3 py-2 capitalize">{log.fromOrderStatus || "-"}</td>
+                            <td className="px-3 py-2 capitalize font-medium">{log.toOrderStatus || "-"}</td>
+                            <td className="px-3 py-2">{log.remark || "-"}</td>
+                            <td className="px-3 py-2">{formatDate(log.createdAt)}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              )}
+            </div>
+            )}
           </div>
         </div>
       )}
@@ -635,16 +813,42 @@ export default function Ordermanagement() {
             </div>
 
             {statusModal.nextStatus === "shipped" && (
-              <div className="space-y-1">
-                <label className="text-sm text-gray-700">Courier Name</label>
-                <input
-                  value={statusModal.courierName}
-                  onChange={(e) =>
-                    setStatusModal((prev) => ({ ...prev, courierName: e.target.value }))
-                  }
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  placeholder="eSewa Courier / Aramex / etc."
-                />
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-700">Courier Name</label>
+                  <input
+                    value={statusModal.courierName}
+                    onChange={(e) =>
+                      setStatusModal((prev) => ({ ...prev, courierName: e.target.value }))
+                    }
+                    className="w-full rounded-md border px-3 py-2 text-sm"
+                    placeholder="Enter Courier Name."
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-sm text-gray-700">CN Number (optional)</label>
+                    <input
+                      value={statusModal.cnNumber}
+                      onChange={(e) =>
+                        setStatusModal((prev) => ({ ...prev, cnNumber: e.target.value }))
+                      }
+                      className="w-full rounded-md border px-3 py-2 text-sm"
+                      placeholder="Consignment number"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm text-gray-700">CN Date (optional)</label>
+                    <input
+                      type="date"
+                      value={statusModal.cnDate}
+                      onChange={(e) =>
+                        setStatusModal((prev) => ({ ...prev, cnDate: e.target.value }))
+                      }
+                      className="w-full rounded-md border px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -775,6 +979,15 @@ export default function Ordermanagement() {
           <div className="bg-white rounded-xl shadow-xl border px-6 py-5 flex items-center gap-3">
             <div className="h-6 w-6 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
             <div className="text-sm font-medium text-gray-800">Updating order status...</div>
+          </div>
+        </div>
+      )}
+
+      {detailLoading && (
+        <div className="fixed inset-0 z-[85] bg-black/35 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-xl border px-6 py-5 flex items-center gap-3">
+            <div className="h-6 w-6 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+            <div className="text-sm font-medium text-gray-800">Loading order details...</div>
           </div>
         </div>
       )}

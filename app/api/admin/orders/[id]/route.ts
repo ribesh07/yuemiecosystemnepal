@@ -24,6 +24,128 @@ function parseOrderId(id: string) {
   }
 }
 
+export async function GET(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    await requireAdminRole();
+
+    const { id } = await context.params;
+    const orderId = parseOrderId(id);
+
+    if (!orderId) {
+      return NextResponse.json(
+        { success: false, message: "Invalid order id" },
+        { status: 400 }
+      );
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+          },
+        },
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                productCode: true,
+                mainImage: true,
+              },
+            },
+          },
+        },
+        payments: true,
+      },
+    });
+
+    if (!order) {
+      return NextResponse.json(
+        { success: false, message: "Order not found" },
+        { status: 404 }
+      );
+    }
+
+    const serialRows = (await prisma.$queryRawUnsafe(
+      `
+        SELECT oi.id as orderItemId, pu.serial_number as serialNumber
+        FROM order_items oi
+        LEFT JOIN product_units pu ON pu.id = oi.product_unit_id
+        WHERE oi.orderId = ?
+      `,
+      orderId.toString()
+    )) as any[];
+
+    const serialMap = new Map<string, string>();
+    for (const row of serialRows || []) {
+      serialMap.set(String(row.orderItemId), row.serialNumber || "");
+    }
+
+    const logs = (await prisma.$queryRawUnsafe(
+      `
+        SELECT
+          id,
+          order_id as orderId,
+          admin_id as adminId,
+          event_type as eventType,
+          from_order_status as fromOrderStatus,
+          to_order_status as toOrderStatus,
+          from_payment_status as fromPaymentStatus,
+          to_payment_status as toPaymentStatus,
+          courier_name as courierName,
+          cancel_reason as cancelReason,
+          payment_mode as paymentMode,
+          transaction_id as transactionId,
+          cn_number as cnNumber,
+          cn_date as cnDate,
+          remark,
+          created_at as createdAt
+        FROM order_update_logs
+        WHERE order_id = ?
+        ORDER BY created_at DESC, id DESC
+      `,
+      orderId.toString()
+    )) as any[];
+
+    const payload = {
+      ...order,
+      items: (order.items || []).map((item: any) => ({
+        ...item,
+        serialNumber: serialMap.get(String(item.id)) || null,
+      })),
+      updateLogs: logs || [],
+    };
+
+    return NextResponse.json({
+      success: true,
+      data: serializeBigInt(payload),
+    });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "UNAUTHORIZED" || error.message === "FORBIDDEN")
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
+      );
+    }
+    console.error("ADMIN_ORDER_DETAIL_ERROR", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch order details" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -51,6 +173,13 @@ export async function PATCH(
     const courierName = body?.courierName
       ? String(body.courierName).trim()
       : "";
+    const cnNumber = body?.cnNumber
+      ? String(body.cnNumber).trim()
+      : "";
+    const cnDateRaw = body?.cnDate
+      ? String(body.cnDate).trim()
+      : "";
+    const cnDate = cnDateRaw ? new Date(cnDateRaw) : null;
     const cancelReason = body?.cancelReason
       ? String(body.cancelReason).trim()
       : "";
@@ -118,6 +247,13 @@ export async function PATCH(
       );
     }
 
+    if (cnDateRaw && (!cnDate || Number.isNaN(cnDate.valueOf()))) {
+      return NextResponse.json(
+        { success: false, message: "Invalid CN date" },
+        { status: 400 }
+      );
+    }
+
     if (nextOrderStatus === "cancelled" && !cancelReason) {
       return NextResponse.json(
         { success: false, message: "Cancellation reason is required" },
@@ -154,12 +290,19 @@ export async function PATCH(
         cancel_reason TEXT NULL,
         payment_mode VARCHAR(50) NULL,
         transaction_id VARCHAR(191) NULL,
+        cn_number VARCHAR(191) NULL,
+        cn_date DATE NULL,
         remark TEXT NULL,
         created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
         PRIMARY KEY (id),
         INDEX idx_order_update_logs_order_id (order_id),
         INDEX idx_order_update_logs_event_type (event_type)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE order_update_logs
+      ADD COLUMN IF NOT EXISTS cn_number VARCHAR(191) NULL AFTER transaction_id,
+      ADD COLUMN IF NOT EXISTS cn_date DATE NULL AFTER cn_number;
     `);
 
     const adminId = admin?.sub ? BigInt(admin.sub) : null;
@@ -334,8 +477,8 @@ export async function PATCH(
         await tx.$executeRawUnsafe(
           `
             INSERT INTO order_update_logs
-            (order_id, admin_id, event_type, from_order_status, to_order_status, courier_name, cancel_reason, remark)
-            VALUES (?, ?, 'order_status', ?, ?, ?, ?, ?)
+            (order_id, admin_id, event_type, from_order_status, to_order_status, courier_name, cancel_reason, cn_number, cn_date, remark)
+            VALUES (?, ?, 'order_status', ?, ?, ?, ?, ?, ?, ?)
           `,
           orderId.toString(),
           adminId ? adminId.toString() : null,
@@ -343,6 +486,8 @@ export async function PATCH(
           nextOrderStatus,
           courierName || null,
           cancelReason || null,
+          cnNumber || null,
+          cnDate ? cnDate.toISOString().slice(0, 10) : null,
           remark || null
         );
       }
