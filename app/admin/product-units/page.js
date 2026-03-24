@@ -38,6 +38,15 @@ export default function ProductUnitsPage() {
   const [editSerial, setEditSerial] = useState("");
   const [editStatus, setEditStatus] = useState("in_stock");
   const [deletingId, setDeletingId] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewProduct, setPreviewProduct] = useState(null);
+
+  const resolveImageUrl = (imageUrl) => {
+    if (!imageUrl) return "/no-image.png";
+    if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+    return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+  };
 
   const loadUnits = useCallback(async () => {
     const token = getAdminToken();
@@ -203,8 +212,98 @@ export default function ProductUnitsPage() {
     }
   };
 
+  const showProductDetails = async () => {
+    const code = productCode.trim();
+    if (!code) {
+      toast.error("Enter product code first");
+      return;
+    }
+    const token = getAdminToken();
+    if (!token) {
+      router.replace("/login-admin");
+      return;
+    }
+    try {
+      setPreviewLoading(true);
+      const res = await fetch(
+        `/api/admin/product-units/product?productCode=${encodeURIComponent(code)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload?.message || "Failed to load product details");
+      setPreviewProduct(payload?.data || null);
+      setPreviewOpen(true);
+    } catch (error) {
+      toast.error(error.message || "Failed to load product details");
+      setPreviewProduct(null);
+      setPreviewOpen(false);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6">
+      {previewOpen && previewProduct && (
+        <div className="fixed inset-0 z-50 bg-black/50 p-4 flex items-center justify-center">
+          <div className="w-full max-w-2xl rounded-xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Product Details</h2>
+              <button
+                onClick={() => setPreviewOpen(false)}
+                className="rounded border px-3 py-1 text-sm hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-5 grid gap-5 md:grid-cols-[220px_1fr]">
+              <img
+                src={resolveImageUrl(
+                  previewProduct?.mainImage || previewProduct?.images?.[0]?.mainImage
+                )}
+                alt={previewProduct?.name || "Product"}
+                className="w-full h-[220px] object-cover rounded-lg border bg-gray-50"
+              />
+              <div className="space-y-2 text-sm">
+                <div className="text-xl font-bold text-gray-900">
+                  {previewProduct?.name || "-"}
+                </div>
+                <div className="text-gray-600">
+                  <span className="font-medium text-gray-800">Code:</span>{" "}
+                  {previewProduct?.productCode || "-"}
+                </div>
+                <div className="text-gray-600">
+                  <span className="font-medium text-gray-800">Brand:</span>{" "}
+                  {previewProduct?.brandName || previewProduct?.brand?.name || "-"}
+                </div>
+                <div className="text-gray-600">
+                  <span className="font-medium text-gray-800">Category:</span>{" "}
+                  {previewProduct?.categoryName || previewProduct?.category?.category || "-"}
+                </div>
+                <div className="text-gray-600">
+                  <span className="font-medium text-gray-800">Price:</span> Rs.{" "}
+                  {previewProduct?.sellPrice ?? "-"}
+                </div>
+                <div className="text-gray-600">
+                  <span className="font-medium text-gray-800">Stock:</span>{" "}
+                  {String(previewProduct?.availableQuantity ?? "0")}
+                </div>
+                <div className="text-gray-600">
+                  <span className="font-medium text-gray-800">Warranty:</span>{" "}
+                  {previewProduct?.warrantyDays || 365} days
+                </div>
+                <div className="text-gray-600">
+                  <span className="font-medium text-gray-800">Description:</span>{" "}
+                  {previewProduct?.description || "-"}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Product Units</h1>
@@ -216,12 +315,22 @@ export default function ProductUnitsPage() {
         <div className="grid gap-3 md:grid-cols-2">
           <div>
             <label className="text-sm text-gray-600">Product Code</label>
-            <input
-              value={productCode}
-              onChange={(e) => setProductCode(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              placeholder="PRD001..."
-            />
+            <div className="flex gap-2">
+              <input
+                value={productCode}
+                onChange={(e) => setProductCode(e.target.value)}
+                className="w-full border rounded px-3 py-2"
+                placeholder="PRD001..."
+              />
+              <button
+                type="button"
+                onClick={showProductDetails}
+                disabled={previewLoading}
+                className="border rounded px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {previewLoading ? "Loading..." : "Show"}
+              </button>
+            </div>
           </div>
           <div>
             <label className="text-sm text-gray-600">Bulk Serial Numbers</label>

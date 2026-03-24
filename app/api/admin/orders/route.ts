@@ -26,8 +26,30 @@ export async function GET(req: Request) {
     const limit = Math.min(toPositiveInt(searchParams.get("limit"), 20), 100);
     const status = (searchParams.get("status") || "all").toLowerCase();
     const search = (searchParams.get("search") || "").trim();
+    const dateFromRaw = (searchParams.get("dateFrom") || "").trim();
+    const dateToRaw = (searchParams.get("dateTo") || "").trim();
 
-    const where: any = {};
+    const baseWhere: any = {};
+
+    if (dateFromRaw || dateToRaw) {
+      const createdAt: any = {};
+      if (dateFromRaw) {
+        const fromDate = new Date(dateFromRaw);
+        if (!Number.isNaN(fromDate.valueOf())) {
+          createdAt.gte = fromDate;
+        }
+      }
+      if (dateToRaw) {
+        const toDate = new Date(dateToRaw);
+        if (!Number.isNaN(toDate.valueOf())) {
+          toDate.setHours(23, 59, 59, 999);
+          createdAt.lte = toDate;
+        }
+      }
+      if (Object.keys(createdAt).length > 0) {
+        baseWhere.createdAt = createdAt;
+      }
+    }
 
     if (status !== "all") {
       if (!ALLOWED_ORDER_STATUSES.has(status)) {
@@ -36,11 +58,10 @@ export async function GET(req: Request) {
           { status: 400 }
         );
       }
-      where.orderStatus = status;
     }
 
     if (search) {
-      where.OR = [
+      baseWhere.OR = [
         {
           user: {
             fullName: { contains: search },
@@ -63,11 +84,14 @@ export async function GET(req: Request) {
       ];
 
       if (/^\d+$/.test(search)) {
-        where.OR.push({ orderNumber: BigInt(search) });
+        baseWhere.OR.push({ orderNumber: BigInt(search) });
       }
     }
 
-    const [total, orders] = await Promise.all([
+    const where: any =
+      status === "all" ? { ...baseWhere } : { ...baseWhere, orderStatus: status };
+
+    const [total, orders, allCount, processingCount, shippedCount, deliveredCount, cancelledCount, returnsCount] = await Promise.all([
       prisma.order.count({ where }),
       prisma.order.findMany({
         where,
@@ -97,6 +121,12 @@ export async function GET(req: Request) {
         skip: (page - 1) * limit,
         take: limit,
       }),
+      prisma.order.count({ where: { ...baseWhere } }),
+      prisma.order.count({ where: { ...baseWhere, orderStatus: "processing" } }),
+      prisma.order.count({ where: { ...baseWhere, orderStatus: "shipped" } }),
+      prisma.order.count({ where: { ...baseWhere, orderStatus: "delivered" } }),
+      prisma.order.count({ where: { ...baseWhere, orderStatus: "cancelled" } }),
+      prisma.order.count({ where: { ...baseWhere, orderStatus: "returns" } }),
     ]);
 
     const orderIds = (orders || []).map((o: any) => o.id?.toString()).filter(Boolean);
@@ -136,6 +166,14 @@ export async function GET(req: Request) {
         limit,
         total,
         totalPages: Math.max(1, Math.ceil(total / limit)),
+        statusCounts: {
+          all: allCount,
+          processing: processingCount,
+          shipped: shippedCount,
+          delivered: deliveredCount,
+          cancelled: cancelledCount,
+          returns: returnsCount,
+        },
       },
     });
   } catch (error) {
