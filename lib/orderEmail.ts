@@ -39,8 +39,8 @@ const baseHtml = (content: string) => {
 
           <!-- HEADER -->
           <tr>
-            <td style="background:#111111;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
-              <img src="${logoUrl}" alt="YuemiNepal" height="32" style="display:inline-block;filter:invert(1) brightness(2);" />
+            <td style="background:#f3f4f6;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
+              <img src="${logoUrl}" alt="YuemiNepal" height="32" style="display:inline-block;" />
               <p style="margin:8px 0 0;color:#9a8a72;font-size:11px;letter-spacing:0.25em;text-transform:uppercase;font-family:Arial,sans-serif;">yuemi.com.np</p>
             </td>
           </tr>
@@ -264,13 +264,8 @@ export function buildOrderPlacedEmail(
         </td>
       </tr>
 
-      // <!-- CTA -->
-      // <tr>
-      //   <td style="padding:28px 40px 40px;">
-      //     ${ctaButton("Track Your Order →", `${baseUrl}/orders/${order.orderNumber}`)}
-      //     <p style="margin:20px 0 0;font-size:13px;color:#aaa;font-family:Arial,sans-serif;">Questions? Reply to this email or contact us at <a href="mailto:hello@yuemi.com.np" style="color:#9a8a72;">hello@yuemi.com.np</a></p>
-      //   </td>
-      // </tr>
+      <!-- CTA -->
+      
 
     </table>
   `);
@@ -345,11 +340,7 @@ export function buildOrderStatusEmail(order: OrderWithRelations) {
         </td>
       </tr>
 
-      <tr>
-        <td style="padding:32px 40px 40px;">
-          ${ctaButton("View Order Details →", `${baseUrl}/orders/${order.orderNumber}`)}
-        </td>
-      </tr>
+      
 
     </table>
   `);
@@ -429,15 +420,7 @@ export function buildOrderPaymentEmail(order: OrderWithRelations) {
         </td>
       </tr>
 
-      <tr>
-        <td style="padding:32px 40px 40px;">
-          ${payment.toLowerCase() === "unpaid"
-            ? ctaButton("Complete Payment →", `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL || "https://yuemi.com.np"}/checkout/${order.orderNumber}`)
-            : ctaButton("View Order →", `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL || "https://yuemi.com.np"}/orders/${order.orderNumber}`)
-          }
-        </td>
-      </tr>
-
+      
     </table>
   `);
 
@@ -454,7 +437,6 @@ export function buildReturnStatusEmail(params: {
   productName?: string | null;
 }) {
   const subject = `↩️ Return Update for Order ${params.orderNumber}`;
-  const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_BASE_URL || "https://yuemi.com.np";
 
   const returnConfig: Record<string, { icon: string; color: string; bg: string; label: string; message: string }> = {
     requested: { icon: "📋", color: "#1a6eb5", bg: "#e8f2fc", label: "Return Requested",  message: "We've received your return request and our team will review it within 1–2 business days." },
@@ -536,13 +518,6 @@ export function buildReturnStatusEmail(params: {
             </tr>
           </table>` : ""}
 
-        </td>
-      </tr>
-
-      <tr>
-        <td style="padding:32px 40px 40px;">
-          ${ctaButton("View Return Status →", `${baseUrl}/orders/${params.orderNumber}`)}
-          <p style="margin:16px 0 0;font-size:13px;color:#aaa;font-family:Arial,sans-serif;">Need help? Email us at <a href="mailto:returns@yuemi.com.np" style="color:#9a8a72;">returns@yuemi.com.np</a></p>
         </td>
       </tr>
 
