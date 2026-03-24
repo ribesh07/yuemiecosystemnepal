@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
-import { requireAdminRole } from "@/lib/auth";
+/youtube-testimonialsimport { requireAdminRole } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
 async function hasColumn(
