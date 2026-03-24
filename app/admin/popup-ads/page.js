@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import useConfirmModalStore from "@/store/confirmModalStore";
 
 
 const API_URL = "/api/popup-ads";
 
 export default function PopupAdsAdmin() {
+  const openConfirm = useConfirmModalStore((state) => state.open);
   const [ads, setAds] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingAd, setEditingAd] = useState(null);
@@ -113,14 +115,18 @@ export default function PopupAdsAdmin() {
   };
 
   const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this ad?")) {
-      try {
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-        fetchAds();
-      } catch (err) {
-        console.error("Failed to delete ad:", err);
-      }
-    }
+    openConfirm({
+      title: "Delete Popup Ad",
+      message: "Are you sure you want to delete this ad?",
+      onConfirm: async () => {
+        try {
+          await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+          fetchAds();
+        } catch (err) {
+          console.error("Failed to delete ad:", err);
+        }
+      },
+    });
   };
 
   const resetForm = () => {

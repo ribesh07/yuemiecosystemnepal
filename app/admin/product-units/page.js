@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import useConfirmModalStore from "@/store/confirmModalStore";
+import useWarningModalStore from "@/store/warningModalStore";
 
 function getAdminToken() {
   if (typeof window === "undefined") return null;
@@ -27,6 +29,8 @@ function formatDate(value) {
 
 export default function ProductUnitsPage() {
   const router = useRouter();
+  const openConfirm = useConfirmModalStore((state) => state.open);
+  const openWarning = useWarningModalStore((state) => state.open);
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [productCode, setProductCode] = useState("");
@@ -191,25 +195,35 @@ export default function ProductUnitsPage() {
   const deleteUnit = async (id) => {
     const token = getAdminToken();
     if (!token) {
-      router.replace("/login-admin");
+      openWarning({
+        title: "Session Expired",
+        message: "Please login again to delete product unit.",
+        onOkay: () => router.replace("/login-admin"),
+      });
       return;
     }
-    if (!window.confirm("Delete this product unit?")) return;
-    try {
-      setDeletingId(String(id));
-      const res = await fetch(`/api/admin/product-units/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const payload = await res.json();
-      if (!res.ok) throw new Error(payload?.message || "Failed to delete unit");
-      toast.success("Unit deleted");
-      loadUnits();
-    } catch (error) {
-      toast.error(error.message || "Failed to delete unit");
-    } finally {
-      setDeletingId(null);
-    }
+
+    openConfirm({
+      title: "Delete Product Unit",
+      message: "Are you sure you want to delete this product unit?",
+      onConfirm: async () => {
+        try {
+          setDeletingId(String(id));
+          const res = await fetch(`/api/admin/product-units/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const payload = await res.json();
+          if (!res.ok) throw new Error(payload?.message || "Failed to delete unit");
+          toast.success("Unit deleted");
+          loadUnits();
+        } catch (error) {
+          toast.error(error.message || "Failed to delete unit");
+        } finally {
+          setDeletingId(null);
+        }
+      },
+    });
   };
 
   const showProductDetails = async () => {

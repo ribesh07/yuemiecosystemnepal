@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import useConfirmModalStore from "@/store/confirmModalStore";
+import useWarningModalStore from "@/store/warningModalStore";
 
 const API_URL = "/api/testimonials";
 const YOUTUBE_API_URL = "/api/youtube-testimonials";
@@ -27,6 +29,8 @@ function getAuthHeader() {
 }
 
 export default function TestimonialsAdmin() {
+  const openConfirm = useConfirmModalStore((state) => state.open);
+  const openWarning = useWarningModalStore((state) => state.open);
   const [testimonials, setTestimonials] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -166,27 +170,35 @@ export default function TestimonialsAdmin() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this testimonial?")) return;
     if (!getAdminToken()) {
-      toast.error("Please login as admin again");
+      openWarning({
+        title: "Session Expired",
+        message: "Please login again to delete testimonial.",
+      });
       return;
     }
 
-    try {
-      const res = await fetch(`${API_URL}?id=${id}`, {
-        method: "DELETE",
-        headers: {
-          ...getAuthHeader(),
-        },
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result?.message || "Failed to delete testimonial");
-      toast.success("Testimonial deleted");
-      fetchTestimonials();
-    } catch (err) {
-      console.error("Delete failed:", err);
-      toast.error(err?.message || "Failed to delete testimonial");
-    }
+    openConfirm({
+      title: "Delete Testimonial",
+      message: "Are you sure you want to delete this testimonial?",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${API_URL}?id=${id}`, {
+            method: "DELETE",
+            headers: {
+              ...getAuthHeader(),
+            },
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result?.message || "Failed to delete testimonial");
+          toast.success("Testimonial deleted");
+          fetchTestimonials();
+        } catch (err) {
+          console.error("Delete failed:", err);
+          toast.error(err?.message || "Failed to delete testimonial");
+        }
+      },
+    });
   };
 
   const handleYoutubeSubmit = async (e) => {
@@ -254,25 +266,33 @@ export default function TestimonialsAdmin() {
   };
 
   const handleYoutubeDelete = async (id) => {
-    if (!confirm("Delete this YouTube testimonial?")) return;
     if (!getAdminToken()) {
-      toast.error("Please login as admin again");
+      openWarning({
+        title: "Session Expired",
+        message: "Please login again to delete YouTube testimonial.",
+      });
       return;
     }
-    try {
-      const res = await fetch(`${YOUTUBE_API_URL}?id=${id}`, {
-        method: "DELETE",
-        headers: {
-          ...getAuthHeader(),
-        },
-      });
-      const payload = await res.json();
-      if (!res.ok) throw new Error(payload?.message || "Delete failed");
-      toast.success("Deleted");
-      fetchYoutubeTestimonials();
-    } catch (err) {
-      toast.error(err?.message || "Delete failed");
-    }
+    openConfirm({
+      title: "Delete Video Testimonial",
+      message: "Are you sure you want to delete this YouTube testimonial?",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${YOUTUBE_API_URL}?id=${id}`, {
+            method: "DELETE",
+            headers: {
+              ...getAuthHeader(),
+            },
+          });
+          const payload = await res.json();
+          if (!res.ok) throw new Error(payload?.message || "Delete failed");
+          toast.success("Deleted");
+          fetchYoutubeTestimonials();
+        } catch (err) {
+          toast.error(err?.message || "Delete failed");
+        }
+      },
+    });
   };
 
   const resetForm = () => {

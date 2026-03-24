@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import useConfirmModalStore from "@/store/confirmModalStore";
+import useWarningModalStore from "@/store/warningModalStore";
+import useInfoModalStore from "@/store/infoModalStore";
 
 function getAdminToken() {
   if (typeof window === "undefined") return null;
@@ -27,6 +30,9 @@ function formatDate(value) {
 
 export default function ReturnsPage() {
   const router = useRouter();
+  const openConfirm = useConfirmModalStore((state) => state.open);
+  const openWarning = useWarningModalStore((state) => state.open);
+  const openInfo = useInfoModalStore((state) => state.open);
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [updatingId, setUpdatingId] = useState(null);
@@ -64,36 +70,49 @@ export default function ReturnsPage() {
   const updateReturnStatus = async (item, nextStatus) => {
     const token = getAdminToken();
     if (!token) {
-      router.replace("/login-admin");
+      openWarning({
+        title: "Session Expired",
+        message: "Please login again to update return status.",
+        onOkay: () => router.replace("/login-admin"),
+      });
       return;
     }
 
-    try {
-      setUpdatingId(item.id);
-      const response = await fetch(`/api/admin/returns/${item.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: nextStatus }),
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload?.message || "Failed to update return status");
-      }
+    openConfirm({
+      title: "Update Return Status",
+      message: `Are you sure you want to change status to "${nextStatus}"?`,
+      onConfirm: async () => {
+        try {
+          setUpdatingId(item.id);
+          const response = await fetch(`/api/admin/returns/${item.id}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ status: nextStatus }),
+          });
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload?.message || "Failed to update return status");
+          }
 
-      setItems((prev) =>
-        prev.map((row) =>
-          String(row.id) === String(item.id) ? { ...row, status: nextStatus } : row
-        )
-      );
-      toast.success(`Return status updated to ${nextStatus}`);
-    } catch (error) {
-      toast.error(error.message || "Failed to update return status");
-    } finally {
-      setUpdatingId(null);
-    }
+          setItems((prev) =>
+            prev.map((row) =>
+              String(row.id) === String(item.id) ? { ...row, status: nextStatus } : row
+            )
+          );
+          openInfo({
+            title: "Status Updated",
+            message: `Return status updated to "${nextStatus}".`,
+          });
+        } catch (error) {
+          toast.error(error.message || "Failed to update return status");
+        } finally {
+          setUpdatingId(null);
+        }
+      },
+    });
   };
 
   const stats = useMemo(() => {
