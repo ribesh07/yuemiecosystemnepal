@@ -1,50 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const RELATED_PRODUCTS = [
-  {
-    id: 1,
-    name: "YueMi M75 150W LED Light (6000K) – Hi/Low (H4/H19)",
-    price: 11249,
-    images: [
-      "https://yuemiecosystem.com/cdn/shop/files/M75_4300k_LED.jpg?v=1730719394",
-      "https://yuemiecosystem.com/cdn/shop/files/150W_LED_22f81754-6547-40df-870c-a8f0f54244ac.jpg?v=1728984552",
-    ],
-  },
-  {
-    id: 2,
-    name: "YueMi M75 150W LED Light (6000K) – Single Beam",
-    price: 9999,
-    images: [
-      "https://yuemiecosystem.com/cdn/shop/files/M100_4300k_LED.jpg?v=1730719286",
-      "https://yuemiecosystem.com/cdn/shop/files/200W_LED.jpg?v=1728984431",
-    ],
-    rating: 4,
-    reviews: 2,
-  },
-  {
-    id: 3,
-    name: "YueMi M75 150W LED Light (4300K) – Single Beam",
-    price: 9999,
-    images: [
-      "https://yuemiecosystem.com/cdn/shop/files/150W_LED_22f81754-6547-40df-870c-a8f0f54244ac.jpg?v=1728984552", // only one image
-    ],
-  },
-  {
-    id: 4,
-    name: "YueMi M100 200W LED Light (4300K) – Hi/Low (H4/H19)",
-    price: 13749,
-    images: [
-      "https://yuemiecosystem.com/cdn/shop/files/150W_LED_22f81754-6547-40df-870c-a8f0f54244ac.jpg?v=1728984552",
-      "https://yuemiecosystem.com/cdn/shop/files/M75_4300k_LED.jpg?v=1730719394",
-    ],
-  },
-];
+function resolveImageUrl(imageUrl) {
+  if (!imageUrl) return "/yumei_logo.png";
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+}
 
-export default function RelatedProduct() {
+function getGalleryImages(product) {
+  const imagePaths = product?.images?.[0]?.imagePath;
+  if (!Array.isArray(imagePaths)) return [];
+  return imagePaths.filter(Boolean);
+}
+
+export default function RelatedProduct({ categoryId, currentProductId }) {
   const router = useRouter();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadRelated = async () => {
+      if (!categoryId) {
+        setItems([]);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `/api/products/filter?categoryId=${encodeURIComponent(
+            String(categoryId)
+          )}&limit=20`,
+          {
+            cache: "no-store",
+          }
+        );
+        const payload = await res.json();
+        if (!res.ok) {
+          setItems([]);
+          return;
+        }
+
+        const rawProducts = payload?.data?.products || [];
+        const filtered = rawProducts.filter(
+          (p) => String(p.id) !== String(currentProductId)
+        );
+        setItems(filtered.slice(0, 4));
+      } catch (error) {
+        console.error("RELATED_PRODUCTS_ERROR", error);
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRelated();
+  }, [categoryId, currentProductId]);
+
+  const products = useMemo(() => items || [], [items]);
+  if (!categoryId || (!loading && products.length === 0)) return null;
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-14">
@@ -52,31 +68,38 @@ export default function RelatedProduct() {
         You may also like
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        {RELATED_PRODUCTS.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            onClick={() =>
-              router.push(`/product-details?id=${product.id}`)
-            }
-          />
-        ))}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="text-center">
+              <div className="bg-gray-100 rounded-lg h-64 animate-pulse mb-4" />
+              <div className="h-4 bg-gray-100 rounded animate-pulse mb-2" />
+              <div className="h-4 bg-gray-100 rounded animate-pulse w-2/3 mx-auto" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onClick={() => router.push(`/all-product/${product.id}`)}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
 
-/* ---------------- CARD ---------------- */
-
 function ProductCard({ product, onClick }) {
   const [hovered, setHovered] = useState(false);
-
-  const hasSecondImage = product.images.length > 1;
-  const displayImage =
-    hovered && hasSecondImage
-      ? product.images[1]
-      : product.images[0];
+  const gallery = getGalleryImages(product);
+  const first = product?.mainImage || gallery[0] || "";
+  const second = gallery.find((img) => img !== first) || first;
+  const hasSecondImage = Boolean(second && second !== first);
+  const displayImage = hovered && hasSecondImage ? second : first;
 
   return (
     <div
@@ -85,46 +108,22 @@ function ProductCard({ product, onClick }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Image */}
       <div className="bg-gray-50 rounded-lg overflow-hidden mb-4 h-64 flex items-center justify-center">
         <img
-          src={displayImage}
-          alt={product.name}
+          src={resolveImageUrl(displayImage)}
+          alt={product?.name || "Product"}
           className="h-full object-contain transition-all duration-300 group-hover:scale-105"
         />
       </div>
 
-      {/* Name */}
-      <h3 className="text-sm font-medium text-gray-900 leading-snug mb-2">
-        {product.name}
+      <h3 className="text-sm font-medium text-gray-900 leading-snug mb-2 line-clamp-2">
+        {product?.name || "-"}
       </h3>
 
-      {/* Rating (optional) */}
-      {product.rating && (
-        <div className="flex justify-center items-center gap-1 mb-1">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <svg
-              key={star}
-              className={`w-4 h-4 ${
-                star <= product.rating
-                  ? "text-black fill-current"
-                  : "text-gray-300"
-              }`}
-              viewBox="0 0 20 20"
-            >
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-          ))}
-          <span className="text-xs text-gray-500">
-            ({product.reviews})
-          </span>
-        </div>
-      )}
-
-      {/* Price */}
       <p className="text-base font-semibold text-gray-900">
-        MRP Rs. {product.price.toLocaleString("en-IN")}
+        MRP Rs. {Number(product?.sellPrice || 0).toLocaleString("en-IN")}
       </p>
     </div>
   );
 }
+
