@@ -3,6 +3,25 @@ import { prisma } from "@/prisma/prisma-client";
 import { requireAdminRole } from "@/lib/auth";
 import { serializeBigInt } from "@/lib/serializeBigInt";
 
+async function hasColumn(
+  tableName: string,
+  columnName: string
+): Promise<boolean> {
+  const rows = (await prisma.$queryRawUnsafe(
+    `
+      SELECT 1
+      FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = ?
+        AND COLUMN_NAME = ?
+      LIMIT 1
+    `,
+    tableName,
+    columnName
+  )) as any[];
+  return Array.isArray(rows) && rows.length > 0;
+}
+
 async function ensureTable() {
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS youtube_testimonials (
@@ -23,13 +42,27 @@ async function ensureTable() {
       INDEX idx_youtube_testimonials_position (position)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   `);
-  await prisma.$executeRawUnsafe(`
-    ALTER TABLE youtube_testimonials
-    ADD COLUMN IF NOT EXISTS profile_image VARCHAR(500) NULL AFTER youtube_link,
-    ADD COLUMN IF NOT EXISTS name VARCHAR(191) NULL AFTER profile_image,
-    ADD COLUMN IF NOT EXISTS designation VARCHAR(191) NULL AFTER name,
-    ADD COLUMN IF NOT EXISTS review TEXT NULL AFTER designation;
-  `);
+
+  if (!(await hasColumn("youtube_testimonials", "profile_image"))) {
+    await prisma.$executeRawUnsafe(
+      "ALTER TABLE youtube_testimonials ADD COLUMN profile_image VARCHAR(500) NULL AFTER youtube_link"
+    );
+  }
+  if (!(await hasColumn("youtube_testimonials", "name"))) {
+    await prisma.$executeRawUnsafe(
+      "ALTER TABLE youtube_testimonials ADD COLUMN name VARCHAR(191) NULL AFTER profile_image"
+    );
+  }
+  if (!(await hasColumn("youtube_testimonials", "designation"))) {
+    await prisma.$executeRawUnsafe(
+      "ALTER TABLE youtube_testimonials ADD COLUMN designation VARCHAR(191) NULL AFTER name"
+    );
+  }
+  if (!(await hasColumn("youtube_testimonials", "review"))) {
+    await prisma.$executeRawUnsafe(
+      "ALTER TABLE youtube_testimonials ADD COLUMN review TEXT NULL AFTER designation"
+    );
+  }
 }
 
 function isYouTubeUrl(url: string) {
