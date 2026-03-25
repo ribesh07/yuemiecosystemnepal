@@ -84,12 +84,16 @@ export async function POST(req: Request) {
       );
     }
 
-    if (paymentMethod !== "cod") {
+    if (paymentMethod !== "cod" && paymentMethod !== "connectips") {
       return NextResponse.json(
-        { success: false, message: "Only COD is supported currently" },
+        { success: false, message: "Unsupported payment method" },
         { status: 400 }
       );
     }
+
+    const connectipsReferenceId = body?.connectipsReferenceId
+      ? String(body.connectipsReferenceId)
+      : null;
 
     const address = await prisma.customerAddress.findFirst({
       where: { id: addressId, customerId },
@@ -172,13 +176,16 @@ export async function POST(req: Request) {
           data: {
             orderNumber,
             customerId,
+            ...(paymentMethod === "connectips" && connectipsReferenceId
+              ? { transactionId: connectipsReferenceId }
+              : {}),
             subtotal: String(subtotal),
             tax: String(tax),
             shippingCost: String(shippingCost),
             discount: String(discount),
             totalAmount: String(totalAmount),
             orderStatus: "processing",
-            paymentStatus: "unpaid",
+            paymentStatus: paymentMethod === "connectips" ? "paid" : "unpaid",
           },
         });
 
@@ -294,10 +301,19 @@ export async function POST(req: Request) {
         await tx.orderPayment.create({
           data: {
             orderId: order.id,
-            paymentMode: "COD",
-            paidAmount: "0",
-            dueAmount: String(totalAmount),
-            status: "unpaid",
+            paymentMode: paymentMethod === "connectips" ? "ConnectIPS" : "COD",
+            ...(paymentMethod === "connectips"
+              ? {
+                  transactionId: connectipsReferenceId,
+                  paidAmount: String(totalAmount),
+                  dueAmount: "0",
+                  status: "paid",
+                }
+              : {
+                  paidAmount: "0",
+                  dueAmount: String(totalAmount),
+                  status: "unpaid",
+                }),
           },
         });
 

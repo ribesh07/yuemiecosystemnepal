@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { getSessionToken, isAuthenticatedClient } from "@/utils/clientAuth";
+import PayWithConnectIPS from "@/components/PayWithConnectIPS";
 import {
   clearCheckoutSelection,
   getCartItems,
@@ -138,8 +139,13 @@ const CheckoutPageContent = () => {
       return;
     }
     
-    if (paymentMethod !== "cod") {
+    if (!paymentMethod) {
       toast.error('Please select a payment method');
+      return;
+    }
+
+    if (paymentMethod === "connectips") {
+      toast.error("Please use the ConnectIPS button below to continue.");
       return;
     }
 
@@ -185,6 +191,29 @@ const CheckoutPageContent = () => {
       .finally(() => {
         setPlacingOrder(false);
       });
+  };
+
+  const saveConnectIPSIntent = ({ referenceId, txnId, amount }) => {
+    try {
+      const payload = {
+        referenceId,
+        txnId,
+        amount,
+        addressId: selectedAddressId,
+        items: summaryItems.map((item) => ({
+          productId: item.id,
+          quantity: Number(item.quantity || 1),
+        })),
+        createdAt: Date.now(),
+      };
+      sessionStorage.setItem(
+        `connectips_intent_${referenceId}`,
+        JSON.stringify(payload)
+      );
+      sessionStorage.setItem("connectips_last_reference", referenceId);
+    } catch (error) {
+      console.error("CONNECTIPS_INTENT_SAVE_ERROR", error);
+    }
   };
 
   const selectedAddress = savedAddresses.find((a) => String(a.id) === String(selectedAddressId));
@@ -343,26 +372,91 @@ const CheckoutPageContent = () => {
                       </div>
                     </div>
                   </div>
+
+                  <div
+                    onClick={() => setPaymentMethod("connectips")}
+                    className={`cursor-pointer p-5 rounded-xl border-2 transition-all duration-200 ${
+                      paymentMethod === "connectips"
+                        ? "border-orange-500 bg-orange-50"
+                        : "border-gray-200 hover:border-orange-300 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          paymentMethod === "connectips"
+                            ? "border-orange-500 bg-orange-500"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        {paymentMethod === "connectips" && (
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="font-bold text-gray-800 text-lg">ConnectIPS Pay</h3>
+                          <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full">
+                            Online
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Pay securely using your mobile banking via ConnectIPS.
+                        </p>
+                      </div>
+                      <Image
+                        src="/connectIPS.png"
+                        alt="ConnectIPS"
+                        width={82}
+                        height={28}
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Place Order Button */}
-              <button
-                type="submit"
-                disabled={placingOrder}
-                className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {placingOrder ? (
-                  <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-                {placingOrder
-                  ? "Placing Order..."
-                  : `Place Order - Rs. ${total.toLocaleString()}`}
-              </button>
+              {/* Place Order / Pay Button */}
+              {paymentMethod === "connectips" ? (
+                <div className="space-y-2">
+                  <div className="w-full flex justify-center">
+                    <PayWithConnectIPS
+                      amount={Math.round(total * 100)}
+                      remarks={`Checkout payment`}
+                      particulars={`Total Rs. ${total.toLocaleString()}`}
+                      disabled={!selectedAddressId || !summaryItems.length}
+                      onBeforeSubmit={saveConnectIPSIntent}
+                      onError={(message) => toast.error(message)}
+                    />
+                  </div>
+                  <p className="text-xs text-center text-gray-500">
+                    You will be redirected to ConnectIPS secure payment page.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={placingOrder}
+                  className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {placingOrder ? (
+                    <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                  {placingOrder
+                    ? "Placing Order..."
+                    : `Place Order - Rs. ${total.toLocaleString()}`}
+                </button>
+              )}
             </div>
 
             {/* Right Column - Order Summary */}
