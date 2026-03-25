@@ -206,16 +206,16 @@ export default function AddressSection() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">My Addresses</h2>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-5 sm:space-y-6">
+      <div className="flex flex-wrap justify-between items-center gap-3">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900">My Addresses</h2>
         <button
           onClick={() => {
             setFormData(emptyForm);
             setEditingId(null);
             setShowForm(true);
           }}
-          className="bg-orange-500 text-white px-4 py-2 rounded text-sm"
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
         >
           + Add Address
         </button>
@@ -232,7 +232,7 @@ export default function AddressSection() {
         {addresses.map((address) => (
           <div
             key={address.id}
-            className="border rounded-lg p-4 flex justify-between items-start"
+            className="border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start gap-3"
           >
             <div>
               <p className="font-semibold">
@@ -258,16 +258,16 @@ export default function AddressSection() {
               )}
             </div>
 
-            <div className="flex gap-3 text-sm">
+            <div className="flex gap-2 text-sm w-full sm:w-auto">
               <button
                 onClick={() => handleEdit(address)}
-                className="text-blue-600"
+                className="flex-1 sm:flex-none px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100"
               >
                 Edit
               </button>
               <button
                 onClick={() => handleDelete(address.id)}
-                className="text-red-600"
+                className="flex-1 sm:flex-none px-3 py-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100"
               >
                 Delete
               </button>
@@ -278,7 +278,7 @@ export default function AddressSection() {
 
       {/* Address Form */}
       {showForm && (
-        <div className="border-t pt-6 space-y-4">
+        <div className="border-t pt-5 sm:pt-6 space-y-4">
           <input
             className="w-full border rounded px-3 py-2"
             value={formData.fullName}
@@ -358,11 +358,11 @@ export default function AddressSection() {
             Set as default billing address
           </label>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleSubmit}
               disabled={saving}
-              className="bg-orange-500 text-white px-4 py-2 rounded"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-lg font-medium transition"
             >
               {saving ? "Saving..." : "Save Address"}
             </button>

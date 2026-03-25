@@ -42,9 +42,9 @@ export default function WarrantyHistory() {
   }, []);
 
   return (
-    <div className="bg-white rounded-xl shadow p-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Warranty History</h3>
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900">Warranty History</h3>
         <span className="text-xs text-gray-500">Total: {items.length}</span>
       </div>
 
@@ -53,7 +53,7 @@ export default function WarrantyHistory() {
       ) : items.length === 0 ? (
         <div className="text-sm text-gray-500">No warranties found yet.</div>
       ) : (
-        <div className="overflow-auto">
+        <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-sm">
             <thead className="bg-gray-50 border-b">
               <tr className="text-left">

@@ -10,7 +10,7 @@ function Modal({ title, isOpen, onClose, children }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-2xl p-6 relative max-h-[90vh] overflow-auto">
+      <div className="bg-white rounded-xl w-full max-w-2xl p-4 sm:p-6 relative max-h-[90vh] overflow-auto">
         <h3 className="text-lg font-semibold mb-4">{title}</h3>
 
         <button
@@ -29,6 +29,12 @@ function Modal({ title, isOpen, onClose, children }) {
 function formatDate(value) {
   if (!value) return "-";
   return new Date(value).toLocaleDateString();
+}
+
+function resolveImageUrl(imageUrl) {
+  if (!imageUrl) return "/no-image.png";
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
 }
 
 function isWithinReturnWindow(order) {
@@ -233,26 +239,27 @@ export default function OrdersSection() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-6">
-      <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Recent Orders</h3>
 
       {loading ? (
         <p className="text-sm text-gray-500">Loading orders...</p>
       ) : tableOrders.length === 0 ? (
         <p className="text-sm text-gray-500">No orders yet.</p>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left">
-              <th>Product</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Total</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableOrders.map((o) => {
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] text-sm">
+            <thead>
+              <tr className="border-b text-left text-gray-600">
+                <th className="py-2 pr-3">Product</th>
+                <th className="py-2 pr-3">Date</th>
+                <th className="py-2 pr-3">Status</th>
+                <th className="py-2 pr-3">Total</th>
+                <th className="py-2 pr-1">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableOrders.map((o) => {
               const status = String(o.orderStatus || "").toLowerCase();
               const canCancel = status === "processing" || status === "shipped";
               const canReview = status === "delivered";
@@ -262,14 +269,18 @@ export default function OrdersSection() {
                 <tr key={o.id} className="border-b">
                   <td
                     onClick={() => setSelectedOrder(o)}
-                    className="text-blue-600 cursor-pointer py-2"
+                    className="text-blue-600 cursor-pointer py-3 pr-3 font-medium hover:underline"
                   >
                     {o.displayName}
                   </td>
-                  <td>{formatDate(o.createdAt)}</td>
-                  <td className="capitalize">{o.orderStatus}</td>
-                  <td>Rs. {Number(o.totalAmount || 0).toLocaleString()}</td>
-                  <td className="py-2">
+                  <td className="pr-3">{formatDate(o.createdAt)}</td>
+                  <td className="capitalize pr-3">
+                    <span className="inline-flex px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
+                      {o.orderStatus}
+                    </span>
+                  </td>
+                  <td className="pr-3 font-semibold">Rs. {Number(o.totalAmount || 0).toLocaleString()}</td>
+                  <td className="py-2 pr-1">
                     <div className="flex gap-2">
                       {canCancel && (
                         <button
@@ -306,9 +317,10 @@ export default function OrdersSection() {
                   </td>
                 </tr>
               );
-            })}
-          </tbody>
-        </table>
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <Modal
@@ -317,45 +329,86 @@ export default function OrdersSection() {
         onClose={() => setSelectedOrder(null)}
       >
         {selectedOrder && (
-          <div className="space-y-3 text-sm">
-            <p>
-              <span className="font-medium">Status:</span>{" "}
-              <span className="capitalize">{selectedOrder.orderStatus}</span>
-            </p>
-            <p>
-              <span className="font-medium">Payment:</span>{" "}
-              <span className="capitalize">{selectedOrder.paymentStatus}</span>
-            </p>
-            <p>
-              <span className="font-medium">Date:</span> {formatDate(selectedOrder.createdAt)}
-            </p>
-            <p>
-              <span className="font-medium">Subtotal:</span> Rs. {Number(selectedOrder.subtotal || 0).toLocaleString()}
-            </p>
-            <p>
-              <span className="font-medium">Shipping:</span> Rs. {Number(selectedOrder.shippingCost || 0).toLocaleString()}
-            </p>
-            <p>
-              <span className="font-medium">Total:</span> Rs. {Number(selectedOrder.totalAmount || 0).toLocaleString()}
-            </p>
+          <div className="space-y-5 text-sm">
+            <div className="rounded-xl border border-gray-200 p-4 bg-gray-50">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex items-center justify-between sm:block">
+                  <p className="text-xs text-gray-500 mb-1">Status</p>
+                  <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 capitalize">
+                    {selectedOrder.orderStatus}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between sm:block">
+                  <p className="text-xs text-gray-500 mb-1">Payment</p>
+                  <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 capitalize">
+                    {selectedOrder.paymentStatus}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Order Date</p>
+                  <p className="font-medium text-gray-800">{formatDate(selectedOrder.createdAt)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Order ID</p>
+                  <p className="font-mono text-xs sm:text-sm text-gray-800 break-all">#{selectedOrder.orderNumber}</p>
+                </div>
+              </div>
+            </div>
 
-            <div className="pt-3 border-t">
-              <p className="font-medium mb-2">Items</p>
-              <ul className="space-y-2">
+            <div className="rounded-xl border border-gray-200 p-4">
+              <p className="font-semibold text-gray-900 mb-3">Items</p>
+              <div className="space-y-3">
                 {(selectedOrder.items || []).map((item) => (
-                  <li key={item.id} className="flex justify-between">
-                    <span>
-                      {item.product?.name || item.productCode} x {Number(item.quantity || 0)}
-                    </span>
-                    <span>Rs. {Number(item.subtotal || 0).toLocaleString()}</span>
-                  </li>
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-3 rounded-lg border border-gray-100 p-3"
+                  >
+                    <div className="w-14 h-14 rounded-md overflow-hidden bg-gray-100 shrink-0">
+                      <img
+                        src={resolveImageUrl(item.product?.mainImage)}
+                        alt={item.product?.name || item.productCode}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 line-clamp-2">
+                        {item.product?.name || item.productCode}
+                      </p>
+                      <p className="text-xs text-gray-500">{item.productCode}</p>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-600">
+                        <span>Qty: {Number(item.quantity || 0)}</span>
+                        <span>Unit: Rs. {Number(item.price || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <p className="font-semibold text-gray-900 whitespace-nowrap">
+                      Rs. {Number(item.subtotal || 0).toLocaleString()}
+                    </p>
+                  </div>
                 ))}
-              </ul>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 p-4 bg-gray-50">
+              <p className="font-semibold text-gray-900 mb-3">Price Summary</p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-gray-700">
+                  <span>Subtotal</span>
+                  <span>Rs. {Number(selectedOrder.subtotal || 0).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-gray-700">
+                  <span>Shipping</span>
+                  <span>Rs. {Number(selectedOrder.shippingCost || 0).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-gray-200 font-bold text-gray-900">
+                  <span>Total</span>
+                  <span>Rs. {Number(selectedOrder.totalAmount || 0).toLocaleString()}</span>
+                </div>
+              </div>
             </div>
 
             <button
               onClick={() => setSelectedOrder(null)}
-              className="mt-4 bg-gray-200 hover:bg-red-400 px-4 py-2 rounded"
+              className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg"
             >
               Close
             </button>
