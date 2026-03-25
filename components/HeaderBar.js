@@ -202,6 +202,49 @@ export default function Header() {
               )}
             </div>
           </div>
+
+          {/* Mobile Nav Links */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden pb-4 border-t border-gray-100">
+              <div className="flex flex-col pt-3 text-sm font-semibold text-gray-800">
+                <Link
+                  href="/home"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-2 py-2 hover:text-orange-600"
+                >
+                  HOME
+                </Link>
+                <Link
+                  href="/about"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-2 py-2 hover:text-orange-600"
+                >
+                  ABOUT US
+                </Link>
+                <Link
+                  href="/all-product"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-2 py-2 hover:text-orange-600"
+                >
+                  BROWSE PRODUCT
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-2 py-2 hover:text-orange-600"
+                >
+                  CONTACT US
+                </Link>
+                <Link
+                  href="/warranty"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-2 py-2 hover:text-orange-600"
+                >
+                  WARRANTY
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
     </header>

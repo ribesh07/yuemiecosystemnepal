@@ -42,11 +42,11 @@ export default function CategoriesPage() {
           </div>
 
           {/* Grid Skeleton */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                <div className="h-48 bg-gray-200 animate-pulse"></div>
-                <div className="p-5">
+                <div className="h-32 sm:h-48 bg-gray-200 animate-pulse"></div>
+                <div className="p-3 sm:p-5">
                   <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
                 </div>
               </div>
@@ -96,7 +96,7 @@ export default function CategoriesPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             {categories.map((category: any) => (
               <Link
                 key={category.id}
@@ -104,7 +104,7 @@ export default function CategoriesPage() {
                 className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:border-orange-200 transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Image Container */}
-                <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-50 overflow-hidden">
+                <div className="relative h-28 sm:h-48 bg-gradient-to-br from-gray-100 to-gray-50 overflow-hidden">
                   <img
                     src={category.image}
                     alt={category.name}
@@ -116,8 +116,8 @@ export default function CategoriesPage() {
                 </div>
 
                 {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors duration-300 text-center">
+                <div className="p-3 sm:p-5">
+                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors duration-300 text-center line-clamp-2">
                     {category.name}
                   </h3>
                   

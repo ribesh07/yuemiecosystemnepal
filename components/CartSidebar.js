@@ -156,7 +156,7 @@ export default function CartSidebar() {
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-x-hidden">
 
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b">
@@ -173,7 +173,7 @@ export default function CartSidebar() {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">
             {loading ? (
               <p className="text-center text-gray-500">Loading...</p>
             ) : cartItems.length === 0 ? (
@@ -198,8 +198,8 @@ export default function CartSidebar() {
                 </div>
 
                 {cartItems.map((item) => (
-                  <div key={item.id} className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex gap-4">
+                  <div key={item.id} className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                    <div className="flex gap-3 sm:gap-4 min-w-0">
                       <div className="pt-1">
                         <input
                           type="checkbox"
@@ -207,7 +207,7 @@ export default function CartSidebar() {
                           onChange={() => toggleSelect(item.id)}
                         />
                       </div>
-                      <div className="w-20 h-20 border rounded flex items-center justify-center overflow-hidden">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 border rounded flex items-center justify-center overflow-hidden shrink-0">
                         {item.image ? (
                           <img
                             src={item.image}
@@ -221,18 +221,18 @@ export default function CartSidebar() {
                         )}
                       </div>
 
-                      <div className="flex-1">
-                        <div className="flex justify-between">
-                          <h3 className="font-semibold truncate">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="font-semibold text-sm sm:text-base leading-5 line-clamp-2 break-words">
                             {item.name}
                           </h3>
-                          <button onClick={() => removeItem(item.id)}>
+                          <button onClick={() => removeItem(item.id)} className="shrink-0">
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </button>
                         </div>
 
-                        <div className="flex justify-between items-center mt-2">
-                          <div className="flex border rounded">
+                        <div className="flex justify-between items-center mt-2 gap-2">
+                          <div className="flex border rounded shrink-0">
                             <button
                               onClick={() => updateQuantity(item.id, -1)}
                               className="px-2"
@@ -250,7 +250,7 @@ export default function CartSidebar() {
                             </button>
                           </div>
 
-                          <div className="font-bold">
+                          <div className="font-bold text-sm sm:text-base text-right shrink-0">
                             Rs. {(item.price * item.quantity).toFixed(2)}
                           </div>
                         </div>

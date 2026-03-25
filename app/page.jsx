@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import ImageSlider from "@/components/ImageSlider";
 //import CarAccessoriesGallery from "@/components/categories";
 import FeaturedCollections from "@/components/FeaturedCollection";
