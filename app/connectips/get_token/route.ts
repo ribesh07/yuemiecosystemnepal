@@ -13,6 +13,19 @@ const AUTH_PASS = process.env.CONNECTIPS_AUTH_PASSWORD;
 
 const filePath = path.join(process.cwd(), 'signatures', 'CREDITOR.pfx');
 const pfx = fs.readFileSync(filePath);
+const SIGNING_KEYS = [
+  "MERCHANTID",
+  "APPID",
+  "APPNAME",
+  "TXNID",
+  "TXNDATE",
+  "TXNCRNCY",
+  "TXNAMT",
+  "REFERENCEID",
+  "REMARKS",
+  "PARTICULARS",
+  "TOKEN",
+] as const;
 
 const readPkcs12WithPass = (password: string): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -59,7 +72,15 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const message = objectToKeyValueString(body);
+
+    // ConnectIPS token signature should include only known gateway fields in fixed order.
+    const sanitized = SIGNING_KEYS.reduce<Record<string, unknown>>((acc, key) => {
+      if (body?.[key] !== undefined && body?.[key] !== null) {
+        acc[key] = body[key];
+      }
+      return acc;
+    }, {});
+    const message = objectToKeyValueString(sanitized);
     const privateKey = await getPrivateKey();
 
     const sign = crypto.createSign('RSA-SHA256');

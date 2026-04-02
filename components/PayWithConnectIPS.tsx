@@ -9,7 +9,6 @@ const MERCHANTID = process.env.NEXT_PUBLIC_CONNECTIPS_MERCHANTID as string;
 const APPID = process.env.NEXT_PUBLIC_CONNECTIPS_APPID as string;
 const APPNAME = process.env.NEXT_PUBLIC_CONNECTIPS_APPNAME as string;
 const CONNECTIPS_API_URL = process.env.NEXT_PUBLIC_CONNECTIPS_API_URL as string;
-const CONNECTIPS_BASE_URL = process.env.NEXT_PUBLIC_CONNECTIPS_BASE_URL as string;
 
 type PayWithConnectIPSProps = {
   amount: number;
@@ -35,19 +34,21 @@ type TransactionDetails = {
   REFERENCEID: string;
   REMARKS: string;
   PARTICULARS: string;
-  TOKEN: 'TOKEN';
 };
 
-type Payload = Omit<TransactionDetails, 'TOKEN'> & { TOKEN: string };
+type Payload = TransactionDetails & { TOKEN: string };
 
 const initiatePayment = async (
   transactionDetails: TransactionDetails,
   onError?: (message: string) => void
 ) => {
   try {
+    // ConnectIPS expects TOKEN placeholder to be part of the signed payload.
+    const tokenPayload = { ...transactionDetails, TOKEN: "TOKEN" };
     const tokenResponse = await fetch('/connectips/get_token', {
       method: 'POST',
-      body: JSON.stringify(transactionDetails),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tokenPayload),
     });
 
     const tokenData = await tokenResponse.json().catch(() => ({}));
@@ -56,6 +57,9 @@ const initiatePayment = async (
     }
 
     const { TOKEN } = tokenData;
+    if (!TOKEN) {
+      throw new Error("Token not returned from ConnectIPS signer");
+    }
 
     const payload: Payload = { ...transactionDetails, TOKEN };
 
@@ -75,7 +79,11 @@ const initiatePayment = async (
     form.submit();
   } catch (error) {
     if (onError) {
-      onError("Failed to start ConnectIPS payment. Please try again.");
+      onError(
+        error instanceof Error
+          ? error.message
+          : "Failed to start ConnectIPS payment. Please try again."
+      );
     }
   }
 };
@@ -107,7 +115,6 @@ const PayWithConnectIPS = ({
           REFERENCEID: referenceId,
           REMARKS: remarks,
           PARTICULARS: particulars,
-          TOKEN: "TOKEN",
         };
 
         if (onBeforeSubmit) {
