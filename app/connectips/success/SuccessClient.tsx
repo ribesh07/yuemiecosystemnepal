@@ -19,6 +19,7 @@ export default function SuccessClient() {
     searchParams.get("REFERENCEID") ||
     searchParams.get("REFID") ||
     searchParams.get("OID") ||
+    txnId ||
     "";
   const txnAmtFromQuery = Number(searchParams.get("TXNAMT") || 0);
 
