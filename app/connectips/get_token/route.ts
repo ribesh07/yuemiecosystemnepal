@@ -26,6 +26,12 @@ const SIGNING_KEYS = [
   "PARTICULARS",
   "TOKEN",
 ] as const;
+const VALIDATE_SIGNING_KEYS = [
+  "MERCHANTID",
+  "APPID",
+  "REFERENCEID",
+  "TXNAMT",
+] as const;
 
 const readPkcs12WithPass = (password: string): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -73,8 +79,15 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    // ConnectIPS token signature should include only known gateway fields in fixed order.
-    const sanitized = SIGNING_KEYS.reduce<Record<string, unknown>>((acc, key) => {
+    // For validation/get-details API, ConnectIPS requires:
+    // MERCHANTID,APPID,REFERENCEID,TXNAMT (exact order).
+    const isValidationShape =
+      body?.REFERENCEID !== undefined &&
+      body?.TXNAMT !== undefined &&
+      body?.TXNID === undefined;
+
+    const keys = isValidationShape ? VALIDATE_SIGNING_KEYS : SIGNING_KEYS;
+    const sanitized = keys.reduce<Record<string, unknown>>((acc, key) => {
       if (body?.[key] !== undefined && body?.[key] !== null) {
         acc[key] = body[key];
       }
