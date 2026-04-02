@@ -90,15 +90,12 @@
 
 
 import { NextResponse } from 'next/server';
+import { generateConnectIPSToken } from "@/lib/connectipsToken";
+import { logConnectIPSDebug } from "@/lib/connectipsDebug";
 
 // import { hostname } from '#/utils/constants';
 
-
-const hostnameEnv = process.env.NEXT_PUBLIC_HOSTNAME;
-const hostname = hostnameEnv ? hostnameEnv : 'http://localhost:3000';
-const USERID = process.env.CONNECTIPS_MERCHAND_USER_ID;
 const PASSWORD = process.env.CONNECTIPS_AUTH_PASSWORD;
-const VALADIATION_URL = process.env.CONNECTIPS_VALIDATION_API_URL;
 const MERCHANTID = process.env.NEXT_PUBLIC_CONNECTIPS_MERCHANTID;
 const APPID = process.env.NEXT_PUBLIC_CONNECTIPS_APPID;
 const DETAILS_URL = process.env.NEXT_PUBLIC_CONNECTIPS_GETDETAILS_URL;
@@ -110,43 +107,56 @@ const credentials = Buffer.from(`${APPID}:${PASSWORD}`).toString("base64");
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    body.MERCHANTID = Number(MERCHANTID);
-    body.APPID = APPID;
-    body.REFERENCEID = String(body.REFERENCEID);
-    body.TXNAMT = Number(body.TXNAMT);
-    // console.log('Request Body:', body);
-
-    const signaturePayload = {
-      MERCHANTID: body.MERCHANTID,
-      APPID: body.APPID,
-      REFERENCEID: body.REFERENCEID,
-      TXNAMT: body.TXNAMT,
-    };
-
-    const tokenResponse = await fetch(`${hostname}/connectips/get_token`, {
-      method: 'POST',
-      body: JSON.stringify(signaturePayload),
-      cache: 'no-cache',
-    });
-
-    if (!tokenResponse.ok) {
-      throw new Error('Token Error');
+    if (!MERCHANTID || !APPID || !PASSWORD || !DETAILS_URL) {
+      return NextResponse.json(
+        { status: "ERROR", statusDesc: "ConnectIPS env is not configured", response: {} },
+        { status: 500 }
+      );
     }
 
-    const { TOKEN } = await tokenResponse.json();
+    const body = await request.json();
+    const referenceId = String(body.REFERENCEID || "").trim();
+    const txnAmt = Number(body.TXNAMT || 0);
+    if (!referenceId || !Number.isFinite(txnAmt) || txnAmt <= 0) {
+      return NextResponse.json(
+        { status: "ERROR", statusDesc: "Invalid REFERENCEID or TXNAMT", response: {} },
+        { status: 400 }
+      );
+    }
+
+    const signaturePayload = {
+      MERCHANTID: Number(MERCHANTID),
+      APPID: APPID,
+      REFERENCEID: referenceId,
+      TXNAMT: txnAmt,
+    };
+
+    const TOKEN = await generateConnectIPSToken(signaturePayload, [
+      "MERCHANTID",
+      "APPID",
+      "REFERENCEID",
+      "TXNAMT",
+    ]);
 
     const payload = {
-        merchantId: Number(MERCHANTID),          
-        appId: APPID,                           
-        referenceId: String(body.REFERENCEID),   
-        txnAmt: Number(body.TXNAMT),            
-        token: TOKEN,
-      };
+      merchantId: Number(MERCHANTID),
+      appId: APPID,
+      referenceId: referenceId,
+      txnAmt: txnAmt,
+      token: TOKEN,
+    };
+    await logConnectIPSDebug({
+      step: "get_details:request",
+      referenceId,
+      data: {
+        detailsUrl: DETAILS_URL,
+        payload,
+      },
+    });
 
 // console.log('Payload:', payload);
 // console.log('Details URL:', DETAILS_URL);
-  const response = await fetch(DETAILS_URL as string, {
+    const response = await fetch(DETAILS_URL as string, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -156,24 +166,34 @@ export async function POST(request: Request) {
       cache: 'no-cache',
     });
 
-  // console.log('Response Status:', response);
-   
-  if (!response.ok) {
-        return NextResponse.json({
+    const data = await response.json().catch(() => ({}));
+    await logConnectIPSDebug({
+      step: "get_details:response",
+      referenceId,
+      data: {
+        statusCode: response.status,
+        ok: response.ok,
+        body: data,
+      },
+    });
+    if (!response.ok) {
+      return NextResponse.json({
         status: 'ERROR',
-        statusDesc: 'RESPONSE Error',
-        response:{}
-      });
+        statusDesc: data?.statusDesc || 'RESPONSE Error',
+        response: data || {}
+      }, { status: response.status });
     }
-  const data = await response.json();
-  // console.log('Validation Response:', data);
 
     return NextResponse.json(data);
   } catch (err) {
-    // console.error(err);
+    console.error("CONNECTIPS_GET_DETAILS_ERROR", err);
+    await logConnectIPSDebug({
+      step: "get_details:error",
+      data: { message: err instanceof Error ? err.message : String(err) },
+    });
     return NextResponse.json({
       status: 'ERROR',
       statusDesc: 'Internal Error',
-    });
+    }, { status: 500 });
   }
 }
