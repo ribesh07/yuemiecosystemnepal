@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 
-import { generateUniqueId } from '@/utils/payments/generateUniqueId';
 import { getDate } from '@/utils/payments/getDate';
 
 const MERCHANTID = process.env.NEXT_PUBLIC_CONNECTIPS_MERCHANTID as string;
@@ -96,14 +95,21 @@ const PayWithConnectIPS = ({
   onBeforeSubmit,
   onError,
 }: PayWithConnectIPSProps) => {
+  const makeTxnId = () => {
+    const timePart = Date.now().toString().slice(-10);
+    const randPart = Math.floor(10 + Math.random() * 90).toString();
+    return `TXN${timePart}${randPart}`; // 15 chars
+  };
+
   return (
     <button
       type="button"
       disabled={disabled}
       className='flex items-center gap-4 px-6 py-3 border border-gray-300 rounded-md hover:border-gray-400 disabled:opacity-60 disabled:cursor-not-allowed'
       onClick={() => {
-        const referenceId = generateUniqueId();
-        const txnId = `Tx${generateUniqueId()}`;
+        const txnId = makeTxnId();
+        // Per ConnectIPS docs, referenceId should be the TXNID passed in gateway request.
+        const referenceId = txnId;
         const transactionDetails: TransactionDetails = {
           MERCHANTID,
           APPID,
