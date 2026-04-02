@@ -5,6 +5,7 @@ import { serializeBigInt } from "@/lib/serializeBigInt";
 import { sendMail } from "@/lib/mailer";
 import { buildOrderPlacedEmail } from "@/lib/orderEmail";
 import { generateInvoicePdf } from "@/lib/invoicePdf";
+import { logConnectIPSDebug } from "@/lib/connectipsDebug";
 
 type OrderInputItem = {
   productId: bigint;
@@ -94,6 +95,17 @@ export async function POST(req: Request) {
     const connectipsReferenceId = body?.connectipsReferenceId
       ? String(body.connectipsReferenceId)
       : null;
+    if (paymentMethod === "connectips") {
+      await logConnectIPSDebug({
+        step: "order:create:connectips:start",
+        referenceId: connectipsReferenceId || undefined,
+        data: {
+          customerId: customerId.toString(),
+          addressId: addressId.toString(),
+          itemCount: Array.isArray(items) ? items.length : 1,
+        },
+      });
+    }
 
     const address = await prisma.customerAddress.findFirst({
       where: { id: addressId, customerId },
@@ -397,6 +409,10 @@ export async function POST(req: Request) {
       data: serializeBigInt(result),
     });
   } catch (error) {
+    await logConnectIPSDebug({
+      step: "order:create:error",
+      data: { message: error instanceof Error ? error.message : String(error) },
+    });
     if (error instanceof Error && error.message.startsWith("INSUFFICIENT_UNITS")) {
       const [, code, available, requested] = error.message.split(":");
       const availableCount = Number(available || 0);
