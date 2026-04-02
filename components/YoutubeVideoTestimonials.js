@@ -43,12 +43,12 @@ const YoutubeVideoTestimonials = () => {
   if (videoTestimonials.length === 0) return null;
 
   return (
-    <section className="py-16 px-4" style={{ backgroundColor: "#F5EFE0" }}>
+    <section className="py-10 md:py-16 px-3 sm:px-4" style={{ backgroundColor: "#F5EFE0" }}>
       <div className="max-w-7xl mx-auto">
-        <h3 className="text-2xl font-bold text-center mb-8 text-gray-900">
+        <h3 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 text-gray-900">
           Video Testimonials
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {videoTestimonials.map((item) => {
             const embedUrl = toEmbedUrl(item.youtubeLink);
             if (!embedUrl) return null;

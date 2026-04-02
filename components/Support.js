@@ -31,13 +31,13 @@ const Support = () => {
   ];
 
   return (
-    <section className="py-16 px-4 bg-white ">
+    <section className="py-10 md:py-16 px-3 sm:px-4 bg-white">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-16 text-gray-900">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 md:mb-16 text-gray-900">
           Support
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-10 md:mb-16">
           {supportFeatures.map((feature) => (
             <div
               key={feature.id}
@@ -52,10 +52,10 @@ const Support = () => {
                   className="object-contain"
                 />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-base md:text-xl font-semibold text-gray-900 mb-2">
                 {feature.title}
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs md:text-sm text-gray-600">
                 {feature.description}
               </p>
             </div>

@@ -84,9 +84,9 @@ const Testimonials = () => {
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="py-16 px-4" style={{ backgroundColor: '#F3F4F6' }}>
+    <section className="py-10 md:py-16 px-3 sm:px-4" style={{ backgroundColor: '#F3F4F6' }}>
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-12 text-gray-900">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12 text-gray-900">
           Testimonials
         </h2>
 
@@ -221,7 +221,7 @@ const Testimonials = () => {
           {/* Navigation Arrows */}
           <button
             onClick={goToPrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
+            className="absolute left-1 sm:left-0 top-1/2 -translate-y-1/2 sm:-translate-x-4 w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
             aria-label="Previous testimonial"
           >
             <svg
@@ -240,7 +240,7 @@ const Testimonials = () => {
           </button>
           <button
             onClick={goToNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
+            className="absolute right-1 sm:right-0 top-1/2 -translate-y-1/2 sm:translate-x-4 w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
             aria-label="Next testimonial"
           >
             <svg

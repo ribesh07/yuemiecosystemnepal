@@ -112,11 +112,11 @@ const Bestseller = () => {
   const hasProducts = useMemo(() => products.length > 0, [products]);
 
   return (
-    <section className="py-12 px-4 max-w-7xl mx-auto">
-      <h2 className="text-4xl font-bold text-center mb-12">Special Products</h2>
+    <section className="py-10 md:py-12 px-3 sm:px-4 max-w-7xl mx-auto">
+      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12">Special Products</h2>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[1, 2, 3, 4].map((idx) => (
             <div key={idx} className="bg-white rounded-lg border p-4 animate-pulse h-[360px]" />
           ))}
@@ -124,7 +124,7 @@ const Bestseller = () => {
       ) : !hasProducts ? (
         <div className="text-center text-gray-500">No special products found.</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {products.map((product) => (
             <div
               key={product.id}

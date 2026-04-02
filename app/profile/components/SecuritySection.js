@@ -86,21 +86,26 @@ export default function SecuritySection() {
     }
   };
 
-  return (
-    <div className="bg-white rounded-xl shadow p-6">
-      <h3 className="text-lg font-semibold mb-4">Security</h3>
+  const closeModal = () => {
+    if (saving) return;
+    setChangePassword(false);
+  };
 
-      <div className="flex gap-4">
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Security</h3>
+
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <button
           onClick={() => setChangePassword(true)}
-          className="bg-black text-white px-4 py-2 rounded text-sm"
+          className="w-full sm:w-auto bg-gray-900 hover:bg-black text-white px-4 py-2.5 rounded-lg text-sm font-medium transition"
         >
           Change Password
         </button>
 
         <button
           onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded text-sm"
+          className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition"
         >
           Logout
         </button>
@@ -109,7 +114,7 @@ export default function SecuritySection() {
       <Modal
         title="Change Password"
         isOpen={changePassword}
-        onClose={() => setChangePassword(false)}
+        onClose={closeModal}
       >
         <form className="space-y-4" onSubmit={handlePasswordSubmit}>
           <input

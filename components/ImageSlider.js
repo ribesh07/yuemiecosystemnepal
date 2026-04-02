@@ -62,9 +62,9 @@ const ImageSlider = () => {
   }, [currentSlide, images.length]);
 
   return (
-    <div className=" mx-auto px-1  overflow-y-auto mt-2 mb-5">
+    <div className="mx-auto px-1 mt-0.5 mb-2 md:mt-2 md:mb-6">
       {/* Main slider container */}
-      <div className=" relative h-120 overflow-hidden">
+      <div className="relative overflow-hidden rounded-lg md:rounded-xl aspect-[16/7] sm:aspect-[16/7] lg:aspect-[21/8] bg-white">
         {/* Images */}
         <div 
           className="flex transition-transform duration-500 ease-in-out h-full"
@@ -75,7 +75,7 @@ const ImageSlider = () => {
               <img
                 src={image}
                 alt={`Slide ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
           ))}
@@ -86,28 +86,28 @@ const ImageSlider = () => {
           <>
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-md transition-all duration-200"
+              className="hidden md:block absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 md:p-2 shadow-md transition-all duration-200"
             >
-              <ChevronLeft className="w-6 h-6 text-gray-800" />
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
             </button>
 
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-md transition-all duration-200"
+              className="hidden md:block absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 md:p-2 shadow-md transition-all duration-200"
             >
-              <ChevronRight className="w-6 h-6 text-gray-800" />
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
             </button>
           </>
         )}
 
         {/* Slide indicators */}
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          <div className="absolute bottom-1.5 md:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
             {images.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full transition-all duration-200 ${
                   index === currentSlide 
                     ? 'bg-white' 
                     : 'bg-white bg-opacity-50 hover:bg-opacity-75'

@@ -128,25 +128,25 @@ export default function FeaturedCollections() {
   }
 
   return (
-    <div className="bg-gradient-to-b from-gray-50 to-white py-16 px-4">
+    <div className="bg-gradient-to-b from-gray-50 to-white py-10 md:py-16 px-3 sm:px-4">
       <div className="max-w-7xl mx-auto">
         {/* Title */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-3 md:mb-4">
             Featured Collections
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
             Discover our handpicked selection of premium products
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex justify-center gap-4 mb-12 flex-wrap">
+        <div className="flex justify-center gap-2 sm:gap-3 md:gap-4 mb-8 md:mb-12 flex-wrap">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setActiveTab(category.id)}
-              className={`px-8 py-3 rounded-full font-semibold text-base transition-all duration-300 ${
+              className={`px-4 sm:px-6 md:px-8 py-2.5 md:py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 ${
                 activeTab === category.id
                   ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg scale-105'
                   : 'bg-white text-gray-800 border-2 border-gray-200 hover:border-orange-300 hover:shadow-md'
@@ -205,7 +205,7 @@ export default function FeaturedCollections() {
                 >
                   {/* Image Container */}
                   <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                    <div className="relative h-72">
+                    <div className="relative h-56 sm:h-64 md:h-72">
                       <Image
                         src={resolveImageUrl(product.mainImage)}
                         alt={product.name}

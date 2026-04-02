@@ -133,13 +133,13 @@ export default function WarrantyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col lg:flex-row">
       {/* Warranty Check Result Modal */}
       {showWarrantyResult && warrantyResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 transform transition-all max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-4 sm:p-6 md:p-8 transform transition-all max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Warranty Status</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Warranty Status</h2>
               <button
                 onClick={() => {
                   setShowWarrantyResult(false);
@@ -161,57 +161,57 @@ export default function WarrantyPage() {
                   </svg>
                 </div>
                 
-                <h3 className="text-3xl font-bold text-gray-800 mb-2">Congratulations!</h3>
-                <p className="text-gray-600 mb-8 text-lg">Your warranty is active and valid</p>
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Congratulations!</h3>
+                <p className="text-gray-600 mb-6 sm:mb-8 text-base sm:text-lg">Your warranty is active and valid</p>
                 
                 <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 text-left space-y-4 mb-6 shadow-inner">
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Product</span>
-                    <span className="font-semibold text-gray-800">{warrantyResult.productName}</span>
+                    <span className="font-semibold text-gray-800 text-right break-words">{warrantyResult.productName}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Serial Number</span>
-                    <span className="font-mono font-semibold text-gray-800">{warrantyResult.serialNumber}</span>
+                    <span className="font-mono font-semibold text-gray-800 text-right break-all">{warrantyResult.serialNumber}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Product Code</span>
-                    <span className="font-semibold text-gray-800">{warrantyResult.productCode}</span>
+                    <span className="font-semibold text-gray-800 text-right break-all">{warrantyResult.productCode}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Category</span>
-                    <span className="font-semibold text-gray-800">{warrantyResult.categoryName}</span>
+                    <span className="font-semibold text-gray-800 text-right break-words">{warrantyResult.categoryName}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Customer Name</span>
-                    <span className="font-semibold text-gray-800">{warrantyResult.customerName}</span>
+                    <span className="font-semibold text-gray-800 text-right break-words">{warrantyResult.customerName}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Contact Number</span>
-                    <span className="font-semibold text-gray-800">{warrantyResult.customerPhone}</span>
+                    <span className="font-semibold text-gray-800 text-right break-words">{warrantyResult.customerPhone}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Email</span>
-                    <span className="font-semibold text-gray-800">{warrantyResult.customerEmail}</span>
+                    <span className="font-semibold text-gray-800 text-right break-all">{warrantyResult.customerEmail}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Address</span>
-                    <span className="font-semibold text-gray-800 text-right max-w-[60%]">{warrantyResult.customerAddress}</span>
+                    <span className="font-semibold text-gray-800 text-right break-words max-w-[60%]">{warrantyResult.customerAddress}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Purchase Date</span>
-                    <span className="font-semibold text-gray-800">{warrantyResult.purchaseDate}</span>
+                    <span className="font-semibold text-gray-800 text-right">{warrantyResult.purchaseDate}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Purchase Source</span>
-                    <span className="font-semibold text-gray-800 capitalize">{warrantyResult.purchaseSource}</span>
+                    <span className="font-semibold text-gray-800 capitalize text-right">{warrantyResult.purchaseSource}</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                  <div className="flex justify-between items-start gap-3 pb-3 border-b border-gray-200">
                     <span className="text-gray-600 font-medium">Warranty Period</span>
-                    <span className="font-semibold text-gray-800">{warrantyResult.warrantyPeriod}</span>
+                    <span className="font-semibold text-gray-800 text-right">{warrantyResult.warrantyPeriod}</span>
                   </div>
-                  <div className="flex justify-between items-center pt-2">
-                    <span className="text-gray-700 font-bold text-lg">Expires On</span>
-                    <span className="font-bold text-orange-600 text-2xl">{warrantyResult.expiryDate}</span>
+                  <div className="flex justify-between items-start gap-3 pt-2">
+                    <span className="text-gray-700 font-bold text-base sm:text-lg">Expires On</span>
+                    <span className="font-bold text-orange-600 text-xl sm:text-2xl text-right">{warrantyResult.expiryDate}</span>
                   </div>
                 </div>
                 
@@ -241,8 +241,8 @@ export default function WarrantyPage() {
                   </svg>
                 </div>
                 
-                <h3 className="text-3xl font-bold text-gray-800 mb-2">Warranty Not Found</h3>
-                <p className="text-gray-600 mb-8 text-lg">
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Warranty Not Found</h3>
+                <p className="text-gray-600 mb-6 sm:mb-8 text-base sm:text-lg">
                   The serial number could not be found in our system
                 </p>
                 
@@ -289,7 +289,7 @@ export default function WarrantyPage() {
       )}
 
       {/* Sidebar */}
-      <div className="w-80 bg-white shadow-xl border-r border-gray-200 flex flex-col">
+      <div className="w-full lg:w-80 bg-white shadow-xl border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -396,20 +396,20 @@ export default function WarrantyPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 overflow-y-auto">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
         <div className="max-w-2xl mx-auto">
           {/* Register Warranty Content */}
           {activeTab === 'register' && (
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <div className="flex items-center gap-4 mb-6">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8">
+              <div className="flex items-center gap-3 sm:gap-4 mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
                   <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-800">Register Warranty</h1>
-                  <p className="text-gray-500">Protect your product with warranty registration</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Register Warranty</h1>
+                  <p className="text-sm sm:text-base text-gray-500">Protect your product with warranty registration</p>
                 </div>
               </div>
 
@@ -425,7 +425,7 @@ export default function WarrantyPage() {
                     value={registerSerial}
                     onChange={(e) => setRegisterSerial(e.target.value)}
                     placeholder="Enter your product's serial number"
-                    className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-lg"
+                    className="w-full px-4 sm:px-5 py-3 sm:py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-base sm:text-lg"
                     required
                   />
                   <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
@@ -439,7 +439,7 @@ export default function WarrantyPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting || !registerSerial.trim()}
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-bold text-lg disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 sm:py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-bold text-base sm:text-lg disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
                 >
                   {isSubmitting ? (
                     <>
@@ -489,16 +489,16 @@ export default function WarrantyPage() {
 
           {/* Check Warranty Content */}
           {activeTab === 'check' && (
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <div className="flex items-center gap-4 mb-6">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8">
+              <div className="flex items-center gap-3 sm:gap-4 mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
                   <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-800">Check Warranty Status</h1>
-                  <p className="text-gray-500">Verify your product's warranty information</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Check Warranty Status</h1>
+                  <p className="text-sm sm:text-base text-gray-500">Verify your product's warranty information</p>
                 </div>
               </div>
 
@@ -515,7 +515,7 @@ export default function WarrantyPage() {
                       value={checkSerial}
                       onChange={(e) => setCheckSerial(e.target.value)}
                       placeholder="Enter serial number"
-                      className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-lg"
+                      className="w-full px-4 sm:px-5 py-3 sm:py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-base sm:text-lg"
                     />
                     <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
                       <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -529,7 +529,7 @@ export default function WarrantyPage() {
                 <button
                   type="submit"
                   disabled={isChecking || !checkSerial.trim()}
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-bold text-lg disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 sm:py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-bold text-base sm:text-lg disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
                 >
                   {isChecking ? (
                     <>

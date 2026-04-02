@@ -154,17 +154,17 @@ function WarrantyRegisterContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-6">
-            <h1 className="text-3xl font-bold text-white">Warranty Registration</h1>
-            <p className="text-orange-100 mt-2">
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-4 sm:px-8 py-5 sm:py-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Warranty Registration</h1>
+            <p className="text-sm sm:text-base text-orange-100 mt-2">
               Verify serial and register store purchase warranty
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-7">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-8 space-y-6 sm:space-y-7">
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -188,7 +188,7 @@ function WarrantyRegisterContent() {
               </button>
             </div>
 
-            <div className="rounded-xl border border-gray-200 p-5 bg-gray-50">
+            <div className="rounded-xl border border-gray-200 p-4 sm:p-5 bg-gray-50">
               <h2 className="text-lg font-semibold text-gray-800 mb-4">Product Details</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -223,7 +223,7 @@ function WarrantyRegisterContent() {
               />
             </div>
 
-            <div className="rounded-xl border border-gray-200 p-5 bg-white">
+            <div className="rounded-xl border border-gray-200 p-4 sm:p-5 bg-white">
               <h2 className="text-lg font-semibold text-gray-800 mb-4">Customer Details</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -288,11 +288,11 @@ function WarrantyRegisterContent() {
               </div>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
                 onClick={() => router.push("/warranty")}
-                className="px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="w-full sm:w-auto px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 Back
               </button>
@@ -309,7 +309,7 @@ function WarrantyRegisterContent() {
                   isAlreadyRegistered ||
                   details?.status === "serial_not_found"
                 }
-                className="px-8 py-3 rounded-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-700 hover:to-orange-800 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-8 py-3 rounded-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-700 hover:to-orange-800 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? "Registering..." : "Register Warranty"}
               </button>

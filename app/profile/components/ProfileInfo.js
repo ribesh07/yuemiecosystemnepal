@@ -11,7 +11,7 @@ function Modal({ title, isOpen, onClose, children }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-xl w-full max-w-lg p-6 relative">
+      <div className="bg-white rounded-xl w-full max-w-lg p-4 sm:p-6 relative mx-3">
         <h3 className="text-lg font-semibold mb-4">{title}</h3>
 
         <button
@@ -178,23 +178,23 @@ export default function ProfileInfo() {
   if (!user) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow p-6 text-center">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 text-center lg:sticky lg:top-24 h-fit">
       <Image
         src={avatarSrc}
         alt="Avatar"
         width={120}
         height={120}
-        className="mx-auto rounded-full object-cover"
+        className="mx-auto rounded-full object-cover ring-4 ring-orange-100"
         unoptimized={avatarSrc.startsWith("data:")}
       />
 
-      <h2 className="mt-4 text-xl font-semibold">{user.fullName}</h2>
-      <p className="text-gray-500 text-sm">{user.email}</p>
+      <h2 className="mt-4 text-xl font-bold text-gray-900">{user.fullName}</h2>
+      <p className="text-gray-500 text-sm break-all">{user.email}</p>
       <p className="text-gray-500 text-sm">{user.phone || "-"}</p>
 
       <button
         onClick={openEditModal}
-        className="mt-3 text-sm text-blue-600 hover:underline"
+        className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-2.5 rounded-lg transition"
       >
         Edit Profile
       </button>
