@@ -175,6 +175,9 @@ const handleDelete = (id) => {
                 Stock
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Warranty Type
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Status
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -255,6 +258,19 @@ const handleDelete = (id) => {
                   <span className="text-sm font-medium text-gray-900">
                     {product.availableQuantity || 0}
                   </span>
+                </td>
+
+                {/* Warranty Type */}
+                <td className="px-6 py-4">
+                  {product.requiresSerial ? (
+                    <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700">
+                      Serial Required
+                    </span>
+                  ) : (
+                    <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700">
+                      Non-Serial
+                    </span>
+                  )}
                 </td>
 
                 {/* Status */}

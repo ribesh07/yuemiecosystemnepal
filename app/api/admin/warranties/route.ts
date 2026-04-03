@@ -13,14 +13,31 @@ export async function GET(req: Request) {
     const status = searchParams.get("status")?.trim().toLowerCase();
 
     const orderId = orderIdRaw ? BigInt(orderIdRaw) : null;
+    const hasWarrantyProductCode = (
+      (await prisma.$queryRawUnsafe(
+        `
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_schema = DATABASE()
+            AND table_name = 'warranties'
+            AND column_name = 'product_code'
+          LIMIT 1
+        `
+      )) as any[]
+    ).length > 0;
+    const productCodeExpr = hasWarrantyProductCode
+      ? "COALESCE(w.product_code, pu.product_code, oi.productCode)"
+      : "COALESCE(pu.product_code, oi.productCode)";
 
     let sql = `
       SELECT w.id, w.purchase_date as purchaseDate, w.expiry_date as expiryDate, w.purchase_source as purchaseSource,
              pu.serial_number as serialNumber,
              p.product_name as productName, p.product_code as productCode, p.warranty_days as warrantyDays,
              o.order_id as orderNumber,
-             u.id as customerId,
-             u.full_name as customerName, u.email as customerEmail, u.phone as customerPhone,
+             COALESCE(u.id, ou.id) as customerId,
+             COALESCE(u.full_name, ou.full_name) as customerName,
+             COALESCE(u.email, ou.email) as customerEmail,
+             COALESCE(u.phone, ou.phone) as customerPhone,
              CONCAT_WS(', ',
                NULLIF(cab.address, ''),
                NULLIF(cab.landmark, ''),
@@ -29,14 +46,21 @@ export async function GET(req: Request) {
                NULLIF(pr.province_name, '')
              ) as customerAddress
       FROM warranties w
-      JOIN product_units pu ON pu.id = w.product_unit_id
-      LEFT JOIN products p ON p.product_code = pu.product_code
+      LEFT JOIN product_units pu ON pu.id = w.product_unit_id
       LEFT JOIN orders o ON o.id = w.order_id
+      LEFT JOIN users ou ON ou.id = o.customerId
+      LEFT JOIN (
+        SELECT oi.orderId, MIN(oi.id) as firstItemId
+        FROM order_items oi
+        GROUP BY oi.orderId
+      ) oi_map ON oi_map.orderId = w.order_id
+      LEFT JOIN order_items oi ON oi.id = oi_map.firstItemId
+      LEFT JOIN products p ON p.product_code = ${productCodeExpr}
       LEFT JOIN users u ON u.id = w.customer_id
       LEFT JOIN customer_address_book cab ON cab.id = (
         SELECT cab2.id
         FROM customer_address_book cab2
-        WHERE cab2.customer_id = u.id
+        WHERE cab2.customer_id = COALESCE(u.id, ou.id)
         ORDER BY cab2.defaultShipping DESC, cab2.id DESC
         LIMIT 1
       )
@@ -51,7 +75,7 @@ export async function GET(req: Request) {
       args.push(orderId.toString());
     }
     if (email) {
-      sql += " AND LOWER(u.email) = ?";
+      sql += " AND LOWER(COALESCE(u.email, ou.email)) = ?";
       args.push(email);
     }
     if (serialNumber) {

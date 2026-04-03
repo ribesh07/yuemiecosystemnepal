@@ -140,14 +140,30 @@ export async function POST(req: Request) {
       );
     }
 
+    const hasWarrantyProductCode = (
+      (await prisma.$queryRawUnsafe(
+        `
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_schema = DATABASE()
+            AND table_name = 'warranties'
+            AND column_name = 'product_code'
+          LIMIT 1
+        `
+      )) as any[]
+    ).length > 0;
+    const productCodeExpr = hasWarrantyProductCode
+      ? "COALESCE(w.product_code, pu.product_code)"
+      : "pu.product_code";
+
     const rows = (await prisma.$queryRawUnsafe(
       `
         SELECT w.purchase_date as purchaseDate, w.expiry_date as expiryDate, w.purchase_source as purchaseSource,
                pu.serial_number as serialNumber,
                p.product_name as productName, p.product_code as productCode, p.warranty_days as warrantyDays
         FROM warranties w
-        JOIN product_units pu ON pu.id = w.product_unit_id
-        LEFT JOIN products p ON p.product_code = pu.product_code
+        LEFT JOIN product_units pu ON pu.id = w.product_unit_id
+        LEFT JOIN products p ON p.product_code = ${productCodeExpr}
         WHERE w.order_id = ?
         ORDER BY w.id ASC
       `,

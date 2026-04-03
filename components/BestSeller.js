@@ -22,6 +22,7 @@ const getAvgRating = (reviews = []) => {
 const Bestseller = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [desktopStartIndex, setDesktopStartIndex] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -45,7 +46,7 @@ const Bestseller = () => {
               new Date(b?.createdAt || 0).getTime() -
               new Date(a?.createdAt || 0).getTime()
           )
-          .slice(0, 4)
+          .slice(0, 10)
           .map((p) => ({
             id: p.id,
             badge: p.brandName || "YueMi Ecosystem",
@@ -110,13 +111,32 @@ const Bestseller = () => {
   };
 
   const hasProducts = useMemo(() => products.length > 0, [products]);
+  const desktopVisibleCount = 4;
+  const desktopVisibleProducts = useMemo(() => {
+    if (!products.length) return [];
+    if (products.length <= desktopVisibleCount) return products;
+    return Array.from({ length: desktopVisibleCount }, (_, idx) => {
+      const i = (desktopStartIndex + idx) % products.length;
+      return products[i];
+    });
+  }, [products, desktopStartIndex]);
+
+  const goDesktopPrev = () => {
+    if (products.length <= desktopVisibleCount) return;
+    setDesktopStartIndex((prev) => (prev - 1 + products.length) % products.length);
+  };
+
+  const goDesktopNext = () => {
+    if (products.length <= desktopVisibleCount) return;
+    setDesktopStartIndex((prev) => (prev + 1) % products.length);
+  };
 
   return (
     <section className="py-10 md:py-12 px-3 sm:px-4 max-w-7xl mx-auto">
       <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12">Special Products</h2>
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[1, 2, 3, 4].map((idx) => (
             <div key={idx} className="bg-white rounded-lg border p-4 animate-pulse h-[360px]" />
           ))}
@@ -124,8 +144,56 @@ const Bestseller = () => {
       ) : !hasProducts ? (
         <div className="text-center text-gray-500">No special products found.</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {products.map((product) => (
+        <>
+          <div className="hidden lg:flex justify-end gap-2 mb-4">
+            <button
+              type="button"
+              onClick={goDesktopPrev}
+              disabled={products.length <= desktopVisibleCount}
+              className="h-10 w-10 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Previous special products"
+            >
+              <span aria-hidden>‹</span>
+            </button>
+            <button
+              type="button"
+              onClick={goDesktopNext}
+              disabled={products.length <= desktopVisibleCount}
+              className="h-10 w-10 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Next special products"
+            >
+              <span aria-hidden>›</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:hidden">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group"
+              >
+                <div className="relative bg-gray-100 p-2 sm:p-3">
+                  <div className="aspect-square relative">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+                <div className="p-3">
+                  <h3 className="text-xs sm:text-sm font-medium text-gray-800 mb-2 line-clamp-2 min-h-[34px]">
+                    {product.name}
+                  </h3>
+                  <p className="text-sm sm:text-base font-bold text-gray-900">{product.mrp}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden lg:grid lg:grid-cols-4 gap-4 md:gap-6">
+          {desktopVisibleProducts.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group"
@@ -177,7 +245,8 @@ const Bestseller = () => {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        </>
       )}
 
       <div className="flex justify-center mt-10">

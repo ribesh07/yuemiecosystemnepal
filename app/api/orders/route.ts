@@ -22,6 +22,26 @@ type ProductForOrder = {
 
 const toNumber = (value: unknown) => Number(value ?? 0);
 
+async function hasColumn(tableName: string, columnName: string) {
+  try {
+    const rows = (await prisma.$queryRawUnsafe(
+      `
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE()
+          AND table_name = ?
+          AND column_name = ?
+        LIMIT 1
+      `,
+      tableName,
+      columnName
+    )) as any[];
+    return rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET() {
   try {
     const user = await requireAuth();
@@ -184,6 +204,8 @@ export async function POST(req: Request) {
     const result = await prisma.$transaction(
       async (tx: any) => {
         const txAny = tx as any;
+        const hasWarrantyProductCodeColumn = await hasColumn("warranties", "product_code");
+        const hasRequiresSerialColumn = await hasColumn("products", "requires_serial");
         const order = await tx.order.create({
           data: {
             orderNumber,
@@ -204,6 +226,23 @@ export async function POST(req: Request) {
         for (const item of normalizedItems) {
           const product = productMap.get(item.productId.toString())!;
           const unitPrice = toNumber(product.sellPrice);
+          const hasSerialUnits = (
+            (await tx.$queryRawUnsafe(
+              "SELECT id FROM product_units WHERE product_code = ? LIMIT 1",
+              product.productCode
+            )) as any[]
+          ).length > 0;
+          const requiresSerialRows = hasRequiresSerialColumn
+            ? ((await tx.$queryRawUnsafe(
+                "SELECT requires_serial as requiresSerial FROM products WHERE product_code = ? LIMIT 1",
+                product.productCode
+              )) as any[])
+            : [];
+          const requiresSerial =
+            requiresSerialRows?.[0]?.requiresSerial !== undefined &&
+            requiresSerialRows?.[0]?.requiresSerial !== null
+              ? Boolean(Number(requiresSerialRows[0].requiresSerial))
+              : hasSerialUnits;
 
           const availableUnits = txAny.productUnit?.findMany
             ? await txAny.productUnit.findMany({
@@ -226,10 +265,63 @@ export async function POST(req: Request) {
                 item.quantity
               );
 
-          if (availableUnits.length < item.quantity) {
+          // Serial-managed product must have enough serial units.
+          if (requiresSerial && availableUnits.length < item.quantity) {
             throw new Error(
               `INSUFFICIENT_UNITS:${product.productCode}:${availableUnits.length}:${item.quantity}`
             );
+          }
+
+          const wdRows = (await tx.$queryRawUnsafe(
+            "SELECT warranty_days as warrantyDays FROM products WHERE product_code = ? LIMIT 1",
+            product.productCode
+          )) as any[];
+          const days = Number(wdRows?.[0]?.warrantyDays || 365);
+          const purchaseDate = new Date();
+          const expiryDate = new Date(purchaseDate);
+          expiryDate.setDate(expiryDate.getDate() + days);
+
+          // Non-serial product flow.
+          if (!requiresSerial) {
+            await tx.orderItem.create({
+              data: {
+                orderId: order.id,
+                productCode: product.productCode,
+                quantity: BigInt(item.quantity),
+                price: String(unitPrice),
+                subtotal: String(unitPrice * item.quantity),
+              },
+            });
+
+            for (let i = 0; i < item.quantity; i += 1) {
+              if (hasWarrantyProductCodeColumn) {
+                await tx.$executeRawUnsafe(
+                  `
+                    INSERT INTO warranties
+                    (product_unit_id, product_code, order_id, customer_id, purchase_date, expiry_date, purchase_source)
+                    VALUES (NULL, ?, ?, ?, ?, ?, 'online')
+                  `,
+                  product.productCode,
+                  order.id.toString(),
+                  customerId.toString(),
+                  purchaseDate,
+                  expiryDate
+                );
+              } else {
+                await tx.$executeRawUnsafe(
+                  `
+                    INSERT INTO warranties
+                    (product_unit_id, order_id, customer_id, purchase_date, expiry_date, purchase_source)
+                    VALUES (NULL, ?, ?, ?, ?, 'online')
+                  `,
+                  order.id.toString(),
+                  customerId.toString(),
+                  purchaseDate,
+                  expiryDate
+                );
+              }
+            }
+            continue;
           }
 
           for (const unit of availableUnits) {
@@ -245,8 +337,6 @@ export async function POST(req: Request) {
                 } as any,
               });
             } catch (itemError) {
-              // Prisma client can lag behind DB schema after manual SQL.
-              // Fallback insert keeps product_unit_id persisted for warranty flow.
               await tx.$executeRawUnsafe(
                 `
                   INSERT INTO order_items
@@ -270,42 +360,50 @@ export async function POST(req: Request) {
             )?.[0];
 
             if (!existingWarranty) {
-              const wdRows = (await tx.$queryRawUnsafe(
-                "SELECT warranty_days as warrantyDays FROM products WHERE product_code = ? LIMIT 1",
-                product.productCode
-              )) as any[];
-              const days = Number(wdRows?.[0]?.warrantyDays || 365);
-              const purchaseDate = new Date();
-              const expiryDate = new Date(purchaseDate);
-              expiryDate.setDate(expiryDate.getDate() + days);
-
-              await tx.$executeRawUnsafe(
-                `
-                  INSERT INTO warranties
-                  (product_unit_id, order_id, customer_id, purchase_date, expiry_date, purchase_source)
-                  VALUES (?, ?, ?, ?, ?, 'online')
-                `,
-                unit.id.toString(),
-                order.id.toString(),
-                customerId.toString(),
-                purchaseDate,
-                expiryDate
-              );
+              if (hasWarrantyProductCodeColumn) {
+                await tx.$executeRawUnsafe(
+                  `
+                    INSERT INTO warranties
+                    (product_unit_id, product_code, order_id, customer_id, purchase_date, expiry_date, purchase_source)
+                    VALUES (?, ?, ?, ?, ?, ?, 'online')
+                  `,
+                  unit.id.toString(),
+                  product.productCode,
+                  order.id.toString(),
+                  customerId.toString(),
+                  purchaseDate,
+                  expiryDate
+                );
+              } else {
+                await tx.$executeRawUnsafe(
+                  `
+                    INSERT INTO warranties
+                    (product_unit_id, order_id, customer_id, purchase_date, expiry_date, purchase_source)
+                    VALUES (?, ?, ?, ?, ?, 'online')
+                  `,
+                  unit.id.toString(),
+                  order.id.toString(),
+                  customerId.toString(),
+                  purchaseDate,
+                  expiryDate
+                );
+              }
             }
-
           }
 
-          if (txAny.productUnit?.updateMany) {
-            await txAny.productUnit.updateMany({
-              where: { id: { in: availableUnits.map((u: any) => u.id) } },
-              data: { status: "sold" },
-            });
-          } else {
-            for (const u of availableUnits) {
-              await tx.$executeRawUnsafe(
-                "UPDATE product_units SET status = 'sold' WHERE id = ?",
-                u.id.toString()
-              );
+          if (availableUnits.length > 0) {
+            if (txAny.productUnit?.updateMany) {
+              await txAny.productUnit.updateMany({
+                where: { id: { in: availableUnits.map((u: any) => u.id) } },
+                data: { status: "sold" },
+              });
+            } else {
+              for (const u of availableUnits) {
+                await tx.$executeRawUnsafe(
+                  "UPDATE product_units SET status = 'sold' WHERE id = ?",
+                  u.id.toString()
+                );
+              }
             }
           }
         }

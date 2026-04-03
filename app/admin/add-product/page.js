@@ -28,6 +28,7 @@ export default function ProductUploadPage() {
     flashSaleProduct: false,
     todayDeals: false,
     specialProduct: false,
+    requiresSerial: true,
     actualPrice: "",
     sellingPrice: "",
     availableQuantity: "",
@@ -116,6 +117,7 @@ export default function ProductUploadPage() {
       flashSaleProduct: false,
       todayDeals: false,
       specialProduct: false,
+      requiresSerial: true,
       actualPrice: "",
       sellingPrice: "",
       availableQuantity: "",
@@ -325,6 +327,16 @@ export default function ProductUploadPage() {
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span>Special Product</span>
+                </label>
+                <label className="flex text-gray-900 items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="requiresSerial"
+                    checked={formData.requiresSerial}
+                    onChange={handleInputChange}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span>Serial Required For Warranty</span>
                 </label>
               </div>
             </div>
