@@ -10,6 +10,26 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
+async function hasColumn(tableName: string, columnName: string) {
+  try {
+    const rows = (await prisma.$queryRawUnsafe(
+      `
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE()
+          AND table_name = ?
+          AND column_name = ?
+        LIMIT 1
+      `,
+      tableName,
+      columnName
+    )) as any[];
+    return rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -37,6 +57,7 @@ export async function POST(req: Request) {
     const flashSaleProduct = formData.get("flashSaleProduct")?.toString();
     const todayDeals = formData.get("todayDeals")?.toString();
     const specialProduct = formData.get("specialProduct")?.toString();
+    const requiresSerialRaw = formData.get("requiresSerial")?.toString();
 
     if (!name || !productCode || !actualPrice || !sellPrice || !status) {
       return NextResponse.json(
@@ -162,6 +183,17 @@ const product = await prisma.$transaction(async (tx: Prisma.TransactionClient) =
     );
   }
 
+  if (requiresSerialRaw !== undefined && requiresSerialRaw !== null) {
+    const hasRequiresSerial = await hasColumn("products", "requires_serial");
+    if (hasRequiresSerial) {
+      await prisma.$executeRawUnsafe(
+        "UPDATE products SET requires_serial = ? WHERE id = ?",
+        requiresSerialRaw === "true" ? 1 : 0,
+        product.id.toString()
+      );
+    }
+  }
+
   return NextResponse.json({
       success: true,
       message: "Product created successfully",
@@ -188,8 +220,36 @@ export async function GET() {
     },
   });
 
+  const hasRequiresSerial = await hasColumn("products", "requires_serial");
+  let requiresMap = new Map<string, boolean>();
+  if (hasRequiresSerial && products.length) {
+    const ids = products.map((p) => p.id.toString());
+    const placeholders = ids.map(() => "?").join(",");
+    const rows = (await prisma.$queryRawUnsafe(
+      `
+        SELECT id, requires_serial as requiresSerial
+        FROM products
+        WHERE id IN (${placeholders})
+      `,
+      ...ids
+    )) as any[];
+    requiresMap = new Map(
+      (rows || []).map((row: any) => [
+        String(row.id),
+        Boolean(Number(row.requiresSerial)),
+      ])
+    );
+  }
+
+  const normalized = products.map((product: any) => ({
+    ...product,
+    requiresSerial: hasRequiresSerial
+      ? (requiresMap.get(String(product.id)) ?? true)
+      : true,
+  }));
+
   return NextResponse.json({
     success: true,
-    products: serializeBigInt(products),
+    products: serializeBigInt(normalized),
   });
 }

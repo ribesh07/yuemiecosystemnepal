@@ -11,6 +11,26 @@ import path from "path";
 import crypto from "crypto";
 import { getProductImageDir, urlToFilePath } from "@/utils/imageUpload";
 
+async function hasColumn(tableName: string, columnName: string) {
+  try {
+    const rows = (await prisma.$queryRawUnsafe(
+      `
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE()
+          AND table_name = ?
+          AND column_name = ?
+        LIMIT 1
+      `,
+      tableName,
+      columnName
+    )) as any[];
+    return rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -46,17 +66,30 @@ export async function GET(
       "SELECT warranty_days as warrantyDays FROM products WHERE id = ? LIMIT 1",
       id
     )) as any[];
+    const hasRequiresSerial = await hasColumn("products", "requires_serial");
+    const requiresRows = hasRequiresSerial
+      ? ((await prisma.$queryRawUnsafe(
+          "SELECT requires_serial as requiresSerial FROM products WHERE id = ? LIMIT 1",
+          id
+        )) as any[])
+      : [];
     const warrantyDaysValue =
       warrantyRows?.[0]?.warrantyDays !== undefined &&
       warrantyRows?.[0]?.warrantyDays !== null
         ? Number(warrantyRows[0].warrantyDays)
         : null;
+    const requiresSerialValue =
+      requiresRows?.[0]?.requiresSerial !== undefined &&
+      requiresRows?.[0]?.requiresSerial !== null
+        ? Boolean(Number(requiresRows[0].requiresSerial))
+        : true;
 
     return NextResponse.json({
       success: true,
       data: serializeBigInt({
         ...product,
         warrantyDays: warrantyDaysValue,
+        requiresSerial: requiresSerialValue,
       }),
     });
   } catch (error) {
@@ -115,6 +148,7 @@ export async function PUT(
     const flashSaleProduct = formData.get("flashSaleProduct") as string | null;
     const todayDeals = formData.get("todayDeals") as string | null;
     const specialProduct = formData.get("specialProduct") as string | null;
+    const requiresSerial = formData.get("requiresSerial") as string | null;
     const actualPrice = formData.get("actualPrice") as string | null;
     const sellPrice = (formData.get("sellPrice") ||
       formData.get("sellingPrice")) as string | null;
@@ -272,6 +306,17 @@ export async function PUT(
         numericWarrantyDays,
         productId.toString()
       );
+      }
+    }
+
+    if (requiresSerial !== null && requiresSerial !== undefined && requiresSerial !== "") {
+      const hasRequiresSerial = await hasColumn("products", "requires_serial");
+      if (hasRequiresSerial) {
+        await prisma.$executeRawUnsafe(
+          "UPDATE products SET requires_serial = ? WHERE id = ?",
+          requiresSerial === "true" ? 1 : 0,
+          productId.toString()
+        );
       }
     }
 

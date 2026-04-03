@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { apiRequest } from '@/utils/ApisafeCalls';
@@ -50,6 +50,7 @@ export default function FeaturedCollections() {
   const [activeTab, setActiveTab] = useState<string>('');
   const [categoryProducts, setCategoryProducts] = useState<{ [key: string]: Product[] }>({});
   const [loading, setLoading] = useState(true);
+  const [desktopStartIndex, setDesktopStartIndex] = useState(0);
 
   // Fetch categories on mount
   useEffect(() => {
@@ -94,10 +95,14 @@ export default function FeaturedCollections() {
         const result = await apiRequest(`/products/filter?categoryId=${activeTab}`, false);
         const apiProducts = result?.data?.products || [];
 
-        // Take only first 4 products and sort by newest
+        // Show latest 10 products for featured section
         const limitedProducts = apiProducts
-          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .slice(0, 4);
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.createdAt || 0).getTime() -
+              new Date(a.createdAt || 0).getTime()
+          )
+          .slice(0, 10);
 
         setCategoryProducts((prev) => ({
           ...prev,
@@ -118,6 +123,31 @@ export default function FeaturedCollections() {
   }, [activeTab]);
 
   const currentProducts = categoryProducts[activeTab] || [];
+  const desktopVisibleCount = 4;
+  const desktopVisibleProducts = useMemo(() => {
+    if (!currentProducts.length) return [];
+    if (currentProducts.length <= desktopVisibleCount) return currentProducts;
+    return Array.from({ length: desktopVisibleCount }, (_, idx) => {
+      const i = (desktopStartIndex + idx) % currentProducts.length;
+      return currentProducts[i];
+    });
+  }, [currentProducts, desktopStartIndex]);
+
+  useEffect(() => {
+    setDesktopStartIndex(0);
+  }, [activeTab]);
+
+  const moveDesktopLeft = () => {
+    if (currentProducts.length <= desktopVisibleCount) return;
+    setDesktopStartIndex((prev) =>
+      (prev - 1 + currentProducts.length) % currentProducts.length
+    );
+  };
+
+  const moveDesktopRight = () => {
+    if (currentProducts.length <= desktopVisibleCount) return;
+    setDesktopStartIndex((prev) => (prev + 1) % currentProducts.length);
+  };
 
   const handleProductClick = (productId: string) => {
     router.push(`/all-product/${productId}`);
@@ -187,9 +217,85 @@ export default function FeaturedCollections() {
             </p>
           </div>
         ) : (
-          /* Product Grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {currentProducts.map((product) => {
+          <>
+            {/* Desktop Arrows */}
+            <div className="hidden lg:flex items-center justify-end gap-2 mb-5">
+              <button
+                type="button"
+                onClick={moveDesktopLeft}
+                disabled={currentProducts.length <= desktopVisibleCount}
+                className="h-10 w-10 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Previous products"
+              >
+                <span aria-hidden>‹</span>
+              </button>
+              <button
+                type="button"
+                onClick={moveDesktopRight}
+                disabled={currentProducts.length <= desktopVisibleCount}
+                className="h-10 w-10 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Next products"
+              >
+                <span aria-hidden>›</span>
+              </button>
+            </div>
+
+            {/* Mobile/Tablet Grid */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:hidden">
+              {currentProducts.map((product) => {
+                const discount = Number(product.actualPrice) > Number(product.sellPrice)
+                  ? Math.round(((Number(product.actualPrice) - Number(product.sellPrice)) / Number(product.actualPrice)) * 100)
+                  : 0;
+                
+                const isOutOfStock = Number(product.availableQuantity) === 0;
+
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => handleProductClick(product.id)}
+                    className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group border border-gray-100"
+                  >
+                    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                      <div className="relative h-40 sm:h-48">
+                        <Image
+                          src={resolveImageUrl(product.mainImage)}
+                          alt={product.name}
+                          fill
+                          className="object-contain p-3"
+                        />
+                      </div>
+                      <div className="absolute top-2 right-2 flex flex-col gap-1">
+                        {isOutOfStock && (
+                          <span className="px-2 py-1 bg-gray-800 text-white rounded-full text-[10px] font-bold">
+                            Sold Out
+                          </span>
+                        )}
+                        {!isOutOfStock && discount > 0 && (
+                          <span className="px-2 py-1 bg-red-500 text-white rounded-full text-[10px] font-bold">
+                            {discount}% OFF
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-[11px] font-semibold text-orange-600 mb-1 uppercase tracking-wide">
+                        {product.categoryName}
+                      </p>
+                      <h3 className="text-xs sm:text-sm font-bold text-gray-900 mb-2 line-clamp-2 min-h-[32px]">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm sm:text-base font-bold text-gray-900">
+                        Rs. {Number(product.sellPrice).toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Grid with arrow paging */}
+            <div className="hidden lg:grid lg:grid-cols-4 gap-6">
+              {desktopVisibleProducts.map((product) => {
               const discount = Number(product.actualPrice) > Number(product.sellPrice)
                 ? Math.round(((Number(product.actualPrice) - Number(product.sellPrice)) / Number(product.actualPrice)) * 100)
                 : 0;
@@ -311,7 +417,8 @@ export default function FeaturedCollections() {
                 </div>
               );
             })}
-          </div>
+            </div>
+          </>
         )}
 
         {/* View All Button */}

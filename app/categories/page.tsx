@@ -62,10 +62,10 @@ export default function CategoriesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-4">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Explore Our Categories
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="hidden sm:block text-lg text-gray-600 max-w-2xl mx-auto">
             Browse through our wide selection of categories to find exactly what you're looking for
           </p>
         </div>
