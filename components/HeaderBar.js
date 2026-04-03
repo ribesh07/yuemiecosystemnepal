@@ -170,9 +170,9 @@ export default function Header() {
 
             {/* Right Side Icons */}
             <div className="flex items-center space-x-4">
-              <button className="p-2">
+              {/* <button className="p-2">
                 <Search size={22} />
-              </button>
+              </button> */}
 
               {!isLoggedIn ? (
                 <Link
