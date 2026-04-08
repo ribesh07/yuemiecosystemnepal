@@ -10,6 +10,7 @@ import { getSessionToken } from "@/utils/clientAuth";
 type ValidationResponse = {
   status?: string;
   statusDesc?: string;
+  creditStatus?: string;
 };
 
 export default function SuccessClient() {
@@ -61,17 +62,41 @@ export default function SuccessClient() {
             TXNAMT: txnAmt,
           }),
         });
-        const validateData: ValidationResponse = await validateRes.json();
-        if (
-          !validateRes.ok ||
-          String(validateData?.status || "").toUpperCase() !== "SUCCESS"
-        ) {
-          setResult({
-            status: "error",
-            message:
-              validateData?.statusDesc || "Payment validation failed at bank.",
+        const validateData: ValidationResponse = await validateRes.json().catch(() => ({}));
+        const validateStatus = String(validateData?.status || "").toUpperCase();
+        let paymentVerified = validateRes.ok && validateStatus === "SUCCESS";
+
+        // Live gateways sometimes fail validate endpoint despite successful debit.
+        // Fallback to gettxndetail and accept known success credit statuses.
+        if (!paymentVerified) {
+          const detailsRes = await fetch("/connectips/get_details", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              REFERENCEID: referenceId,
+              TXNAMT: txnAmt,
+            }),
           });
-          return;
+          const detailsData: ValidationResponse = await detailsRes.json().catch(() => ({}));
+          const detailsStatus = String(detailsData?.status || "").toUpperCase();
+          const creditStatus = String(detailsData?.creditStatus || "").toUpperCase();
+          paymentVerified =
+            detailsStatus === "SUCCESS" &&
+            (creditStatus === "" ||
+              creditStatus === "000" ||
+              creditStatus === "999" ||
+              creditStatus === "DEFER");
+
+          if (!paymentVerified) {
+            setResult({
+              status: "error",
+              message:
+                validateData?.statusDesc ||
+                detailsData?.statusDesc ||
+                "Payment validation failed at bank.",
+            });
+            return;
+          }
         }
 
         if (!intent?.addressId || !Array.isArray(intent?.items) || !intent.items.length) {

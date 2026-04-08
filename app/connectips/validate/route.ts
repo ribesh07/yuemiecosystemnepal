@@ -3,10 +3,10 @@ import { generateConnectIPSToken } from "@/lib/connectipsToken";
 import { logConnectIPSDebug } from "@/lib/connectipsDebug";
 
 const PASSWORD = process.env.CONNECTIPS_AUTH_PASSWORD;
+const AUTH_USER_ID = process.env.CONNECTIPS_MERCHAND_USER_ID;
 const VALADIATION_URL = process.env.CONNECTIPS_VALIDATION_API_URL;
 const MERCHANTID = process.env.NEXT_PUBLIC_CONNECTIPS_MERCHANTID;
 const APPID = process.env.NEXT_PUBLIC_CONNECTIPS_APPID;
-const credentials = Buffer.from(`${APPID}:${PASSWORD}`).toString("base64");
 
 
 export async function POST(request: Request) {
@@ -49,11 +49,15 @@ export async function POST(request: Request) {
       txnAmt: txnAmt,
       token: TOKEN,
     };
+    const authUser = String(AUTH_USER_ID || APPID || "").trim();
+    const authPass = String(PASSWORD || "").trim();
+    const credentials = Buffer.from(`${authUser}:${authPass}`).toString("base64");
     await logConnectIPSDebug({
       step: "validate:request",
       referenceId,
       data: {
         validationUrl: VALADIATION_URL,
+        authUser,
         payload,
       },
     });
