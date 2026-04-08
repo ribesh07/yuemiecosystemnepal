@@ -142,36 +142,55 @@ export async function POST(request: Request) {
       txnAmt: txnAmt,
       token: TOKEN,
     };
-    const authUser = String(AUTH_USER_ID || APPID || "").trim();
     const authPass = String(PASSWORD || "").trim();
-    const credentials = Buffer.from(`${authUser}:${authPass}`).toString("base64");
+    const authUsers = Array.from(
+      new Set(
+        [String(AUTH_USER_ID || "").trim(), String(APPID || "").trim()].filter(Boolean)
+      )
+    );
+    const triedUsers: string[] = [];
     await logConnectIPSDebug({
       step: "get_details:request",
       referenceId,
       data: {
         detailsUrl: DETAILS_URL,
-        authUser,
+        authUsers,
         payload,
       },
     });
 
 // console.log('Payload:', payload);
 // console.log('Details URL:', DETAILS_URL);
-    const response = await fetch(DETAILS_URL as string, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Basic ${credentials}`,
-      },
-      body: JSON.stringify(payload),
-      cache: 'no-cache',
-    });
-
-    const data = await response.json().catch(() => ({}));
+    let response: Response | null = null;
+    let data: any = {};
+    for (const authUser of authUsers) {
+      triedUsers.push(authUser);
+      const credentials = Buffer.from(`${authUser}:${authPass}`).toString("base64");
+      response = await fetch(DETAILS_URL as string, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${credentials}`,
+        },
+        body: JSON.stringify(payload),
+        cache: "no-cache",
+      });
+      data = await response.json().catch(() => ({}));
+      if (response.ok || response.status !== 401) {
+        break;
+      }
+    }
+    if (!response) {
+      return NextResponse.json(
+        { status: "ERROR", statusDesc: "Get details request failed", response: {} },
+        { status: 500 }
+      );
+    }
     await logConnectIPSDebug({
       step: "get_details:response",
       referenceId,
       data: {
+        triedUsers,
         statusCode: response.status,
         ok: response.ok,
         body: data,

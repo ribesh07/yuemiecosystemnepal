@@ -54,7 +54,7 @@ export default function SuccessClient() {
           return;
         }
 
-        const validateRes = await fetch("/connectips/validate", {
+        const validateRes = await fetch("/api/connectips/validate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -69,7 +69,7 @@ export default function SuccessClient() {
         // Live gateways sometimes fail validate endpoint despite successful debit.
         // Fallback to gettxndetail and accept known success credit statuses.
         if (!paymentVerified) {
-          const detailsRes = await fetch("/connectips/get_details", {
+          const detailsRes = await fetch("/api/connectips/get_details", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
