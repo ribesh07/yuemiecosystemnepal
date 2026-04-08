@@ -44,7 +44,7 @@ const initiatePayment = async (
   try {
     // ConnectIPS expects TOKEN placeholder to be part of the signed payload.
     const tokenPayload = { ...transactionDetails, TOKEN: "TOKEN" };
-    const tokenResponse = await fetch('/connectips/get_token', {
+    const tokenResponse = await fetch('/api/connectips/get_token', {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(tokenPayload),
