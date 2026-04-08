@@ -96,13 +96,10 @@ import { logConnectIPSDebug } from "@/lib/connectipsDebug";
 // import { hostname } from '#/utils/constants';
 
 const PASSWORD = process.env.CONNECTIPS_AUTH_PASSWORD;
+const AUTH_USER_ID = process.env.CONNECTIPS_MERCHAND_USER_ID;
 const MERCHANTID = process.env.NEXT_PUBLIC_CONNECTIPS_MERCHANTID;
 const APPID = process.env.NEXT_PUBLIC_CONNECTIPS_APPID;
 const DETAILS_URL = process.env.NEXT_PUBLIC_CONNECTIPS_GETDETAILS_URL;
-
-
-// const credentials = Buffer.from(`User Id: ${Mer} Password: ${pass}`).toString("base64");
-const credentials = Buffer.from(`${APPID}:${PASSWORD}`).toString("base64");
 
 
 export async function POST(request: Request) {
@@ -145,11 +142,15 @@ export async function POST(request: Request) {
       txnAmt: txnAmt,
       token: TOKEN,
     };
+    const authUser = String(AUTH_USER_ID || APPID || "").trim();
+    const authPass = String(PASSWORD || "").trim();
+    const credentials = Buffer.from(`${authUser}:${authPass}`).toString("base64");
     await logConnectIPSDebug({
       step: "get_details:request",
       referenceId,
       data: {
         detailsUrl: DETAILS_URL,
+        authUser,
         payload,
       },
     });
