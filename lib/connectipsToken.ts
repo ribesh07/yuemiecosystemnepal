@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import pem from "pem";
 
-const pfxPath = path.join(process.cwd(), "signatures", "CREDITOR.pfx");
+const pfxPath = path.join(process.cwd(), "signatures", "CREDITOR1.pfx");
 
 const readPkcs12WithPass = (pfx: Buffer, password: string): Promise<string> => {
   return new Promise((resolve, reject) => {
