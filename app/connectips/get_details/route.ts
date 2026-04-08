@@ -97,8 +97,10 @@ import { logConnectIPSDebug } from "@/lib/connectipsDebug";
 
 const PASSWORD = process.env.CONNECTIPS_AUTH_PASSWORD;
 const AUTH_USER_ID = process.env.CONNECTIPS_MERCHAND_USER_ID;
-const MERCHANTID = process.env.NEXT_PUBLIC_CONNECTIPS_MERCHANTID;
-const APPID = process.env.NEXT_PUBLIC_CONNECTIPS_APPID;
+const MERCHANTID =
+  process.env.CONNECTIPS_MERCHANTID || process.env.NEXT_PUBLIC_CONNECTIPS_MERCHANTID;
+const APPID =
+  process.env.CONNECTIPS_APPID || process.env.NEXT_PUBLIC_CONNECTIPS_APPID;
 const DETAILS_URL = process.env.NEXT_PUBLIC_CONNECTIPS_GETDETAILS_URL;
 
 
