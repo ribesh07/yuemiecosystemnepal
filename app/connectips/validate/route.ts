@@ -9,10 +9,25 @@ const MERCHANTID =
 const APPID =
   process.env.CONNECTIPS_APPID || process.env.NEXT_PUBLIC_CONNECTIPS_APPID;
 
+const normalizeEnvValue = (value?: string | null): string => {
+  const raw = String(value || "").trim();
+  if (
+    (raw.startsWith('"') && raw.endsWith('"')) ||
+    (raw.startsWith("'") && raw.endsWith("'"))
+  ) {
+    return raw.slice(1, -1).trim();
+  }
+  return raw;
+};
 
 export async function POST(request: Request) {
   try {
-    if (!MERCHANTID || !APPID || !PASSWORD || !VALADIATION_URL) {
+    const merchantId = normalizeEnvValue(MERCHANTID);
+    const appId = normalizeEnvValue(APPID);
+    const authPass = normalizeEnvValue(PASSWORD);
+    const validationUrl = normalizeEnvValue(VALADIATION_URL);
+
+    if (!merchantId || !appId || !authPass || !validationUrl) {
       return NextResponse.json(
         { status: "ERROR", statusDesc: "ConnectIPS env is not configured" },
         { status: 500 }
@@ -30,8 +45,8 @@ export async function POST(request: Request) {
     }
 
     const signaturePayload = {
-      MERCHANTID: Number(MERCHANTID),
-      APPID: APPID,
+      MERCHANTID: Number(merchantId),
+      APPID: appId,
       REFERENCEID: referenceId,
       TXNAMT: txnAmt,
     };
@@ -44,26 +59,26 @@ export async function POST(request: Request) {
     ]);
 
     const payload = {
-      merchantId: Number(MERCHANTID),
-      appId: APPID,
+      merchantId: Number(merchantId),
+      appId: appId,
       referenceId: referenceId,
       txnAmt: txnAmt,
       token: TOKEN,
     };
-    const authPass = String(PASSWORD || "").trim();
-    const authUser = String(APPID || "").trim();
+    const authUser = appId;
     await logConnectIPSDebug({
       step: "validate:request",
       referenceId,
       data: {
-        validationUrl: VALADIATION_URL,
+        validationUrl,
         authUser,
+        authPassLength: authPass.length,
         payload,
       },
     });
 
     const credentials = Buffer.from(`${authUser}:${authPass}`).toString("base64");
-    const response = await fetch(VALADIATION_URL as string, {
+    const response = await fetch(validationUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

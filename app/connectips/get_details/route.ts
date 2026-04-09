@@ -102,10 +102,25 @@ const APPID =
   process.env.CONNECTIPS_APPID || process.env.NEXT_PUBLIC_CONNECTIPS_APPID;
 const DETAILS_URL = process.env.NEXT_PUBLIC_CONNECTIPS_GETDETAILS_URL;
 
+const normalizeEnvValue = (value?: string | null): string => {
+  const raw = String(value || "").trim();
+  if (
+    (raw.startsWith('"') && raw.endsWith('"')) ||
+    (raw.startsWith("'") && raw.endsWith("'"))
+  ) {
+    return raw.slice(1, -1).trim();
+  }
+  return raw;
+};
 
 export async function POST(request: Request) {
   try {
-    if (!MERCHANTID || !APPID || !PASSWORD || !DETAILS_URL) {
+    const merchantId = normalizeEnvValue(MERCHANTID);
+    const appId = normalizeEnvValue(APPID);
+    const authPass = normalizeEnvValue(PASSWORD);
+    const detailsUrl = normalizeEnvValue(DETAILS_URL);
+
+    if (!merchantId || !appId || !authPass || !detailsUrl) {
       return NextResponse.json(
         { status: "ERROR", statusDesc: "ConnectIPS env is not configured", response: {} },
         { status: 500 }
@@ -123,8 +138,8 @@ export async function POST(request: Request) {
     }
 
     const signaturePayload = {
-      MERCHANTID: Number(MERCHANTID),
-      APPID: APPID,
+      MERCHANTID: Number(merchantId),
+      APPID: appId,
       REFERENCEID: referenceId,
       TXNAMT: txnAmt,
     };
@@ -137,20 +152,20 @@ export async function POST(request: Request) {
     ]);
 
     const payload = {
-      merchantId: Number(MERCHANTID),
-      appId: APPID,
+      merchantId: Number(merchantId),
+      appId: appId,
       referenceId: referenceId,
       txnAmt: txnAmt,
       token: TOKEN,
     };
-    const authPass = String(PASSWORD || "").trim();
-    const authUser = String(APPID || "").trim();
+    const authUser = appId;
     await logConnectIPSDebug({
       step: "get_details:request",
       referenceId,
       data: {
-        detailsUrl: DETAILS_URL,
+        detailsUrl,
         authUser,
+        authPassLength: authPass.length,
         payload,
       },
     });
@@ -158,7 +173,7 @@ export async function POST(request: Request) {
 // console.log('Payload:', payload);
 // console.log('Details URL:', DETAILS_URL);
     const credentials = Buffer.from(`${authUser}:${authPass}`).toString("base64");
-    const response = await fetch(DETAILS_URL as string, {
+    const response = await fetch(detailsUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
