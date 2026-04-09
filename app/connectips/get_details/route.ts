@@ -92,6 +92,8 @@
 import { NextResponse } from 'next/server';
 import { generateConnectIPSToken } from "@/lib/connectipsToken";
 import { logConnectIPSDebug } from "@/lib/connectipsDebug";
+import fs from "fs";
+import path from "path";
 
 // import { hostname } from '#/utils/constants';
 
@@ -113,11 +115,37 @@ const normalizeEnvValue = (value?: string | null): string => {
   return raw;
 };
 
+const readRawEnvValue = (key: string): string => {
+  try {
+    const envPath = path.join(process.cwd(), ".env");
+    if (!fs.existsSync(envPath)) return "";
+    const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      if (!trimmed.startsWith(`${key}=`)) continue;
+      const raw = trimmed.slice(key.length + 1).trim();
+      const unwrapped = normalizeEnvValue(raw).replace(/\\\$/g, "$");
+      return unwrapped;
+    }
+  } catch {
+    // ignore and fall back to process.env
+  }
+  return "";
+};
+
+const resolveAuthPassword = (): string => {
+  const fromEnv = normalizeEnvValue(PASSWORD);
+  const fromRawEnvFile = readRawEnvValue("CONNECTIPS_AUTH_PASSWORD");
+  // Prefer process env when it looks complete; otherwise use raw .env fallback.
+  return fromEnv.length >= fromRawEnvFile.length ? fromEnv : fromRawEnvFile;
+};
+
 export async function POST(request: Request) {
   try {
     const merchantId = normalizeEnvValue(MERCHANTID);
     const appId = normalizeEnvValue(APPID);
-    const authPass = normalizeEnvValue(PASSWORD);
+    const authPass = resolveAuthPassword();
     const detailsUrl = normalizeEnvValue(DETAILS_URL);
 
     if (!merchantId || !appId || !authPass || !detailsUrl) {
