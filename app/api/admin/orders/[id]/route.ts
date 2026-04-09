@@ -15,6 +15,12 @@ const ORDER_STATUS_FLOW: Record<string, string[]> = {
 };
 
 const PAYMENT_STATUSES = new Set(["unpaid", "paid", "partial", "refunded"]);
+const PAYMENT_STATUS_FLOW: Record<string, string[]> = {
+  unpaid: ["paid"],
+  paid: ["refunded"],
+  refunded: [],
+  partial: ["paid", "refunded"],
+};
 
 function parseOrderId(id: string) {
   try {
@@ -257,6 +263,27 @@ export async function PATCH(
         { success: false, message: "Invalid payment status" },
         { status: 400 }
       );
+    }
+
+    if (nextPaymentStatus) {
+      const currentPaymentStatus = String(existingOrder.paymentStatus || "")
+        .toLowerCase()
+        .trim();
+      const allowedPaymentTransitions =
+        PAYMENT_STATUS_FLOW[currentPaymentStatus] || [];
+      if (
+        currentPaymentStatus &&
+        currentPaymentStatus !== nextPaymentStatus &&
+        !allowedPaymentTransitions.includes(nextPaymentStatus)
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Invalid payment transition: ${currentPaymentStatus} -> ${nextPaymentStatus}`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     if (nextOrderStatus === "shipped" && !courierName) {

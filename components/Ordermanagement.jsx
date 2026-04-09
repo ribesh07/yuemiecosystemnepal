@@ -4,8 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-const PAYMENT_STATUS_OPTIONS = ["unpaid", "paid", "refunded"];
-
 const ALLOWED_TRANSITIONS = {
   processing: ["processing", "shipped", "cancelled"],
   shipped: ["shipped", "delivered", "cancelled"],
@@ -55,6 +53,34 @@ function formatDate(dateStr) {
 function getFirstProduct(order) {
   const item = order?.items?.[0];
   return item?.product?.name || item?.productCode || "N/A";
+}
+
+function getAllowedPaymentStatuses(currentStatus) {
+  const normalized = String(currentStatus || "").toLowerCase().trim();
+  if (normalized === "paid") return ["paid", "refunded"];
+  if (normalized === "refunded") return ["refunded"];
+  if (normalized === "partial") return ["partial", "paid", "refunded"];
+  return ["unpaid", "paid"];
+}
+
+function getOrderPaymentMode(order) {
+  if (order?.payments?.length) {
+    const firstPayment = order.payments[0];
+    if (firstPayment?.paymentMode) return String(firstPayment.paymentMode);
+  }
+  if (String(order?.paymentMethod || "").toLowerCase() === "connectips") {
+    return "ConnectIPS";
+  }
+  return "";
+}
+
+function getOrderTransactionId(order) {
+  if (order?.payments?.length) {
+    const firstPayment = order.payments[0];
+    if (firstPayment?.transactionId) return String(firstPayment.transactionId);
+  }
+  if (order?.transactionId) return String(order.transactionId);
+  return "";
 }
 
 function StatusBadge({ value }) {
@@ -286,13 +312,16 @@ export default function Ordermanagement() {
     closeStatusModal();
   };
 
-  const openPaymentModal = (orderId, nextStatus) => {
+  const openPaymentModal = (order, nextStatus) => {
+    const currentMode = getOrderPaymentMode(order);
+    const currentTxn = getOrderTransactionId(order);
+    const isConnectIPS = currentMode.toLowerCase() === "connectips";
     setPaymentModal({
       open: true,
-      orderId,
+      orderId: String(order.id),
       nextStatus,
-      paymentMode: "COD",
-      transactionId: "",
+      paymentMode: currentMode || "COD",
+      transactionId: isConnectIPS ? currentTxn : "",
       remark: "",
     });
   };
@@ -497,6 +526,7 @@ export default function Ordermanagement() {
                   const id = String(order.id);
                   const transitionOptions =
                     ALLOWED_TRANSITIONS[order.orderStatus] || [order.orderStatus];
+                  const paymentOptions = getAllowedPaymentStatuses(order.paymentStatus);
 
                   return (
                     <tr key={id} className="border-b last:border-0">
@@ -558,14 +588,14 @@ export default function Ordermanagement() {
                                 nextPaymentStatus === "paid" ||
                                 nextPaymentStatus === "refunded"
                               ) {
-                                openPaymentModal(id, nextPaymentStatus);
+                                openPaymentModal(order, nextPaymentStatus);
                                 return;
                               }
                               updateOrder(id, { paymentStatus: nextPaymentStatus });
                             }}
                             className="w-full rounded-md border px-2 py-1 text-xs"
                           >
-                            {PAYMENT_STATUS_OPTIONS.map((status) => (
+                            {paymentOptions.map((status) => (
                               <option key={status} value={status}>
                                 {status}
                               </option>
@@ -646,6 +676,31 @@ export default function Ordermanagement() {
                 <div className="font-semibold">Total: {formatMoney(selectedOrder.totalAmount)}</div>
               </div>
             </div>
+
+            {String(selectedOrder.paymentStatus || "").toLowerCase() === "paid" &&
+              getOrderPaymentMode(selectedOrder).toLowerCase() === "connectips" && (
+                <div className="rounded-md border p-3 bg-gray-50 text-sm space-y-2">
+                  <div className="font-semibold text-gray-800">ConnectIPS Payment</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-600">Payment Mode</label>
+                      <input
+                        value={getOrderPaymentMode(selectedOrder)}
+                        readOnly
+                        className="w-full rounded-md border bg-gray-100 px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-600">Transaction ID</label>
+                      <input
+                        value={getOrderTransactionId(selectedOrder)}
+                        readOnly
+                        className="w-full rounded-md border bg-gray-100 px-3 py-2 text-sm font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
             <div>
               <div className="text-sm font-semibold mb-2">Items</div>
@@ -936,9 +991,21 @@ export default function Ordermanagement() {
                 onChange={(e) =>
                   setPaymentModal((prev) => ({ ...prev, transactionId: e.target.value }))
                 }
+                readOnly={
+                  paymentModal.paymentMode.toLowerCase() === "connectips" &&
+                  paymentModal.nextStatus === "refunded" &&
+                  Boolean(paymentModal.transactionId)
+                }
                 className="w-full rounded-md border px-3 py-2 text-sm"
                 placeholder="TXN123456"
               />
+              {paymentModal.paymentMode.toLowerCase() === "connectips" &&
+                paymentModal.nextStatus === "refunded" &&
+                Boolean(paymentModal.transactionId) && (
+                  <p className="text-xs text-gray-500">
+                    ConnectIPS transaction ID is auto-filled and locked.
+                  </p>
+                )}
             </div>
 
             <div className="space-y-1">

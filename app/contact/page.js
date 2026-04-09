@@ -203,7 +203,7 @@ const ContactPage = () => {
             <p>
               <strong>Autozone Traders</strong>
             </p>
-            <p>Universiry RD, Kuleshwor-14, Kathmandu</p>
+            <p>University RD, Kuleshwor-14, Kathmandu</p>
             <p>Nepal</p>
           </div>
         </section>
