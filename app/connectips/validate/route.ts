@@ -3,7 +3,6 @@ import { generateConnectIPSToken } from "@/lib/connectipsToken";
 import { logConnectIPSDebug } from "@/lib/connectipsDebug";
 
 const PASSWORD = process.env.CONNECTIPS_AUTH_PASSWORD;
-const AUTH_USER_ID = process.env.CONNECTIPS_MERCHAND_USER_ID;
 const VALADIATION_URL = process.env.CONNECTIPS_VALIDATION_API_URL;
 const MERCHANTID =
   process.env.CONNECTIPS_MERCHANTID || process.env.NEXT_PUBLIC_CONNECTIPS_MERCHANTID;
@@ -52,52 +51,34 @@ export async function POST(request: Request) {
       token: TOKEN,
     };
     const authPass = String(PASSWORD || "").trim();
-    const authUsers = Array.from(
-      new Set(
-        [String(AUTH_USER_ID || "").trim(), String(APPID || "").trim()].filter(Boolean)
-      )
-    );
-    const triedUsers: string[] = [];
+    const authUser = String(APPID || "").trim();
     await logConnectIPSDebug({
       step: "validate:request",
       referenceId,
       data: {
         validationUrl: VALADIATION_URL,
-        authUsers,
+        authUser,
         payload,
       },
     });
 
-    let response: Response | null = null;
-    let data: any = {};
-    for (const authUser of authUsers) {
-      triedUsers.push(authUser);
-      const credentials = Buffer.from(`${authUser}:${authPass}`).toString("base64");
-      response = await fetch(VALADIATION_URL as string, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${credentials}`,
-        },
-        body: JSON.stringify(payload),
-        cache: "no-cache",
-      });
-      data = await response.json().catch(() => ({}));
-      if (response.ok || response.status !== 401) {
-        break;
-      }
-    }
-    if (!response) {
-      return NextResponse.json(
-        { status: "ERROR", statusDesc: "Validate request failed" },
-        { status: 500 }
-      );
-    }
+    const credentials = Buffer.from(`${authUser}:${authPass}`).toString("base64");
+    const response = await fetch(VALADIATION_URL as string, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${credentials}`,
+      },
+      body: JSON.stringify(payload),
+      cache: "no-cache",
+    });
+    const data: any = await response.json().catch(() => ({}));
+
     await logConnectIPSDebug({
       step: "validate:response",
       referenceId,
       data: {
-        triedUsers,
+        authUser,
         statusCode: response.status,
         ok: response.ok,
         body: data,
