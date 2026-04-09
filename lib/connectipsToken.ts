@@ -3,7 +3,29 @@ import fs from "fs";
 import path from "path";
 import pem from "pem";
 
-const pfxPath = path.join(process.cwd(), "signatures", "CREDITOR1.pfx");
+const resolvePfxPath = (): string => {
+  const customPath = String(process.env.CONNECTIPS_PFX_PATH || "").trim();
+  if (customPath) {
+    return path.isAbsolute(customPath)
+      ? customPath
+      : path.join(process.cwd(), customPath);
+  }
+
+  const fileName = String(process.env.CONNECTIPS_PFX_FILE || "").trim();
+  if (fileName) {
+    return path.join(process.cwd(), "signatures", fileName);
+  }
+
+  const candidates = ["CREDITOR.pfx", "CREDITOR1.pfx"];
+  for (const candidate of candidates) {
+    const candidatePath = path.join(process.cwd(), "signatures", candidate);
+    if (fs.existsSync(candidatePath)) {
+      return candidatePath;
+    }
+  }
+
+  return path.join(process.cwd(), "signatures", "CREDITOR.pfx");
+};
 
 const readPkcs12WithPass = (pfx: Buffer, password: string): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -23,11 +45,11 @@ const readPkcs12WithPass = (pfx: Buffer, password: string): Promise<string> => {
 };
 
 export async function getConnectIPSPrivateKey(): Promise<string> {
+  const pfxPath = resolvePfxPath();
   const pfx = fs.readFileSync(pfxPath);
   const candidates = [
     process.env.CONNECTIPS_PFX_PASSWORD,
     process.env.CONNECTIPS_CREDITOR_PASSWORD,
-    process.env.CONNECTIPS_AUTH_PASSWORD,
   ].filter((v): v is string => Boolean(v && String(v).trim()));
 
   if (!candidates.length) {
@@ -60,4 +82,3 @@ export async function generateConnectIPSToken(
   sign.end();
   return sign.sign(privateKey, "base64");
 }
-
