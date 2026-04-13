@@ -22,8 +22,8 @@ export async function GET() {
     ).length > 0;
 
     const productCodeExpr = hasWarrantyProductCode
-      ? "COALESCE(w.product_code, pu.product_code, oi.productCode)"
-      : "COALESCE(pu.product_code, oi.productCode)";
+      ? "COALESCE(w.product_code, pu.product_code)"
+      : "pu.product_code";
 
     const rows = (await prisma.$queryRawUnsafe(
       `
@@ -32,14 +32,8 @@ export async function GET() {
                p.product_name as productName, p.product_code as productCode, p.warranty_days as warrantyDays,
                o.order_id as orderNumber
         FROM warranties w
-        LEFT JOIN product_units pu ON pu.id = w.product_unit_id
+        INNER JOIN product_units pu ON pu.id = w.product_unit_id
         LEFT JOIN orders o ON o.id = w.order_id
-        LEFT JOIN (
-          SELECT oi.orderId, MIN(oi.id) as firstItemId
-          FROM order_items oi
-          GROUP BY oi.orderId
-        ) oi_map ON oi_map.orderId = w.order_id
-        LEFT JOIN order_items oi ON oi.id = oi_map.firstItemId
         LEFT JOIN products p ON p.product_code = ${productCodeExpr}
         WHERE (w.customer_id = ? OR o.customerId = ?)
         ORDER BY w.created_at DESC

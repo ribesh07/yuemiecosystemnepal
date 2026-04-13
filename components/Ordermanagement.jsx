@@ -123,6 +123,10 @@ export default function Ordermanagement() {
     type: "", // shipped | cancelled
     orderId: null,
     nextStatus: "",
+    serialNumber: "",
+    serialNumbers: [],
+    serialSelectionRequired: false,
+    serialLoading: false,
     courierName: "",
     cnNumber: "",
     cnDate: "",
@@ -250,18 +254,51 @@ export default function Ordermanagement() {
     [router]
   );
 
-  const openStatusModal = (orderId, nextStatus) => {
+  const openStatusModal = async (order, nextStatus) => {
+    const token = getAdminToken();
+    const orderId = String(order?.id || "");
     setStatusModal({
       open: true,
       type: nextStatus,
       orderId,
       nextStatus,
+      serialNumber: "",
+      serialNumbers: [],
+      serialSelectionRequired: false,
+      serialLoading: nextStatus === "shipped",
       courierName: "",
       cnNumber: "",
       cnDate: "",
       cancelReason: "",
       remark: "",
     });
+
+    if (nextStatus !== "shipped" || !orderId || !token) return;
+
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.message || "Failed to load serial numbers");
+      }
+      const detail = payload?.data || {};
+      const serialNumbers = Array.isArray(detail.availableSerialNumbers)
+        ? detail.availableSerialNumbers
+        : [];
+      const serialSelectionRequired = Boolean(detail.serialSelectionRequired);
+
+      setStatusModal((prev) => ({
+        ...prev,
+        serialNumbers,
+        serialSelectionRequired,
+        serialLoading: false,
+      }));
+    } catch (error) {
+      setStatusModal((prev) => ({ ...prev, serialLoading: false }));
+      toast.error(error?.message || "Failed to load serial numbers");
+    }
   };
 
   const closeStatusModal = () => {
@@ -270,6 +307,10 @@ export default function Ordermanagement() {
       type: "",
       orderId: null,
       nextStatus: "",
+      serialNumber: "",
+      serialNumbers: [],
+      serialSelectionRequired: false,
+      serialLoading: false,
       courierName: "",
       cnNumber: "",
       cnDate: "",
@@ -284,6 +325,14 @@ export default function Ordermanagement() {
       toast.error("Courier name is required");
       return;
     }
+    if (
+      statusModal.nextStatus === "shipped" &&
+      statusModal.serialSelectionRequired &&
+      !statusModal.serialNumber
+    ) {
+      toast.error("Please select serial number");
+      return;
+    }
     if (statusModal.nextStatus === "cancelled" && !statusModal.cancelReason.trim()) {
       toast.error("Cancel reason is required");
       return;
@@ -291,6 +340,10 @@ export default function Ordermanagement() {
 
     await updateOrder(statusModal.orderId, {
       orderStatus: statusModal.nextStatus,
+      serialNumber:
+        statusModal.nextStatus === "shipped"
+          ? statusModal.serialNumber || undefined
+          : undefined,
       courierName:
         statusModal.nextStatus === "shipped"
           ? statusModal.courierName.trim()
@@ -560,7 +613,7 @@ export default function Ordermanagement() {
                               const nextStatus = e.target.value;
                               if (nextStatus === order.orderStatus) return;
                               if (nextStatus === "shipped" || nextStatus === "cancelled") {
-                                openStatusModal(id, nextStatus);
+                                openStatusModal(order, nextStatus);
                                 return;
                               }
                               updateOrder(id, { orderStatus: nextStatus });
@@ -870,6 +923,40 @@ export default function Ordermanagement() {
             {statusModal.nextStatus === "shipped" && (
               <div className="space-y-3">
                 <div className="space-y-1">
+                  <label className="text-sm text-gray-700">Choose warranty serial number</label>
+                  <select
+                    value={statusModal.serialNumber}
+                    onChange={(e) =>
+                      setStatusModal((prev) => ({ ...prev, serialNumber: e.target.value }))
+                    }
+                    className="w-full rounded-md border px-3 py-2 text-sm"
+                    disabled={statusModal.serialLoading || !statusModal.serialSelectionRequired}
+                  >
+                    {!statusModal.serialSelectionRequired ? (
+                      <option value="">No serial number required</option>
+                    ) : (
+                      <option value="">Select Serial Number</option>
+                    )}
+                    {(statusModal.serialNumbers || []).map((serialItem) => (
+                      <option
+                        key={`${serialItem.productCode}-${serialItem.serialNumber}`}
+                        value={serialItem.serialNumber}
+                      >
+                        {`${serialItem.productName || serialItem.productCode || "Product"} - ${serialItem.serialNumber}`}
+                      </option>
+                    ))}
+                  </select>
+                  {statusModal.serialLoading && (
+                    <p className="text-xs text-gray-500">Loading serial numbers...</p>
+                  )}
+                  {statusModal.serialSelectionRequired &&
+                    !statusModal.serialLoading &&
+                    (!statusModal.serialNumbers || statusModal.serialNumbers.length === 0) && (
+                      <p className="text-xs text-red-600">
+                        No in-stock serial numbers available for this order.
+                      </p>
+                    )}
+
                   <label className="text-sm text-gray-700">Courier Name</label>
                   <input
                     value={statusModal.courierName}

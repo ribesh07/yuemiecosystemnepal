@@ -26,8 +26,8 @@ export async function GET(req: Request) {
       )) as any[]
     ).length > 0;
     const productCodeExpr = hasWarrantyProductCode
-      ? "COALESCE(w.product_code, pu.product_code, oi.productCode)"
-      : "COALESCE(pu.product_code, oi.productCode)";
+      ? "COALESCE(w.product_code, pu.product_code)"
+      : "pu.product_code";
 
     let sql = `
       SELECT w.id, w.purchase_date as purchaseDate, w.expiry_date as expiryDate, w.purchase_source as purchaseSource,
@@ -46,15 +46,9 @@ export async function GET(req: Request) {
                NULLIF(pr.province_name, '')
              ) as customerAddress
       FROM warranties w
-      LEFT JOIN product_units pu ON pu.id = w.product_unit_id
+      INNER JOIN product_units pu ON pu.id = w.product_unit_id
       LEFT JOIN orders o ON o.id = w.order_id
       LEFT JOIN users ou ON ou.id = o.customerId
-      LEFT JOIN (
-        SELECT oi.orderId, MIN(oi.id) as firstItemId
-        FROM order_items oi
-        GROUP BY oi.orderId
-      ) oi_map ON oi_map.orderId = w.order_id
-      LEFT JOIN order_items oi ON oi.id = oi_map.firstItemId
       LEFT JOIN products p ON p.product_code = ${productCodeExpr}
       LEFT JOIN users u ON u.id = w.customer_id
       LEFT JOIN customer_address_book cab ON cab.id = (

@@ -114,6 +114,60 @@ export async function GET(
       serialMap.set(String(row.orderItemId), row.serialNumber || "");
     }
 
+    const hasRequiresSerialColumn = await hasColumn("products", "requires_serial");
+    const productCodes = Array.from(
+      new Set((order.items || []).map((item: any) => String(item.productCode || "")).filter(Boolean))
+    );
+    const serialRequiredProductCodes = new Set<string>();
+    if (productCodes.length) {
+      const placeholders = productCodes.map(() => "?").join(",");
+      if (hasRequiresSerialColumn) {
+        const requiredRows = (await prisma.$queryRawUnsafe(
+          `
+            SELECT product_code as productCode, requires_serial as requiresSerial
+            FROM products
+            WHERE product_code IN (${placeholders})
+          `,
+          ...productCodes
+        )) as any[];
+        for (const row of requiredRows || []) {
+          if (Number(row?.requiresSerial) === 1) {
+            serialRequiredProductCodes.add(String(row.productCode));
+          }
+        }
+      } else {
+        const unitRows = (await prisma.$queryRawUnsafe(
+          `
+            SELECT DISTINCT product_code as productCode
+            FROM product_units
+            WHERE product_code IN (${placeholders})
+          `,
+          ...productCodes
+        )) as any[];
+        for (const row of unitRows || []) {
+          if (row?.productCode) {
+            serialRequiredProductCodes.add(String(row.productCode));
+          }
+        }
+      }
+    }
+
+    const availableSerialNumbers = serialRequiredProductCodes.size
+      ? ((await prisma.$queryRawUnsafe(
+        `
+            SELECT pu.serial_number as serialNumber, pu.product_code as productCode, p.product_name as productName
+            FROM product_units pu
+            LEFT JOIN products p ON p.product_code = pu.product_code
+            WHERE pu.status = 'in_stock'
+              AND pu.product_code IN (${Array.from(serialRequiredProductCodes)
+                .map(() => "?")
+                .join(",")})
+            ORDER BY pu.product_code ASC, pu.serial_number ASC
+          `,
+          ...Array.from(serialRequiredProductCodes)
+        )) as any[])
+      : [];
+
     const logs = (await prisma.$queryRawUnsafe(
       `
         SELECT
@@ -146,6 +200,8 @@ export async function GET(
         ...item,
         serialNumber: serialMap.get(String(item.id)) || null,
       })),
+      serialSelectionRequired: serialRequiredProductCodes.size > 0,
+      availableSerialNumbers: availableSerialNumbers || [],
       updateLogs: logs || [],
     };
 
@@ -216,6 +272,9 @@ export async function PATCH(
       : "";
     const transactionId = body?.transactionId
       ? String(body.transactionId).trim()
+      : "";
+    const serialNumber = body?.serialNumber
+      ? String(body.serialNumber).trim()
       : "";
 
     if (!nextOrderStatus && !nextPaymentStatus) {
@@ -357,6 +416,8 @@ export async function PATCH(
     }
 
     const hasProductUnitIdColumn = await hasColumn("order_items", "product_unit_id");
+    const hasWarrantyProductCodeColumn = await hasColumn("warranties", "product_code");
+    const hasRequiresSerialColumn = await hasColumn("products", "requires_serial");
 
     const adminId = admin?.sub ? BigInt(admin.sub) : null;
 
@@ -454,6 +515,140 @@ export async function PATCH(
               await tx.$executeRawUnsafe(
                 "UPDATE product_units SET status = 'in_stock' WHERE id = ?",
                 id.toString()
+              );
+            }
+          }
+        }
+      }
+
+      if (nextOrderStatus && nextOrderStatus === "shipped") {
+        if (!hasProductUnitIdColumn) {
+          throw new Error("SERIAL_COLUMN_MISSING");
+        }
+        const productCodesInOrder = Array.from(
+          new Set((unitRows || []).map((row: any) => String(row.productCode || "")).filter(Boolean))
+        );
+        const serialRequiredProductCodes = new Set<string>();
+        if (productCodesInOrder.length) {
+          const placeholders = productCodesInOrder.map(() => "?").join(",");
+          if (hasRequiresSerialColumn) {
+            const requiredRows = (await tx.$queryRawUnsafe(
+              `
+                SELECT product_code as productCode, requires_serial as requiresSerial
+                FROM products
+                WHERE product_code IN (${placeholders})
+              `,
+              ...productCodesInOrder
+            )) as any[];
+            for (const row of requiredRows || []) {
+              if (Number(row?.requiresSerial) === 1) {
+                serialRequiredProductCodes.add(String(row.productCode));
+              }
+            }
+          } else {
+            const hasUnitRows = (await tx.$queryRawUnsafe(
+              `
+                SELECT DISTINCT product_code as productCode
+                FROM product_units
+                WHERE product_code IN (${placeholders})
+              `,
+              ...productCodesInOrder
+            )) as any[];
+            for (const row of hasUnitRows || []) {
+              if (row?.productCode) serialRequiredProductCodes.add(String(row.productCode));
+            }
+          }
+        }
+
+        if (serialRequiredProductCodes.size > 0) {
+          if (!serialNumber) {
+            throw new Error("SERIAL_REQUIRED");
+          }
+
+          const selectedUnitRows = (await tx.$queryRawUnsafe(
+            `
+              SELECT id, product_code as productCode, status
+              FROM product_units
+              WHERE serial_number = ?
+              LIMIT 1
+            `,
+            serialNumber
+          )) as any[];
+          const selectedUnit = selectedUnitRows?.[0];
+          if (!selectedUnit) {
+            throw new Error("SERIAL_NOT_FOUND");
+          }
+          if (String(selectedUnit.status || "").toLowerCase() !== "in_stock") {
+            throw new Error("SERIAL_NOT_AVAILABLE");
+          }
+          const selectedProductCode = String(selectedUnit.productCode || "");
+          if (!serialRequiredProductCodes.has(selectedProductCode)) {
+            throw new Error("SERIAL_NOT_IN_ORDER");
+          }
+
+          const targetRow = (unitRows || []).find(
+            (row: any) =>
+              String(row.productCode || "") === selectedProductCode &&
+              !row.productUnitId
+          );
+          if (!targetRow) {
+            throw new Error("SERIAL_ALREADY_ASSIGNED");
+          }
+
+          await tx.$executeRawUnsafe(
+            "UPDATE order_items SET product_unit_id = ? WHERE id = ?",
+            String(selectedUnit.id),
+            String(targetRow.id)
+          );
+          await tx.$executeRawUnsafe(
+            "UPDATE product_units SET status = 'sold' WHERE id = ?",
+            String(selectedUnit.id)
+          );
+
+          // Create warranty at serial assignment time (shipped), so it appears in warranty lists.
+          const existingWarrantyForUnit = (
+            (await tx.$queryRawUnsafe(
+              "SELECT id FROM warranties WHERE product_unit_id = ? LIMIT 1",
+              String(selectedUnit.id)
+            )) as any[]
+          )?.[0];
+
+          if (!existingWarrantyForUnit) {
+            const wdRows = (await tx.$queryRawUnsafe(
+              "SELECT warranty_days as warrantyDays FROM products WHERE product_code = ? LIMIT 1",
+              selectedProductCode
+            )) as any[];
+            const days = Number(wdRows?.[0]?.warrantyDays || 365);
+            const purchaseDate = new Date();
+            const expiryDate = new Date(purchaseDate);
+            expiryDate.setDate(expiryDate.getDate() + days);
+
+            if (hasWarrantyProductCodeColumn) {
+              await tx.$executeRawUnsafe(
+                `
+                  INSERT INTO warranties
+                  (product_unit_id, product_code, order_id, customer_id, purchase_date, expiry_date, purchase_source)
+                  VALUES (?, ?, ?, ?, ?, ?, 'online')
+                `,
+                String(selectedUnit.id),
+                selectedProductCode,
+                orderId.toString(),
+                order.customerId.toString(),
+                purchaseDate,
+                expiryDate
+              );
+            } else {
+              await tx.$executeRawUnsafe(
+                `
+                  INSERT INTO warranties
+                  (product_unit_id, order_id, customer_id, purchase_date, expiry_date, purchase_source)
+                  VALUES (?, ?, ?, ?, ?, 'online')
+                `,
+                String(selectedUnit.id),
+                orderId.toString(),
+                order.customerId.toString(),
+                purchaseDate,
+                expiryDate
               );
             }
           }
@@ -618,6 +813,45 @@ export async function PATCH(
         { success: false, message: "Forbidden" },
         { status: 403 }
       );
+    }
+
+    if (error instanceof Error) {
+      if (error.message === "SERIAL_REQUIRED") {
+        return NextResponse.json(
+          { success: false, message: "Serial number is required for this order" },
+          { status: 400 }
+        );
+      }
+      if (error.message === "SERIAL_NOT_FOUND") {
+        return NextResponse.json(
+          { success: false, message: "Selected serial number not found" },
+          { status: 400 }
+        );
+      }
+      if (error.message === "SERIAL_NOT_AVAILABLE") {
+        return NextResponse.json(
+          { success: false, message: "Selected serial number is not in stock" },
+          { status: 400 }
+        );
+      }
+      if (error.message === "SERIAL_NOT_IN_ORDER") {
+        return NextResponse.json(
+          { success: false, message: "Selected serial number does not match this order product" },
+          { status: 400 }
+        );
+      }
+      if (error.message === "SERIAL_ALREADY_ASSIGNED") {
+        return NextResponse.json(
+          { success: false, message: "Serial number already assigned for this order item" },
+          { status: 400 }
+        );
+      }
+      if (error.message === "SERIAL_COLUMN_MISSING") {
+        return NextResponse.json(
+          { success: false, message: "Database is missing order_items.product_unit_id column" },
+          { status: 500 }
+        );
+      }
     }
 
     console.error("ADMIN_ORDER_UPDATE_ERROR", error);
