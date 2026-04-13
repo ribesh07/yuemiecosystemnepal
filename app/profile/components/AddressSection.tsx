@@ -7,13 +7,15 @@ import { getSessionToken, isAuthenticatedClient } from "@/utils/clientAuth";
 
 export default function AddressSection() {
   const router = useRouter();
-  const [addresses, setAddresses] = useState([]);
+
+  const [addresses, setAddresses] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [provinces, setProvinces] = useState([]);
-  const [cities, setCities] = useState([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [cities, setCities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
   const emptyForm = {
     fullName: "",
@@ -43,12 +45,15 @@ export default function AddressSection() {
       const response = await fetch("/api/customers/addresses", {
         headers: authHeaders(),
       });
+
       const data = await response.json();
+
       if (!response.ok) {
         throw new Error(data?.message || "Failed to load addresses");
       }
+
       setAddresses(data?.data || []);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.message || "Failed to load addresses");
     } finally {
       setLoading(false);
@@ -60,16 +65,22 @@ export default function AddressSection() {
 
     const init = async () => {
       const authed = await isAuthenticatedClient();
+
       if (!authed) {
         toast.error("Please login first");
         router.replace("/account?next=/profile");
         return;
       }
 
-      const provincesRes = await fetch("/api/admin/provinces");
-      const provincesData = await provincesRes.json();
-      if (mounted) {
-        setProvinces(provincesData || []);
+      try {
+        const provincesRes = await fetch("/api/admin/provinces");
+        const provincesData = await provincesRes.json();
+
+        if (mounted) {
+          setProvinces(provincesData || []);
+        }
+      } catch (err) {
+        toast.error("Failed to load provinces");
       }
 
       await loadAddresses();
@@ -92,84 +103,117 @@ export default function AddressSection() {
     fetch("/api/admin/cities")
       .then((res) => res.json())
       .then((data) => {
-        const filtered = data.filter((c) => c.provinceId == formData.provinceId);
+        const filtered = data.filter(
+          (c: any) => c.provinceId == formData.provinceId
+        );
         setCities(filtered);
+      })
+      .catch(() => {
+        toast.error("Failed to load cities");
       });
   }, [formData.provinceId]);
 
-  const handleChange = (field, value) => {
+  const handleChange = (field: string, value: any) => {
+    if (field === "phone") {
+      value = value.replace(/[^0-9]/g, "").slice(0, 10);
+    }
+
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    setErrors((prev: any) => ({
+      ...prev,
+      [field]: "",
+    }));
   };
 
   const handleSubmit = async () => {
-    const required = {
-      fullName: formData.fullName?.trim(),
-      phone: formData.phone?.trim(),
-      provinceId: formData.provinceId,
-      cityId: formData.cityId,
-      zoneName: formData.zoneName?.trim(),
-      address: formData.address?.trim(),
-    };
+    if (saving) return;
 
-    if (
-      !required.fullName ||
-      !required.phone ||
-      !required.provinceId ||
-      !required.cityId ||
-      !required.zoneName ||
-      !required.address
-    ) {
-      toast.error("Please fill all required fields");
+    const newErrors: any = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone is required";
+    } else if (formData.phone.length !== 10) {
+      newErrors.phone = "Phone must be exactly 10 digits";
+    }
+
+    if (!formData.provinceId) {
+      newErrors.provinceId = "Please select a province";
+    }
+
+    if (!formData.cityId) {
+      newErrors.cityId = "Please select a city";
+    }
+
+    if (!formData.zoneName.trim()) {
+      newErrors.zoneName = "Zone / Area is required";
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Full address is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+
+      const firstError = Object.values(newErrors)[0];
+      toast.error(firstError as string);
+
       return;
     }
 
     setSaving(true);
+
     try {
       const endpoint = editingId
         ? `/api/customers/addresses/${editingId}`
         : "/api/customers/addresses";
+
       const method = editingId ? "PUT" : "POST";
 
       const res = await fetch(endpoint, {
         method,
         headers: authHeaders(),
-        body: JSON.stringify({
-          ...formData,
-          fullName: required.fullName,
-          phone: required.phone,
-          zoneName: required.zoneName,
-          address: required.address,
-        }),
+        body: JSON.stringify(formData),
       });
 
       const payload = await res.json();
+
       if (!res.ok) {
         throw new Error(payload?.message || "Failed to save address");
       }
 
       if (editingId) {
         setAddresses((prev) =>
-          prev.map((item) => (item.id === editingId ? payload.data : item))
+          prev.map((item) =>
+            item.id === editingId ? payload.data : item
+          )
         );
       } else {
         setAddresses((prev) => [payload.data, ...prev]);
       }
 
       toast.success(editingId ? "Address updated" : "Address added");
+
       setShowForm(false);
       setFormData(emptyForm);
       setEditingId(null);
-    } catch (error) {
+      setErrors({});
+    } catch (error: any) {
       toast.error(error.message || "Failed to save address");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleEdit = (address) => {
+  const handleEdit = (address: any) => {
     setFormData({
       fullName: address.fullName || "",
       phone: address.phone || "",
@@ -182,16 +226,19 @@ export default function AddressSection() {
       defaultShipping: Boolean(address.defaultShipping),
       defaultBilling: Boolean(address.defaultBilling),
     });
+
     setEditingId(address.id);
     setShowForm(true);
+    setErrors({});
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     try {
       const res = await fetch(`/api/customers/addresses/${id}`, {
         method: "DELETE",
         headers: authHeaders(),
       });
+
       const payload = await res.json();
 
       if (!res.ok) {
@@ -199,75 +246,74 @@ export default function AddressSection() {
       }
 
       setAddresses((prev) => prev.filter((item) => item.id !== id));
+
       toast.success("Address deleted");
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.message || "Failed to delete address");
     }
   };
 
+  const inputClass = (field: string) =>
+    `w-full border rounded px-3 py-2 ${
+      errors[field] ? "border-red-500" : "border-gray-300"
+    }`;
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-5 sm:space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-3">
-        <h2 className="text-lg sm:text-xl font-bold text-gray-900">My Addresses</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+          My Addresses
+        </h2>
+
         <button
           onClick={() => {
             setFormData(emptyForm);
             setEditingId(null);
             setShowForm(true);
+            setErrors({});
           }}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
         >
           + Add Address
         </button>
       </div>
 
-      {/* Address List */}
       <div className="space-y-4">
-        {loading && <p className="text-gray-500 text-sm">Loading addresses...</p>}
+        {loading && (
+          <p className="text-gray-500 text-sm">Loading addresses...</p>
+        )}
 
         {!loading && addresses.length === 0 && (
-          <p className="text-gray-500 text-sm">No addresses added yet.</p>
+          <p className="text-gray-500 text-sm">
+            No addresses added yet.
+          </p>
         )}
 
         {addresses.map((address) => (
           <div
             key={address.id}
-            className="border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start gap-3"
+            className="border border-gray-200 rounded-xl p-4 flex justify-between gap-3"
           >
             <div>
-              <p className="font-semibold">
-                {address.fullName}
-                {address.defaultShipping && (
-                  <span className="ml-2 text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
-                    Default Shipping
-                  </span>
-                )}
-                {address.defaultBilling && (
-                  <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                    Default Billing
-                  </span>
-                )}
-              </p>
+              <p className="font-semibold">{address.fullName}</p>
               <p className="text-sm text-gray-600">{address.phone}</p>
               <p className="text-sm text-gray-600">
-                {address.address}, {address.zone?.zoneName}, {address.city?.city},{" "}
-                {address.province?.name}
+                {address.address}, {address.zone?.zoneName},{" "}
+                {address.city?.city}, {address.province?.name}
               </p>
-              {address.landmark && (
-                <p className="text-sm text-gray-500">Landmark: {address.landmark}</p>
-              )}
             </div>
 
-            <div className="flex gap-2 text-sm w-full sm:w-auto">
+            <div className="flex gap-2">
               <button
                 onClick={() => handleEdit(address)}
-                className="flex-1 sm:flex-none px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100"
+                className="px-3 py-1 bg-blue-100 text-blue-600 rounded"
               >
                 Edit
               </button>
+
               <button
                 onClick={() => handleDelete(address.id)}
-                className="flex-1 sm:flex-none px-3 py-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100"
+                className="px-3 py-1 bg-red-100 text-red-600 rounded"
               >
                 Delete
               </button>
@@ -276,100 +322,118 @@ export default function AddressSection() {
         ))}
       </div>
 
-      {/* Address Form */}
       {showForm && (
-        <div className="border-t pt-5 sm:pt-6 space-y-4">
-          <label className="text-sm font-medium text-red-500">Full Name *</label>
+        <div className="border-t pt-5 space-y-4">
           <input
-
-            className="w-full border rounded px-3 py-2"
+            className={inputClass("fullName")}
+            placeholder="Full Name *"
             value={formData.fullName}
-            onChange={(e) => handleChange("fullName", e.target.value)}
-            placeholder="Full Name"
+            onChange={(e) =>
+              handleChange("fullName", e.target.value)
+            }
           />
-          <label className="text-sm font-medium text-red-500">Phone *</label>
+          {errors.fullName && (
+            <p className="text-red-500 text-sm">
+              {errors.fullName}
+            </p>
+          )}
+
           <input
-            className="w-full border rounded px-3 py-2"
+            className={inputClass("phone")}
+            placeholder="Phone *"
             value={formData.phone}
-            onChange={(e) => handleChange("phone", e.target.value)}
-            placeholder="Phone"
+            onChange={(e) =>
+              handleChange("phone", e.target.value)
+            }
           />
-          <label className="text-sm font-medium text-red-500">Province *</label>
+          {errors.phone && (
+            <p className="text-red-500 text-sm">
+              {errors.phone}
+            </p>
+          )}
+
           <select
-            className="w-full border rounded px-3 py-2"
+            className={inputClass("provinceId")}
             value={formData.provinceId}
-            onChange={(e) => handleChange("provinceId", e.target.value)}
+            onChange={(e) =>
+              handleChange("provinceId", e.target.value)
+            }
           >
-            <option value="">Select Province</option>
+            <option value="">Select Province *</option>
             {provinces.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
               </option>
             ))}
           </select>
-
-          <label className="text-sm font-medium text-red-500">City *</label>
+          {errors.provinceId && (
+            <p className="text-red-500 text-sm">
+              {errors.provinceId}
+            </p>
+          )}
 
           <select
-            className="w-full border rounded px-3 py-2"
+            className={inputClass("cityId")}
             value={formData.cityId}
-            onChange={(e) => handleChange("cityId", e.target.value)}
+            onChange={(e) =>
+              handleChange("cityId", e.target.value)
+            }
           >
-            <option value="">Select City</option>
+            <option value="">Select City *</option>
             {cities.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.city}
               </option>
             ))}
           </select>
-
-          <label className="text-sm font-medium text-red-500">Local Zone / Area *</label>
+          {errors.cityId && (
+            <p className="text-red-500 text-sm">
+              {errors.cityId}
+            </p>
+          )}
 
           <textarea
-            className="w-full border rounded px-3 py-2 min-h-20"
+            className={inputClass("zoneName")}
+            placeholder="Zone / Area *"
             value={formData.zoneName}
-            onChange={(e) => handleChange("zoneName", e.target.value)}
-            placeholder="Enter local zone / area"
+            onChange={(e) =>
+              handleChange("zoneName", e.target.value)
+            }
           />
-          <label className="text-sm font-medium text-red-500 ">Full Address *</label>
-          <textarea
-            className="w-full border rounded px-3 py-2 min-h-24"
-            value={formData.address}
-            onChange={(e) => handleChange("address", e.target.value)}
-            placeholder="Enter full address"
-          />
+          {errors.zoneName && (
+            <p className="text-red-500 text-sm">
+              {errors.zoneName}
+            </p>
+          )}
 
-          <label className="text-sm font-medium">Landmark (optional)</label>
+          <textarea
+            className={inputClass("address")}
+            placeholder="Full Address *"
+            value={formData.address}
+            onChange={(e) =>
+              handleChange("address", e.target.value)
+            }
+          />
+          {errors.address && (
+            <p className="text-red-500 text-sm">
+              {errors.address}
+            </p>
+          )}
+
           <input
             className="w-full border rounded px-3 py-2"
-            value={formData.landmark}
-            onChange={(e) => handleChange("landmark", e.target.value)}
             placeholder="Landmark (optional)"
+            value={formData.landmark}
+            onChange={(e) =>
+              handleChange("landmark", e.target.value)
+            }
           />
 
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={formData.defaultShipping}
-              onChange={(e) => handleChange("defaultShipping", e.target.checked)}
-            />
-            Set as default shipping address
-          </label>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={formData.defaultBilling}
-              onChange={(e) => handleChange("defaultBilling", e.target.checked)}
-            />
-            Set as default billing address
-          </label>
-
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex gap-3">
             <button
               onClick={handleSubmit}
               disabled={saving}
-              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-lg font-medium transition"
+              className="bg-orange-500 text-white px-4 py-2 rounded"
             >
               {saving ? "Saving..." : "Save Address"}
             </button>
@@ -378,6 +442,7 @@ export default function AddressSection() {
               onClick={() => {
                 setShowForm(false);
                 setEditingId(null);
+                setErrors({});
               }}
               className="border px-4 py-2 rounded"
             >
