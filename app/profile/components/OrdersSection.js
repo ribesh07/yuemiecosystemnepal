@@ -44,7 +44,7 @@ function isWithinReturnWindow(order) {
   if (!baseDate) return false;
   const diffMs = Date.now() - new Date(baseDate).getTime();
   const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  return diffDays <= 3;
+  return diffDays <= 7;
 }
 
 export default function OrdersSection() {
@@ -299,14 +299,18 @@ export default function OrdersSection() {
                           >
                             Add Review
                           </button>
-                          {canReturn && (
-                            <button
-                              onClick={() => setReturnOrder(o)}
-                              className="px-3 py-1 rounded bg-amber-100 text-amber-700 hover:bg-amber-200 text-xs"
-                            >
-                              Return
-                            </button>
-                          )}
+                          <button
+                            onClick={() => canReturn && setReturnOrder(o)}
+                            disabled={!canReturn}
+                            title={!canReturn ? "Return window expired (after 7 days from delivery)." : ""}
+                            className={`px-3 py-1 rounded text-xs ${
+                              canReturn
+                                ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            }`}
+                          >
+                            Return
+                          </button>
                         </>
                       )}
 

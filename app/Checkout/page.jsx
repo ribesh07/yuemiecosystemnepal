@@ -223,6 +223,97 @@ const CheckoutPageContent = () => {
     0
   );
   const total = subtotal + shipping;
+  const orderSummaryCard = (
+    <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 sticky top-4">
+      <h3 className="text-xl font-bold text-gray-800 mb-6">Order Summary</h3>
+
+      <div className="mb-6 pb-6 border-b border-gray-200">
+        <div className="space-y-4">
+          {summaryItems.map((item) => (
+            <div key={item.id} className="flex gap-4">
+              <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-gray-200">
+                <Image
+                  src={item?.image || "/yumei_logo.png"}
+                  alt={item?.name || "Product"}
+                  fill
+                  className="object-cover"
+                  sizes="96px"
+                />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-gray-800 text-sm mb-1 line-clamp-2">
+                  {item?.name}
+                </h4>
+                <p className="text-xs text-gray-600 mb-2">
+                  {item?.categoryName || "-"}
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    Qty: {item.quantity}
+                  </span>
+                  <span className="font-bold text-orange-500">
+                    Rs. {Number(item.sellPrice || 0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {isCartCheckout && (
+        <div className="mb-4 text-xs text-gray-500">
+          Total Items:{" "}
+          {summaryItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}
+        </div>
+      )}
+
+      <div className="space-y-3 mb-6">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600">Subtotal</span>
+          <span className="font-medium text-gray-800">Rs. {subtotal.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600">Delivery Charge</span>
+          <span className="font-medium text-gray-800">Rs. {shipping}</span>
+        </div>
+        {paymentMethod === "cod" && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">COD Fee</span>
+            <span className="font-medium text-gray-800">Rs. 0</span>
+          </div>
+        )}
+        <div className="pt-3 border-t-2 border-gray-200 flex justify-between">
+          <span className="font-bold text-gray-800">Total Amount</span>
+          <span className="font-bold text-2xl text-orange-500">
+            Rs. {total.toLocaleString()}
+          </span>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <div className="bg-green-50 rounded-xl p-3 border border-green-200">
+          <div className="flex items-center gap-2 mb-1">
+            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span className="font-semibold text-sm text-green-800">Secure Checkout</span>
+          </div>
+          <p className="text-xs text-green-700">Your information is encrypted</p>
+        </div>
+
+        <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+          <div className="flex items-center gap-2 mb-1">
+            <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+            <span className="font-semibold text-sm text-blue-800">Free Returns</span>
+          </div>
+          <p className="text-xs text-blue-700">7 days return policy</p>
+        </div>
+      </div>
+    </div>
+  );
 
   if (!authChecked || productLoading) {
     return (
@@ -320,6 +411,11 @@ const CheckoutPageContent = () => {
                     ) : null}
                   </div>
                 )}
+              </div>
+
+              {/* Order Summary (Mobile only) */}
+              <div className="lg:hidden">
+                {orderSummaryCard}
               </div>
 
               {/* Payment Method Section */}
@@ -461,97 +557,8 @@ const CheckoutPageContent = () => {
 
             {/* Right Column - Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 sticky top-4">
-                <h3 className="text-xl font-bold text-gray-800 mb-6">Order Summary</h3>
-
-                {/* Product Details */}
-                <div className="mb-6 pb-6 border-b border-gray-200">
-                  <div className="space-y-4">
-                    {summaryItems.map((item) => (
-                      <div key={item.id} className="flex gap-4">
-                        <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-gray-200">
-                          <Image
-                            src={item?.image || "/yumei_logo.png"}
-                            alt={item?.name || "Product"}
-                            fill
-                            className="object-cover"
-                            sizes="96px"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-800 text-sm mb-1 line-clamp-2">
-                            {item?.name}
-                          </h4>
-                          <p className="text-xs text-gray-600 mb-2">
-                            {item?.categoryName || "-"}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">
-                              Qty: {item.quantity}
-                            </span>
-                            <span className="font-bold text-orange-500">
-                              Rs. {Number(item.sellPrice || 0)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {isCartCheckout && (
-                  <div className="mb-4 text-xs text-gray-500">
-                    Total Items:{" "}
-                    {summaryItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}
-                  </div>
-                )}
-
-                {/* Price Breakdown */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium text-gray-800">Rs. {subtotal.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Delivery Charge</span>
-                    <span className="font-medium text-gray-800">Rs. {shipping}</span>
-                  </div>
-                  {paymentMethod === "cod" && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">COD Fee</span>
-                      <span className="font-medium text-gray-800">Rs. 0</span>
-                    </div>
-                  )}
-                  <div className="pt-3 border-t-2 border-gray-200 flex justify-between">
-                    <span className="font-bold text-gray-800">Total Amount</span>
-                    <span className="font-bold text-2xl text-orange-500">
-                      Rs. {total.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Security & Info */}
-                <div className="space-y-3">
-                  <div className="bg-green-50 rounded-xl p-3 border border-green-200">
-                    <div className="flex items-center gap-2 mb-1">
-                      <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="font-semibold text-sm text-green-800">Secure Checkout</span>
-                    </div>
-                    <p className="text-xs text-green-700">Your information is encrypted</p>
-                  </div>
-
-                  <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
-                    <div className="flex items-center gap-2 mb-1">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                      </svg>
-                      <span className="font-semibold text-sm text-blue-800">Free Returns</span>
-                    </div>
-                    <p className="text-xs text-blue-700">7 days return policy</p>
-                  </div>
-                </div>
+              <div className="hidden lg:block">
+                {orderSummaryCard}
               </div>
             </div>
           </div>

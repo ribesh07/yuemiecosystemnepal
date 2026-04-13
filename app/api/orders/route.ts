@@ -281,18 +281,18 @@ export async function POST(req: Request) {
           const expiryDate = new Date(purchaseDate);
           expiryDate.setDate(expiryDate.getDate() + days);
 
-          // Non-serial product flow.
-          if (!requiresSerial) {
-            await tx.orderItem.create({
-              data: {
-                orderId: order.id,
-                productCode: product.productCode,
-                quantity: BigInt(item.quantity),
-                price: String(unitPrice),
-                subtotal: String(unitPrice * item.quantity),
-              },
-            });
+          await tx.orderItem.create({
+            data: {
+              orderId: order.id,
+              productCode: product.productCode,
+              quantity: BigInt(item.quantity),
+              price: String(unitPrice),
+              subtotal: String(unitPrice * item.quantity),
+            },
+          });
 
+          // Non-serial products keep warranty registration at order creation.
+          if (!requiresSerial) {
             for (let i = 0; i < item.quantity; i += 1) {
               if (hasWarrantyProductCodeColumn) {
                 await tx.$executeRawUnsafe(
@@ -318,90 +318,6 @@ export async function POST(req: Request) {
                   customerId.toString(),
                   purchaseDate,
                   expiryDate
-                );
-              }
-            }
-            continue;
-          }
-
-          for (const unit of availableUnits) {
-            try {
-              await tx.orderItem.create({
-                data: {
-                  orderId: order.id,
-                  productCode: product.productCode,
-                  productUnitId: unit.id,
-                  quantity: BigInt(1),
-                  price: String(unitPrice),
-                  subtotal: String(unitPrice),
-                } as any,
-              });
-            } catch (itemError) {
-              await tx.$executeRawUnsafe(
-                `
-                  INSERT INTO order_items
-                  (orderId, productCode, product_unit_id, quantity, price, subtotal, createdAt)
-                  VALUES (?, ?, ?, ?, ?, ?, NOW())
-                `,
-                order.id.toString(),
-                product.productCode,
-                unit.id.toString(),
-                "1",
-                String(unitPrice),
-                String(unitPrice)
-              );
-            }
-
-            const existingWarranty = (
-              (await tx.$queryRawUnsafe(
-                "SELECT id FROM warranties WHERE product_unit_id = ? LIMIT 1",
-                unit.id.toString()
-              )) as any[]
-            )?.[0];
-
-            if (!existingWarranty) {
-              if (hasWarrantyProductCodeColumn) {
-                await tx.$executeRawUnsafe(
-                  `
-                    INSERT INTO warranties
-                    (product_unit_id, product_code, order_id, customer_id, purchase_date, expiry_date, purchase_source)
-                    VALUES (?, ?, ?, ?, ?, ?, 'online')
-                  `,
-                  unit.id.toString(),
-                  product.productCode,
-                  order.id.toString(),
-                  customerId.toString(),
-                  purchaseDate,
-                  expiryDate
-                );
-              } else {
-                await tx.$executeRawUnsafe(
-                  `
-                    INSERT INTO warranties
-                    (product_unit_id, order_id, customer_id, purchase_date, expiry_date, purchase_source)
-                    VALUES (?, ?, ?, ?, ?, 'online')
-                  `,
-                  unit.id.toString(),
-                  order.id.toString(),
-                  customerId.toString(),
-                  purchaseDate,
-                  expiryDate
-                );
-              }
-            }
-          }
-
-          if (availableUnits.length > 0) {
-            if (txAny.productUnit?.updateMany) {
-              await txAny.productUnit.updateMany({
-                where: { id: { in: availableUnits.map((u: any) => u.id) } },
-                data: { status: "sold" },
-              });
-            } else {
-              for (const u of availableUnits) {
-                await tx.$executeRawUnsafe(
-                  "UPDATE product_units SET status = 'sold' WHERE id = ?",
-                  u.id.toString()
                 );
               }
             }

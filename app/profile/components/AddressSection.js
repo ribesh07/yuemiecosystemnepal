@@ -279,20 +279,22 @@ export default function AddressSection() {
       {/* Address Form */}
       {showForm && (
         <div className="border-t pt-5 sm:pt-6 space-y-4">
+          <label className="text-sm font-medium text-red-500">Full Name *</label>
           <input
+
             className="w-full border rounded px-3 py-2"
             value={formData.fullName}
             onChange={(e) => handleChange("fullName", e.target.value)}
             placeholder="Full Name"
           />
-
+          <label className="text-sm font-medium text-red-500">Phone *</label>
           <input
             className="w-full border rounded px-3 py-2"
             value={formData.phone}
             onChange={(e) => handleChange("phone", e.target.value)}
             placeholder="Phone"
           />
-
+          <label className="text-sm font-medium text-red-500">Province *</label>
           <select
             className="w-full border rounded px-3 py-2"
             value={formData.provinceId}
@@ -305,6 +307,8 @@ export default function AddressSection() {
               </option>
             ))}
           </select>
+
+          <label className="text-sm font-medium text-red-500">City *</label>
 
           <select
             className="w-full border rounded px-3 py-2"
@@ -319,13 +323,15 @@ export default function AddressSection() {
             ))}
           </select>
 
+          <label className="text-sm font-medium text-red-500">Local Zone / Area *</label>
+
           <textarea
             className="w-full border rounded px-3 py-2 min-h-20"
             value={formData.zoneName}
             onChange={(e) => handleChange("zoneName", e.target.value)}
             placeholder="Enter local zone / area"
           />
-
+          <label className="text-sm font-medium text-red-500 ">Full Address *</label>
           <textarea
             className="w-full border rounded px-3 py-2 min-h-24"
             value={formData.address}
@@ -333,6 +339,7 @@ export default function AddressSection() {
             placeholder="Enter full address"
           />
 
+          <label className="text-sm font-medium">Landmark (optional)</label>
           <input
             className="w-full border rounded px-3 py-2"
             value={formData.landmark}

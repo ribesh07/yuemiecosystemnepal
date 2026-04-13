@@ -4,8 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-const PAYMENT_STATUS_OPTIONS = ["unpaid", "paid", "refunded"];
-
 const ALLOWED_TRANSITIONS = {
   processing: ["processing", "shipped", "cancelled"],
   shipped: ["shipped", "delivered", "cancelled"],
@@ -57,6 +55,34 @@ function getFirstProduct(order) {
   return item?.product?.name || item?.productCode || "N/A";
 }
 
+function getAllowedPaymentStatuses(currentStatus) {
+  const normalized = String(currentStatus || "").toLowerCase().trim();
+  if (normalized === "paid") return ["paid", "refunded"];
+  if (normalized === "refunded") return ["refunded"];
+  if (normalized === "partial") return ["partial", "paid", "refunded"];
+  return ["unpaid", "paid"];
+}
+
+function getOrderPaymentMode(order) {
+  if (order?.payments?.length) {
+    const firstPayment = order.payments[0];
+    if (firstPayment?.paymentMode) return String(firstPayment.paymentMode);
+  }
+  if (String(order?.paymentMethod || "").toLowerCase() === "connectips") {
+    return "ConnectIPS";
+  }
+  return "";
+}
+
+function getOrderTransactionId(order) {
+  if (order?.payments?.length) {
+    const firstPayment = order.payments[0];
+    if (firstPayment?.transactionId) return String(firstPayment.transactionId);
+  }
+  if (order?.transactionId) return String(order.transactionId);
+  return "";
+}
+
 function StatusBadge({ value }) {
   const map = {
     processing: "bg-amber-100 text-amber-700",
@@ -97,6 +123,10 @@ export default function Ordermanagement() {
     type: "", // shipped | cancelled
     orderId: null,
     nextStatus: "",
+    serialNumber: "",
+    serialNumbers: [],
+    serialSelectionRequired: false,
+    serialLoading: false,
     courierName: "",
     cnNumber: "",
     cnDate: "",
@@ -224,18 +254,51 @@ export default function Ordermanagement() {
     [router]
   );
 
-  const openStatusModal = (orderId, nextStatus) => {
+  const openStatusModal = async (order, nextStatus) => {
+    const token = getAdminToken();
+    const orderId = String(order?.id || "");
     setStatusModal({
       open: true,
       type: nextStatus,
       orderId,
       nextStatus,
+      serialNumber: "",
+      serialNumbers: [],
+      serialSelectionRequired: false,
+      serialLoading: nextStatus === "shipped",
       courierName: "",
       cnNumber: "",
       cnDate: "",
       cancelReason: "",
       remark: "",
     });
+
+    if (nextStatus !== "shipped" || !orderId || !token) return;
+
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.message || "Failed to load serial numbers");
+      }
+      const detail = payload?.data || {};
+      const serialNumbers = Array.isArray(detail.availableSerialNumbers)
+        ? detail.availableSerialNumbers
+        : [];
+      const serialSelectionRequired = Boolean(detail.serialSelectionRequired);
+
+      setStatusModal((prev) => ({
+        ...prev,
+        serialNumbers,
+        serialSelectionRequired,
+        serialLoading: false,
+      }));
+    } catch (error) {
+      setStatusModal((prev) => ({ ...prev, serialLoading: false }));
+      toast.error(error?.message || "Failed to load serial numbers");
+    }
   };
 
   const closeStatusModal = () => {
@@ -244,6 +307,10 @@ export default function Ordermanagement() {
       type: "",
       orderId: null,
       nextStatus: "",
+      serialNumber: "",
+      serialNumbers: [],
+      serialSelectionRequired: false,
+      serialLoading: false,
       courierName: "",
       cnNumber: "",
       cnDate: "",
@@ -258,6 +325,14 @@ export default function Ordermanagement() {
       toast.error("Courier name is required");
       return;
     }
+    if (
+      statusModal.nextStatus === "shipped" &&
+      statusModal.serialSelectionRequired &&
+      !statusModal.serialNumber
+    ) {
+      toast.error("Please select serial number");
+      return;
+    }
     if (statusModal.nextStatus === "cancelled" && !statusModal.cancelReason.trim()) {
       toast.error("Cancel reason is required");
       return;
@@ -265,6 +340,10 @@ export default function Ordermanagement() {
 
     await updateOrder(statusModal.orderId, {
       orderStatus: statusModal.nextStatus,
+      serialNumber:
+        statusModal.nextStatus === "shipped"
+          ? statusModal.serialNumber || undefined
+          : undefined,
       courierName:
         statusModal.nextStatus === "shipped"
           ? statusModal.courierName.trim()
@@ -286,13 +365,16 @@ export default function Ordermanagement() {
     closeStatusModal();
   };
 
-  const openPaymentModal = (orderId, nextStatus) => {
+  const openPaymentModal = (order, nextStatus) => {
+    const currentMode = getOrderPaymentMode(order);
+    const currentTxn = getOrderTransactionId(order);
+    const isConnectIPS = currentMode.toLowerCase() === "connectips";
     setPaymentModal({
       open: true,
-      orderId,
+      orderId: String(order.id),
       nextStatus,
-      paymentMode: "COD",
-      transactionId: "",
+      paymentMode: currentMode || "COD",
+      transactionId: isConnectIPS ? currentTxn : "",
       remark: "",
     });
   };
@@ -497,6 +579,7 @@ export default function Ordermanagement() {
                   const id = String(order.id);
                   const transitionOptions =
                     ALLOWED_TRANSITIONS[order.orderStatus] || [order.orderStatus];
+                  const paymentOptions = getAllowedPaymentStatuses(order.paymentStatus);
 
                   return (
                     <tr key={id} className="border-b last:border-0">
@@ -530,7 +613,7 @@ export default function Ordermanagement() {
                               const nextStatus = e.target.value;
                               if (nextStatus === order.orderStatus) return;
                               if (nextStatus === "shipped" || nextStatus === "cancelled") {
-                                openStatusModal(id, nextStatus);
+                                openStatusModal(order, nextStatus);
                                 return;
                               }
                               updateOrder(id, { orderStatus: nextStatus });
@@ -558,14 +641,14 @@ export default function Ordermanagement() {
                                 nextPaymentStatus === "paid" ||
                                 nextPaymentStatus === "refunded"
                               ) {
-                                openPaymentModal(id, nextPaymentStatus);
+                                openPaymentModal(order, nextPaymentStatus);
                                 return;
                               }
                               updateOrder(id, { paymentStatus: nextPaymentStatus });
                             }}
                             className="w-full rounded-md border px-2 py-1 text-xs"
                           >
-                            {PAYMENT_STATUS_OPTIONS.map((status) => (
+                            {paymentOptions.map((status) => (
                               <option key={status} value={status}>
                                 {status}
                               </option>
@@ -646,6 +729,31 @@ export default function Ordermanagement() {
                 <div className="font-semibold">Total: {formatMoney(selectedOrder.totalAmount)}</div>
               </div>
             </div>
+
+            {String(selectedOrder.paymentStatus || "").toLowerCase() === "paid" &&
+              getOrderPaymentMode(selectedOrder).toLowerCase() === "connectips" && (
+                <div className="rounded-md border p-3 bg-gray-50 text-sm space-y-2">
+                  <div className="font-semibold text-gray-800">ConnectIPS Payment</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-600">Payment Mode</label>
+                      <input
+                        value={getOrderPaymentMode(selectedOrder)}
+                        readOnly
+                        className="w-full rounded-md border bg-gray-100 px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-600">Transaction ID</label>
+                      <input
+                        value={getOrderTransactionId(selectedOrder)}
+                        readOnly
+                        className="w-full rounded-md border bg-gray-100 px-3 py-2 text-sm font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
             <div>
               <div className="text-sm font-semibold mb-2">Items</div>
@@ -815,6 +923,40 @@ export default function Ordermanagement() {
             {statusModal.nextStatus === "shipped" && (
               <div className="space-y-3">
                 <div className="space-y-1">
+                  <label className="text-sm text-gray-700">Choose warranty serial number</label>
+                  <select
+                    value={statusModal.serialNumber}
+                    onChange={(e) =>
+                      setStatusModal((prev) => ({ ...prev, serialNumber: e.target.value }))
+                    }
+                    className="w-full rounded-md border px-3 py-2 text-sm"
+                    disabled={statusModal.serialLoading || !statusModal.serialSelectionRequired}
+                  >
+                    {!statusModal.serialSelectionRequired ? (
+                      <option value="">No serial number required</option>
+                    ) : (
+                      <option value="">Select Serial Number</option>
+                    )}
+                    {(statusModal.serialNumbers || []).map((serialItem) => (
+                      <option
+                        key={`${serialItem.productCode}-${serialItem.serialNumber}`}
+                        value={serialItem.serialNumber}
+                      >
+                        {`${serialItem.productName || serialItem.productCode || "Product"} - ${serialItem.serialNumber}`}
+                      </option>
+                    ))}
+                  </select>
+                  {statusModal.serialLoading && (
+                    <p className="text-xs text-gray-500">Loading serial numbers...</p>
+                  )}
+                  {statusModal.serialSelectionRequired &&
+                    !statusModal.serialLoading &&
+                    (!statusModal.serialNumbers || statusModal.serialNumbers.length === 0) && (
+                      <p className="text-xs text-red-600">
+                        No in-stock serial numbers available for this order.
+                      </p>
+                    )}
+
                   <label className="text-sm text-gray-700">Courier Name</label>
                   <input
                     value={statusModal.courierName}
@@ -936,9 +1078,21 @@ export default function Ordermanagement() {
                 onChange={(e) =>
                   setPaymentModal((prev) => ({ ...prev, transactionId: e.target.value }))
                 }
+                readOnly={
+                  paymentModal.paymentMode.toLowerCase() === "connectips" &&
+                  paymentModal.nextStatus === "refunded" &&
+                  Boolean(paymentModal.transactionId)
+                }
                 className="w-full rounded-md border px-3 py-2 text-sm"
                 placeholder="TXN123456"
               />
+              {paymentModal.paymentMode.toLowerCase() === "connectips" &&
+                paymentModal.nextStatus === "refunded" &&
+                Boolean(paymentModal.transactionId) && (
+                  <p className="text-xs text-gray-500">
+                    ConnectIPS transaction ID is auto-filled and locked.
+                  </p>
+                )}
             </div>
 
             <div className="space-y-1">

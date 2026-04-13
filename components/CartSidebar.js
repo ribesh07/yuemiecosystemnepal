@@ -20,6 +20,23 @@ export default function CartSidebar() {
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(
+      new CustomEvent("cart-sidebar-visibility", {
+        detail: { isOpen },
+      })
+    );
+
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("cart-sidebar-visibility", {
+          detail: { isOpen: false },
+        })
+      );
+    };
+  }, [isOpen]);
+
   // Load cart + listen for open event
   useEffect(() => {
     loadCart();

@@ -1,12 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function TawkToWidget() {
   const number = "9802341806"; 
   const message = "Hello! I'm interested in your products !";
 
   const [showSelection, setShowSelection] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  useEffect(() => {
+    const onCartVisibility = (event) => {
+      const open = Boolean(event?.detail?.isOpen);
+      setCartOpen(open);
+      if (open) {
+        setShowSelection(false);
+      }
+    };
+    window.addEventListener("cart-sidebar-visibility", onCartVisibility);
+    return () => {
+      window.removeEventListener("cart-sidebar-visibility", onCartVisibility);
+    };
+  }, []);
 
   const handleChatIconClick = (e) => {
     e.preventDefault();
@@ -39,7 +54,11 @@ export default function TawkToWidget() {
   return (
     <>
       {/* Chat Icon */}
-      <div className="fixed bottom-2 right-3 z-50 flex flex-col items-center justify-center">
+      <div
+        className={`fixed bottom-2 right-3 z-50 flex flex-col items-center justify-center transition-opacity duration-200 ${
+          cartOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
+      >
         <button
           onClick={handleChatIconClick}
           className="hover:scale-110 transform text-white p-3 rounded-full flex items-center justify-center transition-all duration-300 animate-bounce"

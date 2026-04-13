@@ -67,7 +67,7 @@ const baseHtml = (content: string) => {
                 </tr>
               </table>
               <p style="margin:20px 0 4px;color:#555;font-size:11px;font-family:Arial,sans-serif;">© ${new Date().getFullYear()} YuemiNepal. All rights reserved.</p>
-              <p style="margin:0;color:#444;font-size:11px;font-family:Arial,sans-serif;">Kathmandu, Nepal &nbsp;·&nbsp; <a href="mailto:yuemineppal@gmail.com" style="color:#9a8a72;text-decoration:none;">yuemineppal@gmail.com</a></p>
+              <p style="margin:0;color:#444;font-size:11px;font-family:Arial,sans-serif;">Kathmandu, Nepal &nbsp;·&nbsp; <a href="mailto:yueminepal@gmail.com" style="color:#9a8a72;text-decoration:none;">yueminepal@gmail.com</a></p>
             </td>
           </tr>
 
