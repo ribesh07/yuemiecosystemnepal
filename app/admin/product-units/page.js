@@ -27,6 +27,19 @@ function formatDate(value) {
   return new Date(value).toLocaleString();
 }
 
+function normalizeUnitStatus(value) {
+  const raw = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+
+  if (raw === "instock") return "in_stock";
+  if (raw === "in_stock") return "in_stock";
+  if (raw === "sold") return "sold";
+  if (raw === "returned") return "returned";
+  return "in_stock";
+}
+
 export default function ProductUnitsPage() {
   const router = useRouter();
   const openConfirm = useConfirmModalStore((state) => state.open);
@@ -104,7 +117,7 @@ export default function ProductUnitsPage() {
         });
       }
       const entry = grouped.get(key);
-      const status = String(unit.status || "");
+      const status = normalizeUnitStatus(unit.status);
       entry.total += 1;
       if (status === "in_stock") entry.in_stock += 1;
       if (status === "sold") entry.sold += 1;
@@ -155,7 +168,7 @@ export default function ProductUnitsPage() {
   const startEdit = (unit) => {
     setEditingId(String(unit.id));
     setEditSerial(unit.serialNumber || "");
-    setEditStatus(unit.status || "in_stock");
+    setEditStatus(normalizeUnitStatus(unit.status));
   };
 
   const cancelEdit = () => {
@@ -179,7 +192,7 @@ export default function ProductUnitsPage() {
         },
         body: JSON.stringify({
           serialNumber: editSerial.trim(),
-          status: editStatus,
+          status: normalizeUnitStatus(editStatus),
         }),
       });
       const payload = await res.json();
@@ -487,7 +500,7 @@ export default function ProductUnitsPage() {
                           <option value="returned">returned</option>
                         </select>
                       ) : (
-                        unit.status
+                        normalizeUnitStatus(unit.status)
                       )}
                     </td>
                     <td className="px-4 py-3">{formatDate(unit.createdAt)}</td>
