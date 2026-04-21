@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-
 export default function AuthPage() {
   const nameRegex = /^[A-Za-z\s]+$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -11,6 +10,7 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
   const [formData, setFormData] = useState({
     firstname: "",
@@ -25,63 +25,70 @@ export default function AuthPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
     if (name === "phone") {
       const numericValue = value.replace(/[^0-9]/g, "").slice(0, 10);
       setFormData((prev) => ({ ...prev, [name]: numericValue }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+
+    // remove error while typing
+    setErrors((prev: any) => ({ ...prev, [name]: "" }));
   };
 
   const handleCreateAccount = async () => {
     if (isSubmitting) return;
 
-    // 1️⃣ Validation
-    if (
-      !formData.firstname ||
-      !formData.lastname ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword ||
-      !formData.phone
-    ) {
-      toast.error("Please fill in all required fields.");
+    const newErrors: any = {};
+
+    if (!formData.firstname) {
+      newErrors.firstname = "First name is required";
+    } else if (!nameRegex.test(formData.firstname)) {
+      newErrors.firstname = "Only alphabets allowed";
+    }
+
+    if (!formData.lastname) {
+      newErrors.lastname = "Last name is required";
+    } else if (!nameRegex.test(formData.lastname)) {
+      newErrors.lastname = "Only alphabets allowed";
+    }
+
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    if (!formData.phone) {
+      newErrors.phone = "Mobile number is required";
+    } else if (formData.phone.length !== 10) {
+      newErrors.phone = "Must be 10 digits";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Minimum 6 characters";
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+
+      const firstError = Object.values(newErrors)[0];
+      toast.error(firstError as string);
       return;
     }
 
-    if (!nameRegex.test(formData.firstname)) {
-      toast.error("First name should contain alphabets only.");
-      return;
-    }
-
-    if (!nameRegex.test(formData.lastname)) {
-      toast.error("Last name should contain alphabets only.");
-      return;
-    }
-
-    if (!emailRegex.test(formData.email)) {
-      toast.error("Please enter a valid email address.");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast.error("Password should be at least 6 characters long.");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Password and Confirm Password do not match.");
-      return;
-    }
-
-    if (formData.phone.length !== 10) {
-      toast.error("Mobile number should be exactly 10 digits.");
-      return;
-    }
-
-    // 2️⃣ API call
     try {
       setIsSubmitting(true);
+
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,53 +119,62 @@ export default function AuthPage() {
     }
   };
 
+  const inputClass = (field: string) =>
+    `w-full px-4 py-3 border rounded-lg focus:ring-2 ${
+      errors[field] ? "border-red-500 focus:ring-red-400" : "focus:ring-orange-500"
+    }`;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-orange-600 mb-2">CREATE ACCOUNT</h1>
         </div>
+
         <div className="space-y-4">
           {/* First Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+            <label className="block text-sm font-medium mb-1">First Name *</label>
             <input
               name="firstname"
               value={formData.firstname}
               onChange={handleInputChange}
               placeholder="Enter First Name"
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
+              className={inputClass("firstname")}
             />
+            {errors.firstname && <p className="text-red-500 text-sm mt-1">{errors.firstname}</p>}
           </div>
 
           {/* Last Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+            <label className="block text-sm font-medium mb-1">Last Name *</label>
             <input
               name="lastname"
               value={formData.lastname}
               onChange={handleInputChange}
               placeholder="Enter Last Name"
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
+              className={inputClass("lastname")}
             />
+            {errors.lastname && <p className="text-red-500 text-sm mt-1">{errors.lastname}</p>}
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
+            <label className="block text-sm font-medium mb-1">E-mail *</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
               placeholder="Enter Email"
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
+              className={inputClass("email")}
             />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number *</label>
+            <label className="block text-sm font-medium mb-1">Mobile Number *</label>
             <input
               type="tel"
               name="phone"
@@ -166,13 +182,14 @@ export default function AuthPage() {
               onChange={handleInputChange}
               placeholder="Enter Mobile Number"
               maxLength={10}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500"
+              className={inputClass("phone")}
             />
+            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+            <label className="block text-sm font-medium mb-1">Password *</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -180,21 +197,22 @@ export default function AuthPage() {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Enter Password"
-                className="w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-orange-500"
+                className={inputClass("password")}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-3 text-gray-400"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label>
+            <label className="block text-sm font-medium mb-1">Confirm Password *</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -202,32 +220,35 @@ export default function AuthPage() {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 placeholder="Confirm Password"
-                className="w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-orange-500"
+                className={inputClass("confirmPassword")}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-3 text-gray-400"
               >
                 {showConfirmPassword ? "Hide" : "Show"}
               </button>
             </div>
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+            )}
           </div>
 
           {/* Submit */}
           <button
             onClick={handleCreateAccount}
             disabled={isSubmitting}
-            className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 mt-4 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 mt-4 disabled:opacity-60"
           >
             {isSubmitting ? "CREATING..." : "CREATE ACCOUNT"}
           </button>
 
-          {/* Already have account */}
-          <div className="mt-6 text-center">
+          {/* Login */}
+          <div className="text-center mt-4">
             <button
               onClick={() => router.push("/account")}
-              className="text-blue-600 hover:text-blue-800 font-medium"
+              className="text-blue-600 hover:text-blue-800"
             >
               Already have an account? Sign in
             </button>

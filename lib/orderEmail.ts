@@ -257,7 +257,7 @@ export function buildOrderPlacedEmail(
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td style="background:#fffbf2;border:1px solid #e8d9b5;border-radius:8px;padding:16px 20px;">
-                <p style="margin:0;font-size:13px;color:#7a6020;font-family:Arial,sans-serif;">📎 <strong>Your invoice is attached</strong> to this email as a PDF.</p>
+                
               </td>
             </tr>
           </table>

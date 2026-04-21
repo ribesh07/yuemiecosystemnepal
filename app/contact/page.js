@@ -81,7 +81,7 @@ const ContactPage = () => {
           <div className="space-y-2 text-gray-700">
             <p className="font-medium">Autozone Traders</p>
             <p>
-              <span className="font-semibold">Address:</span> Universiry RD, Kuleshwor-14, kathmandu, Nepal
+              <span className="font-semibold">Address:</span> University RD, Kuleshwor-14, kathmandu, Nepal
             </p>
             <p>
               <span className="font-semibold">Phone Number:</span> 9802341806 

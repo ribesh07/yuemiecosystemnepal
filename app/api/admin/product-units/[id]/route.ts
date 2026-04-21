@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
 import { requireAdminRole } from "@/lib/auth";
+import { serializeBigInt } from "@/lib/serializeBigInt";
 
 function parseId(id: string) {
   try {
@@ -8,6 +9,19 @@ function parseId(id: string) {
   } catch {
     return null;
   }
+}
+
+function normalizeUnitStatus(value: unknown) {
+  const raw = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+
+  if (raw === "instock") return "in_stock";
+  if (raw === "in_stock") return "in_stock";
+  if (raw === "sold") return "sold";
+  if (raw === "returned") return "returned";
+  return "";
 }
 
 export async function PUT(
@@ -27,7 +41,7 @@ export async function PUT(
 
     const body = await req.json();
     const serialNumber = String(body?.serialNumber || "").trim();
-    const status = String(body?.status || "").trim();
+    const status = normalizeUnitStatus(body?.status);
     const allowedStatus = ["in_stock", "sold", "returned"];
 
     if (!serialNumber && !status) {
@@ -86,7 +100,7 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       message: "Product unit updated",
-      data: updated?.[0] || null,
+      data: serializeBigInt(updated?.[0] || null),
     });
   } catch (error) {
     if (
