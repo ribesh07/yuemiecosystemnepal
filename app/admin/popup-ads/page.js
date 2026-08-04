@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import useConfirmModalStore from "@/store/confirmModalStore";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 
 const API_URL = "/api/popup-ads";
@@ -195,7 +196,7 @@ export default function PopupAdsAdmin() {
                     {ad.imageUrl ? (
                       <div className="w-24 h-16 rounded-lg overflow-hidden border border-slate-200 shrink-0">
                         <img
-                          src={ad.imageUrl}
+                          src={resolveImageUrl(ad.imageUrl, "/no-image.png")}
                           alt={ad.title}
                           className="w-full h-full object-cover"
                         />

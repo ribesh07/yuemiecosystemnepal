@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 export default function EditBannerPage() {
   const params = useParams();
@@ -18,12 +19,6 @@ export default function EditBannerPage() {
   const [existingImage, setExistingImage] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const resolveImageUrl = (imageUrl) => {
-    if (!imageUrl) return "";
-    if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-    return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
-  };
 
   useEffect(() => {
     if (!bannerId) return;

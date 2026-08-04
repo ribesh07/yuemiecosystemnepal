@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { getSessionToken, isAuthenticatedClient } from "@/utils/clientAuth";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 function Modal({ title, isOpen, onClose, children }) {
   if (!isOpen) return null;
@@ -29,12 +30,6 @@ function Modal({ title, isOpen, onClose, children }) {
 function formatDate(value) {
   if (!value) return "-";
   return new Date(value).toLocaleDateString();
-}
-
-function resolveImageUrl(imageUrl) {
-  if (!imageUrl) return "/no-image.png";
-  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
 }
 
 function isWithinReturnWindow(order) {

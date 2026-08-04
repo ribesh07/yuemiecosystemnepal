@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import useConfirmModalStore from "@/store/confirmModalStore";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 import toast from "react-hot-toast";
 
 
@@ -96,7 +97,7 @@ export default function CategoriesListPage() {
                   <td className="px-4 py-2 border-b">
                     {cat.image ? (
                       <img
-                        src={cat.image}
+                        src={resolveImageUrl(cat.image, "/images/default-category.jpg")}
                         alt={cat.name}
                         className="w-20 h-20 object-cover rounded"
                       />

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Upload, Save, RotateCcw, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import useConfirmModalStore from "@/store/confirmModalStore";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 export default function ProductEditPage() {
   const openConfirm = useConfirmModalStore((state) => state.open);
@@ -46,12 +47,6 @@ export default function ProductEditPage() {
     mainImage: null,
     productImages: [],
   });
-
-  const resolveImageUrl = (imageUrl) => {
-    if (!imageUrl) return "/no-image.png";
-    if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-    return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
-  };
 
   useEffect(() => {
     const fetchCategories = async () => {

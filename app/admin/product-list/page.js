@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Edit2, Trash2, Info, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import useConfirmModalStore from "@/store/confirmModalStore";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 import toast from "react-hot-toast";
 
@@ -20,12 +21,6 @@ export default function ProductListPage() {
   // const [showConfirm, setShowConfirm] = useState(false);
   // const [deleteId, setDeleteId] = useState(null);
   const openConfirm = useConfirmModalStore((state) => state.open);
-
-  const resolveImageUrl = (imageUrl) => {
-    if (!imageUrl) return "/no-image.png";
-    if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-    return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
-  };
 
   // Fetch Products
   useEffect(() => {

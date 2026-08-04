@@ -3,16 +3,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import useConfirmModalStore from "@/store/confirmModalStore";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 export default function BannerList() {
   const [banners, setBanners] = useState([]);
   const openConfirm = useConfirmModalStore((state) => state.open);
-  const resolveImageUrl = (imageUrl) => {
-    if (!imageUrl) return "/no-image.png";
-    if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-    return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
-  };
-
   const fetchBanners = async () => {
     const res = await fetch("/api/banners");
     const data = await res.json();

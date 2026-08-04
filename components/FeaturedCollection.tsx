@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { apiRequest } from '@/utils/ApisafeCalls';
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 interface Product {
   id: string;
@@ -35,12 +36,6 @@ interface Category {
   id: string;
   category: string;
   image: string;
-}
-
-function resolveImageUrl(imageUrl?: string | null) {
-  if (!imageUrl) return "/images/default-product.jpg";
-  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
 }
 
 export default function FeaturedCollections() {
@@ -257,8 +252,8 @@ export default function FeaturedCollections() {
                   >
                     <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                       <div className="relative h-40 sm:h-48">
-                        <Image
-                          src={resolveImageUrl(product.mainImage)}
+                          <Image
+                          src={resolveImageUrl(product.mainImage, "/images/default-product.jpg")}
                           alt={product.name}
                           fill
                           className="object-contain p-3"
@@ -313,7 +308,7 @@ export default function FeaturedCollections() {
                   <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                     <div className="relative h-56 sm:h-64 md:h-72">
                       <Image
-                        src={resolveImageUrl(product.mainImage)}
+                        src={resolveImageUrl(product.mainImage, "/images/default-product.jpg")}
                         alt={product.name}
                         fill
                         className="object-contain p-6 group-hover:scale-110 transition-transform duration-500"

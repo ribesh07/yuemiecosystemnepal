@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import useConfirmModalStore from "@/store/confirmModalStore";
 import useWarningModalStore from "@/store/warningModalStore";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 function getAdminToken() {
   if (typeof window === "undefined") return null;
@@ -58,12 +59,6 @@ export default function ProductUnitsPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewProduct, setPreviewProduct] = useState(null);
-
-  const resolveImageUrl = (imageUrl) => {
-    if (!imageUrl) return "/no-image.png";
-    if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-    return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
-  };
 
   const loadUnits = useCallback(async () => {
     const token = getAdminToken();

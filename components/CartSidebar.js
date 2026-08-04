@@ -11,6 +11,7 @@ import {
   setCheckoutSelection,
   setCartItems as persistCartItems,
 } from "@/utils/cartClient";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 export default function CartSidebar() {
   const router = useRouter();
@@ -227,7 +228,7 @@ export default function CartSidebar() {
                       <div className="w-16 h-16 sm:w-20 sm:h-20 border rounded flex items-center justify-center overflow-hidden shrink-0">
                         {item.image ? (
                           <img
-                            src={item.image}
+                            src={resolveImageUrl(item.image, "/no-image.png")}
                             alt={item.name}
                             className="object-cover w-full h-full"
                           />
