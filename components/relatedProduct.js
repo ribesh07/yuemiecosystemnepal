@@ -2,12 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-
-function resolveImageUrl(imageUrl) {
-  if (!imageUrl) return "/yumei_logo.png";
-  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
-}
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 function getGalleryImages(product) {
   const imagePaths = product?.images?.[0]?.imagePath;
@@ -110,7 +105,7 @@ function ProductCard({ product, onClick }) {
     >
       <div className="bg-gray-50 rounded-lg overflow-hidden mb-4 h-64 flex items-center justify-center">
         <img
-          src={resolveImageUrl(displayImage)}
+          src={resolveImageUrl(displayImage, "/yumei_logo.png")}
           alt={product?.name || "Product"}
           className="h-full object-contain transition-all duration-300 group-hover:scale-105"
         />
@@ -126,4 +121,3 @@ function ProductCard({ product, onClick }) {
     </div>
   );
 }
-

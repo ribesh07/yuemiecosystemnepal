@@ -3,6 +3,7 @@
 import { use, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "@/utils/ApisafeCalls";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 interface Product {
   id: string;
@@ -15,12 +16,6 @@ interface Product {
   available: boolean;
   mainImage: string;
   brandName: string;
-}
-
-function resolveImageUrl(imageUrl?: string | null) {
-  if (!imageUrl) return "/images/default-product.jpg";
-  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
 }
 
 export default function CategoryProductsPage({
@@ -359,7 +354,7 @@ export default function CategoryProductsPage({
                   {/* Image Container */}
                   <div className="relative aspect-square bg-gray-50 overflow-hidden">
                     <img
-                      src={resolveImageUrl(product.mainImage)}
+                      src={resolveImageUrl(product.mainImage, "/images/default-product.jpg")}
                       alt={product.name}
                       className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"

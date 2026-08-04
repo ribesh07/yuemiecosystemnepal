@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 const toNumber = (value) => {
   const parsed = Number(value);
@@ -175,7 +176,7 @@ const Bestseller = () => {
                 <div className="relative bg-gray-100 p-2 sm:p-3">
                   <div className="aspect-square relative">
                     <Image
-                      src={product.image}
+                      src={resolveImageUrl(product.image, "/yumei_logo.png")}
                       alt={product.name}
                       fill
                       className="object-contain"
@@ -215,7 +216,7 @@ const Bestseller = () => {
 
                 <div className="aspect-square relative">
                   <Image
-                    src={product.image}
+                    src={resolveImageUrl(product.image, "/yumei_logo.png")}
                     alt={product.name}
                     fill
                     className="object-contain"

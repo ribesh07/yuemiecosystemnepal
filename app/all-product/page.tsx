@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "@/utils/ApisafeCalls";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 interface Product {
   id: string;
@@ -24,12 +25,6 @@ interface Category {
   id: string;
   category: string;
   image: string;
-}
-
-function resolveImageUrl(imageUrl?: string | null) {
-  if (!imageUrl) return "/yumei_logo.png";
-  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
 }
 
 export default function AllProductPage() {
@@ -413,7 +408,7 @@ export default function AllProductPage() {
                   {/* Image Container */}
                   <div className="relative aspect-square bg-gray-50 overflow-hidden">
                     <Image
-                      src={resolveImageUrl(product.image)}
+                      src={resolveImageUrl(product.image, "/yumei_logo.png")}
                       alt={product.title}
                       fill
                       className="object-contain p-4 group-hover:scale-110 transition-transform duration-500"
@@ -499,7 +494,7 @@ export default function AllProductPage() {
                     {/* Image */}
                     <div className="relative w-48 h-48 flex-shrink-0 bg-gray-50 rounded-xl overflow-hidden">
                       <Image
-                        src={resolveImageUrl(product.image)}
+                        src={resolveImageUrl(product.image, "/yumei_logo.png")}
                         alt={product.title}
                         fill
                         className="object-contain p-4 group-hover:scale-110 transition-transform duration-500"

@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 const YuemiCategoriesDropdown = () => {
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -72,7 +73,7 @@ const YuemiCategoriesDropdown = () => {
               <div className="flex items-center gap-4 flex-1">
                 <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 border-orange-200">
                   <Image
-                    src={category.image}
+                    src={resolveImageUrl(category.image, "/images/default-category.jpg")}
                     alt={category.name}
                     fill
                     className="object-cover"
@@ -150,7 +151,7 @@ const YuemiCategoriesDropdown = () => {
 
                   <div className="relative h-48 rounded-xl overflow-hidden border border-orange-200">
                     <Image
-                      src={category.image}
+                      src={resolveImageUrl(category.image, "/images/default-category.jpg")}
                       alt={category.name}
                       fill
                       className="object-cover"

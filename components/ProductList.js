@@ -4,12 +4,7 @@ import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "@/utils/ApisafeCalls";
-
-function resolveImageUrl(imageUrl) {
-  if (!imageUrl) return "/images/default-product.jpg";
-  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
-}
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 export default function ProductList({ filters }) {
   const router = useRouter(); // ✅ add this
@@ -66,7 +61,7 @@ export default function ProductList({ filters }) {
         >
           <div className="relative w-full h-48 bg-gray-100">
             <Image
-              src={resolveImageUrl(product.image)}
+              src={resolveImageUrl(product.image, "/images/default-product.jpg")}
               alt={product.title}
               fill
               className="object-cover"

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiRequest } from "@/utils/ApisafeCalls";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
@@ -106,7 +107,7 @@ export default function CategoriesPage() {
                 {/* Image Container */}
                 <div className="relative h-28 sm:h-48 bg-gradient-to-br from-gray-100 to-gray-50 overflow-hidden">
                   <img
-                    src={category.image}
+                    src={resolveImageUrl(category.image, "/images/default-category.jpg")}
                     alt={category.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     loading="lazy"

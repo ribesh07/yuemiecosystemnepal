@@ -8,6 +8,7 @@ import { isAuthenticatedClient } from "@/utils/clientAuth";
 import { addCartItem } from "@/utils/cartClient";
 import toast from "react-hot-toast";
 import { Share2 } from "lucide-react";
+import { resolveImageUrl } from "@/utils/resolveImageUrl";
 
 interface ProductImage {
   id: string;
@@ -61,12 +62,6 @@ interface Product {
     rating: string;
     createdAt?: string;
   }[];
-}
-
-function resolveImageUrl(imageUrl?: string | null) {
-  if (!imageUrl) return "/yumei_logo.png";
-  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-  return imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
 }
 
 function formatDate(value?: string) {
@@ -202,7 +197,7 @@ export default function ProductDetailPage() {
         id: product.id,
         productCode: product.productCode,
         name: product.name,
-        image: resolveImageUrl(product.mainImage),
+        image: resolveImageUrl(product.mainImage, "/yumei_logo.png"),
         price: Number(product.sellPrice || 0),
         quantity,
         availableQuantity: Number(product.availableQuantity || 0),
@@ -289,7 +284,10 @@ export default function ProductDetailPage() {
 
   const isInStock = Number(product.availableQuantity) > 0;
   const isLowStock = Number(product.availableQuantity) <= 10 && Number(product.availableQuantity) > 0;
-  const selectedImageUrl = resolveImageUrl(imageList[selectedImage] || product.mainImage);
+  const selectedImageUrl = resolveImageUrl(
+    imageList[selectedImage] || product.mainImage,
+    "/yumei_logo.png"
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -409,7 +407,7 @@ export default function ProductDetailPage() {
                     }`}
                   >
                     <img
-                      src={resolveImageUrl(image)}
+                      src={resolveImageUrl(image, "/yumei_logo.png")}
                       alt={`View ${index + 1}`}
                       className="w-full h-full object-contain p-3"
                     />
